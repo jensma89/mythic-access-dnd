@@ -4,6 +4,7 @@ models.py
 Table models for DB.
 """
 from sqlmodel import Field, Relationship, SQLModel
+from sqlalchemy import UniqueConstraint
 from pydantic import EmailStr
 from datetime import datetime, timezone
 from typing import List, Optional
@@ -25,13 +26,22 @@ class User(SQLModel, table=True):
 
 class Campaign(SQLModel, table=True):
     """Model to create a campaign table."""
+    __table_args__ = (
+        UniqueConstraint("title",
+                         "created_by",
+                         name="uq_user_title"),
+    )
     id: int | None = Field(default=None, primary_key=True)
     title: str
     genre: str | None = None
     description: str | None = Field(default=None, description="Story of the campaign")
     max_classes: int
     created_by: int = Field(foreign_key="user.id")
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     # ORM link to User
     creator: Optional[User] = Relationship(back_populates="campaigns")
 
+
+class Classes(SQLModel, table=True):
+    pass
