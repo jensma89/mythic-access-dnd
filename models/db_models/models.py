@@ -7,3 +7,5 @@ from sqlmodel import Field, SQLModel, select
 
 
 
+class User(SQLModel, table=True):
+
