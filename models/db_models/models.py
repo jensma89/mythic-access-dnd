@@ -3,6 +3,7 @@ models.py
 
 Table models for DB.
 """
+from markdown_it.rules_block import table
 from sqlmodel import Field, Relationship, SQLModel
 from sqlalchemy import UniqueConstraint
 from pydantic import EmailStr
@@ -43,5 +44,17 @@ class Campaign(SQLModel, table=True):
     creator: Optional[User] = Relationship(back_populates="campaigns")
 
 
-class Classes(SQLModel, table=True):
+class Class(SQLModel, table=True):
+    pass
+
+
+class DiceSet(SQLModel, table=True):
+    pass
+
+
+class Dice(SQLModel, table=True):
+    pass
+
+
+class DiceLog(SQLModel, table=True):
     pass
