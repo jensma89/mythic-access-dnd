@@ -1,28 +1,27 @@
 """
-models.py
+table_models.py
 
 Table models for DB.
 """
-from markdown_it.rules_block import table
 from sqlmodel import Field, Relationship, SQLModel
 from sqlalchemy import UniqueConstraint
-from pydantic import EmailStr
 from datetime import datetime, timezone
 from typing import List, Optional
 
 
 
 class User(SQLModel, table=True):
-    """Model to create user table."""
+    """The table model for User."""
     id: int | None = Field(default=None, primary_key=True)
-    user_name: str = Field(unique=True)
-    email: EmailStr = Field(unique=True)
+    user_name: str = Field(unique=True, index=True)
+    email: str = Field(unique=True, index=True)
     hashed_password: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime | None = None
 
     # Relationship to campaign
     campaigns: List["Campaign"] = Relationship(back_populates="creator")
+
 
 
 class Campaign(SQLModel, table=True):
@@ -44,17 +43,17 @@ class Campaign(SQLModel, table=True):
     creator: Optional[User] = Relationship(back_populates="campaigns")
 
 
-class Class(SQLModel, table=True):
+class Class(SQLModel, table=False):
     pass
 
 
-class DiceSet(SQLModel, table=True):
+class DiceSet(SQLModel, table=False):
     pass
 
 
-class Dice(SQLModel, table=True):
+class Dice(SQLModel, table=False):
     pass
 
 
-class DiceLog(SQLModel, table=True):
+class DiceLog(SQLModel, table=False):
     pass
