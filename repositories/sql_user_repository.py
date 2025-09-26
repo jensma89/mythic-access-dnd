@@ -1,25 +1,26 @@
 """
 sql_user_repository.py
 
-Concrete method implementation for user management.
+Concrete implementation for sqlalchemy, user management.
 """
 from fastapi import Query
 from typing import List, Optional, Annotated
 from sqlmodel import Session, select
 from models.db_models.table_models import User
-from models.schemas.user_schema import UserCreate, UserUpdate, UserPublic
-from .user_repository import UserRepository
+from models.schemas.user_schema import *
+from repositories.user_repository import UserRepository
 
 
 
 class SqlAlchemyUserRepository(UserRepository):
-    """This class implement the user handling methods"""
+    """This class implement
+    the user handling methods with sqlalchemy."""
     def __init__(self, session: Session):
         self.session = session
 
 
     def get_by_id(self, user_id: int) -> Optional[UserPublic]:
-        """Method to get a user by id"""
+        """Method to get a user by ID."""
         db_user = self.session.get(User, user_id)
         if db_user:
             return UserPublic.model_validate(db_user)
