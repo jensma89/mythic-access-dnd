@@ -11,11 +11,11 @@ from models.schemas.user_schema import *
 
 
 class UserRepository(ABC):
-    """This class defines the management methods for user"""
+    """This class defines the management methods for users."""
 
     @abstractmethod
     def get_by_id(self, user_id: int) -> Optional[UserPublic]:
-        """Get user by id method"""
+        """Get user by ID method."""
         pass
 
 
@@ -24,23 +24,23 @@ class UserRepository(ABC):
                  offset: Annotated[int, Query(ge=0)] = 0,
                  limit: Annotated[int, Query(le=100)] = 100
                  ) -> List[UserPublic]:
-        """Show all users method"""
+        """Show all users method."""
         pass
 
 
     @abstractmethod
     def add(self, user: UserCreate) -> UserPublic:
-        """Add new user method"""
+        """Add new user method."""
         pass
 
 
     @abstractmethod
     def update(self, user_id: int, user: UserUpdate) -> Optional[UserPublic]:
-        """Change user data method"""
+        """Change user data method."""
         pass
 
 
     @abstractmethod
     def delete(self, user_id: int) -> bool:
-        """Remove a user method"""
+        """Remove a user method."""
         pass

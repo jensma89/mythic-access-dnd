@@ -4,6 +4,7 @@ campaign_schema.py
 Request/response schemas for campaigns.
 """
 from sqlmodel import SQLModel
+from datetime import datetime
 
 
 
@@ -30,4 +31,10 @@ class CampaignUpdate(SQLModel):
 class CampaignPublic(CampaignBase):
     """Model to respond public data"""
     created_by: int
-    created_at: str
+    created_at: datetime
+
+    class Config:
+        """Formatted timestamp"""
+        json_encoders = {
+            datetime: lambda v: v.strftime("%Y-%m-%d %H:%M:%S")
+        }

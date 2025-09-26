@@ -14,7 +14,7 @@ import os
 load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(DATABASE_URL, echo=False) # Set echo True for debug mode
 
 
 
@@ -30,8 +30,3 @@ def get_session():
 
 
 SessionDep = Annotated[Session, Depends(get_session)]
-
-"""
-def get_user_service(session: Session = Depends(get_session)) -> UserService:
-    return UserService(SqlAlchemyUserRepository(session))
-"""
