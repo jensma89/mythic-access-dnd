@@ -1,75 +1,81 @@
 """
 users.py
 
-The API routes for users
+The API endpoints for users.
 """
 from typing import List, Annotated
 from fastapi import APIRouter, Depends,HTTPException, Query
-from sqlmodel import select
-from models.db_models.table_models import User
+from sqlmodel import Session
 from models.schemas.user_schema import *
 from dependencies import SessionDep
+from repositories.sql_user_repository import SqlAlchemyUserRepository
+from services.user_service import UserService
 
 
 router = APIRouter(tags=["users"])
 
 
+async def get_user_service(
+        session: Annotated[Session, Depends(SessionDep)]
+) -> UserService:
+    """Factory to setup the service."""
+    repo = SqlAlchemyUserRepository(session)
+    return UserService(repo)
+
+
 @router.get("/users/", response_model=List[UserPublic])
 async def read_users(
         session: SessionDep,
-        offset: int = 0,
+        offset: Annotated[int, Query(o, ge=0)] = 0,
         limit: Annotated[int, Query(le=100)] = 100,
+        service: Annotated[
+            UserService,
+            Depends(get_user_service)
+        ] = Depends(get_user_service)
 ):
-        users = (
-            session.exec(select(User)
-                         .offset(offset)
-                         .limit(limit)).all())
-        return users
+    """Endpoint to get all users."""
+    return service.list_users(offset, limit)
 
 
 @router.post("/users/", response_model=UserPublic)
-async def add_user(user: UserCreate, session: SessionDep):
-    # New User object
-    db_user = User(
-        user_name=user.user_name,
-        email=user.email,
-        hashed_password=user.hashed_password
-    )
-    session.add(db_user)
-    session.commit()
-    session.refresh(db_user)
-
-    return db_user
+async def create_user(
+        user: UserCreate,
+        service: Annotated[
+            UserService,
+            Depends(get_user_service)
+        ] = Depends(get_user_service)
+):
+    """Endpoint to create a new user."""
+    return service.create_user(user)
 
 
 @router.put("/users/{user_id}", response_model=UserPublic)
 async def update_user(
         user_id: int,
         user: UserUpdate,
-        session: SessionDep
+        service: Annotated[
+            UserService,
+            Depends(get_user_service)
+        ] = Depends(get_user_service)
 ):
-    # Get user from DB
-    db_user = session.get(User, user_id)
-    if not db_user:
+    """Endpoint to change user data."""
+    updated = service.update_user(user_id, user)
+    if not updated:
         raise HTTPException(status_code=404, detail="User not found")
-
-    # Update only the fields that are changed by client
-    for key, value in user.model_dump(exclude_unset=True).items():
-        setattr(db_user, key, value)
-
-    session.commit()
-    session.refresh(db_user)
-    return db_user
+    return updated
 
 
 @router.delete("/users/{user_id}", response_model=UserPublic)
-async def delete_user(user_id: int,  session: SessionDep):
-    db_user = session.get(User, user_id)
-    if not db_user:
+async def delete_user(
+        user_id: int,
+        service: Annotated[
+            UserService,
+            Depends(get_user_service)]
+        = Depends(get_user_service)
+):
+    """Endpoint to delete a user by id."""
+    deleted = service.delete_user(user_id)
+    if not deleted:
         raise HTTPException(status_code=404, detail="User not found")
+    return deleted
 
-    # Delete user
-    session.delete(db_user)
-    session.commit()
-
-    return db_user
