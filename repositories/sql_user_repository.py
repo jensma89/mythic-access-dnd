@@ -3,11 +3,12 @@ sql_user_repository.py
 
 Concrete method implementation for user management.
 """
-from typing import List, Optional
+from fastapi import Query
+from typing import List, Optional, Annotated
 from sqlmodel import Session, select
 from models.db_models.table_models import User
 from models.schemas.user_schema import UserCreate, UserUpdate, UserPublic
-from user_repository import UserRepository
+from .user_repository import UserRepository
 
 
 
@@ -26,8 +27,9 @@ class SqlAlchemyUserRepository(UserRepository):
 
 
     def list_all(self,
-                 offset: int = 0,
-                 limit: int = 100) -> List[UserPublic]:
+                 offset: Annotated[int, Query(ge=0)] = 0,
+                 limit: Annotated[int, Query(le=100)] = 100
+                 ) -> List[UserPublic]:
         """Method to show all users."""
         users = self.session.exec(
             select(User)
@@ -60,11 +62,11 @@ class SqlAlchemyUserRepository(UserRepository):
         return UserPublic.model_validate(db_user)
 
 
-    def delete(self, user_id: int) -> bool:
+    def delete(self, user_id: int) -> Optional[UserPublic]:
         """Method to remove a user."""
         db_user = self.session.get(User, user_id)
         if not db_user:
-            return False
+            return None
         self.session.delete(db_user)
         self.session.commit()
-        return True
+        return UserPublic.model_validate(db_user)

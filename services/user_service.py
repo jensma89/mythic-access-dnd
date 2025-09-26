@@ -3,8 +3,11 @@ user_service.py
 
 Business logic for user.
 """
-from typing import List, Optional
-from models.schemas.user_schema import UserCreate, UserUpdate, UserPublic
+from fastapi import Query
+from typing import List, Optional, Annotated
+from models.schemas.user_schema import (UserCreate,
+                                        UserUpdate,
+                                        UserPublic)
 from repositories.user_repository import UserRepository
 
 
@@ -26,8 +29,9 @@ class UserService:
 
 
     def list_users(self,
-                   offset: int = 0,
-                   limit: int = 100) -> List[UserPublic]:
+                   offset: Annotated[int, Query(ge=0)] = 0,
+                   limit: Annotated[int, Query(le=100)] = 100
+                   ) -> List[UserPublic]:
         """Get a list of all users."""
         return self.repo.list_all(offset, limit)
 

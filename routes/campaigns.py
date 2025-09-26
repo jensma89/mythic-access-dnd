@@ -11,4 +11,4 @@ from models.schemas.campaign_schema import *
 from dependencies import SessionDep
 
 
-router = APIRouter(prefix="/campaigns", tags=["campaigns"])
+router = APIRouter(tags=["campaigns"])

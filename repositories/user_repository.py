@@ -3,8 +3,9 @@ user_repository.py
 
 Defined methods for user management.
 """
+from fastapi import Query
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import Annotated, List, Optional
 from models.schemas.user_schema import *
 
 
@@ -19,7 +20,10 @@ class UserRepository(ABC):
 
 
     @abstractmethod
-    def list_all(self, offset: int = 0, limit: int = 100) -> List[UserPublic]:
+    def list_all(self,
+                 offset: Annotated[int, Query(ge=0)] = 0,
+                 limit: Annotated[int, Query(le=100)] = 100
+                 ) -> List[UserPublic]:
         """Show all users method"""
         pass
 

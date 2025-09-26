@@ -11,7 +11,9 @@ from datetime import datetime
 
 class UserBase(SQLModel):
     """Base User model that shares common definitions"""
+    id: int
     user_name: str
+
 
 
 class UserCreate(SQLModel):
@@ -46,5 +48,5 @@ class UserMe(UserPublic):
     updated_at: datetime | None = None
 
     class Config(UserPublic.Config):
-        """Formatting timestamp"""
+        """Formatting timestamp get config from UserPublic.Config"""
         pass

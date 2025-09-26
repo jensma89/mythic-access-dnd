@@ -15,9 +15,8 @@ from services.user_service import UserService
 router = APIRouter(tags=["users"])
 
 
-async def get_user_service(
-        session: Annotated[Session, Depends(SessionDep)]
-) -> UserService:
+def get_user_service(
+        session: SessionDep) -> UserService:
     """Factory to setup the service."""
     repo = SqlAlchemyUserRepository(session)
     return UserService(repo)
@@ -25,14 +24,9 @@ async def get_user_service(
 
 @router.get("/users/", response_model=List[UserPublic])
 async def read_users(
-        session: SessionDep,
-        offset: Annotated[int, Query(o, ge=0)] = 0,
+        offset: Annotated[int, Query(ge=0)] = 0,
         limit: Annotated[int, Query(le=100)] = 100,
-        service: Annotated[
-            UserService,
-            Depends(get_user_service)
-        ] = Depends(get_user_service)
-):
+        service: UserService = Depends(get_user_service)):
     """Endpoint to get all users."""
     return service.list_users(offset, limit)
 
@@ -40,11 +34,7 @@ async def read_users(
 @router.post("/users/", response_model=UserPublic)
 async def create_user(
         user: UserCreate,
-        service: Annotated[
-            UserService,
-            Depends(get_user_service)
-        ] = Depends(get_user_service)
-):
+        service: UserService = Depends(get_user_service)):
     """Endpoint to create a new user."""
     return service.create_user(user)
 
@@ -53,29 +43,22 @@ async def create_user(
 async def update_user(
         user_id: int,
         user: UserUpdate,
-        service: Annotated[
-            UserService,
-            Depends(get_user_service)
-        ] = Depends(get_user_service)
-):
+        service: UserService = Depends(get_user_service)):
     """Endpoint to change user data."""
     updated = service.update_user(user_id, user)
     if not updated:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404,
+                            detail="User not found")
     return updated
 
 
 @router.delete("/users/{user_id}", response_model=UserPublic)
 async def delete_user(
         user_id: int,
-        service: Annotated[
-            UserService,
-            Depends(get_user_service)]
-        = Depends(get_user_service)
-):
+        service: UserService = Depends(get_user_service)):
     """Endpoint to delete a user by id."""
     deleted = service.delete_user(user_id)
     if not deleted:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404,
+                            detail="User not found")
     return deleted
-
