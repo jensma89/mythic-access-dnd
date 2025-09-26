@@ -3,11 +3,10 @@ users.py
 
 The API endpoints for users.
 """
-from typing import List, Annotated
-from fastapi import APIRouter, Depends,HTTPException, Query
-from sqlmodel import Session
-from models.schemas.user_schema import *
+from typing import Annotated, List
+from fastapi import APIRouter, Depends, HTTPException, Query
 from dependencies import SessionDep
+from models.schemas.user_schema import *
 from repositories.sql_user_repository import SqlAlchemyUserRepository
 from services.user_service import UserService
 
@@ -15,9 +14,8 @@ from services.user_service import UserService
 router = APIRouter(tags=["users"])
 
 
-def get_user_service(
-        session: SessionDep) -> UserService:
-    """Factory to setup the service."""
+def get_user_service(session: SessionDep) -> UserService:
+    """Factory to get the user service."""
     repo = SqlAlchemyUserRepository(session)
     return UserService(repo)
 
