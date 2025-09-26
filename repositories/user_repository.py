@@ -1,7 +1,7 @@
 """
 user_repository.py
 
-Interface for user management.
+Defined methods for user management.
 """
 from abc import ABC, abstractmethod
 from typing import List, Optional

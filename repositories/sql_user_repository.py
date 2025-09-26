@@ -1,7 +1,7 @@
 """
 sql_user_repository.py
 
-Concrete SQL model for user management.
+Concrete method implementation for user management.
 """
 from typing import List, Optional
 from sqlmodel import Session, select
@@ -12,11 +12,13 @@ from user_repository import UserRepository
 
 
 class SqlAlchemyUserRepository(UserRepository):
+    """This class implement the user handling methods"""
     def __init__(self, session: Session):
         self.session = session
 
 
     def get_by_id(self, user_id: int) -> Optional[UserPublic]:
+        """Method to get a user by id"""
         db_user = self.session.get(User, user_id)
         if db_user:
             return UserPublic.model_validate(db_user)
@@ -26,6 +28,7 @@ class SqlAlchemyUserRepository(UserRepository):
     def list_all(self,
                  offset: int = 0,
                  limit: int = 100) -> List[UserPublic]:
+        """Method to show all users."""
         users = self.session.exec(
             select(User)
             .offset(offset)
@@ -34,6 +37,7 @@ class SqlAlchemyUserRepository(UserRepository):
 
 
     def add(self, user: UserCreate) -> UserPublic:
+        """Method to add a new user."""
         db_user = User(**user.model_dump())
         self.session.add(db_user)
         self.session.commit()
@@ -44,6 +48,7 @@ class SqlAlchemyUserRepository(UserRepository):
     def update(self,
                user_id: int,
                user: UserUpdate) -> Optional[UserPublic]:
+        """Method to change the data of a user."""
         db_user = self.session.get(User, user_id)
         if not db_user:
             return None
@@ -56,6 +61,7 @@ class SqlAlchemyUserRepository(UserRepository):
 
 
     def delete(self, user_id: int) -> bool:
+        """Method to remove a user."""
         db_user = self.session.get(User, user_id)
         if not db_user:
             return False
