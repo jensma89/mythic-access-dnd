@@ -5,15 +5,14 @@ Business logic for user.
 """
 from fastapi import Query
 from typing import List, Optional, Annotated
-from models.schemas.user_schema import (UserCreate,
-                                        UserUpdate,
-                                        UserPublic)
+from models.schemas.user_schema import *
 from repositories.user_repository import UserRepository
 
 
 
 class UserService:
-    """Initialise the bussines logic for user service operations."""
+    """Initialise the bussines logic
+    for user service operations."""
     def __init__(self, repository: UserRepository):
         self.repo = repository
 
