@@ -110,5 +110,14 @@ class Dice(SQLModel, table=True):
 
 
 
-class DiceLog(SQLModel, table=False):
-    pass
+class DiceLog(SQLModel, table=True):
+    """Table model for dice logs."""
+    id: int | None = Field(default=None, primary_key=True)
+    timestamp: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        nullable=False)
+    user_id: int = Field(foreign_key="user.id", nullable=False)
+    campaign_id: int = Field(foreign_key="campaign.id", nullable=False)
+    roll: str = Field(nullable=False)
+    result: int = Field(nullable=False)
+    # TODO FIFO db, just record 100 logs then overwrite the latest entity.
