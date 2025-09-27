@@ -79,14 +79,35 @@ class Class(SQLModel, table=True):
     # Link to Campaign
     campaign: "Campaign" = Relationship(back_populates="classes")
 
+    # Link to DiceSet
+    dice_sets: List["DiceSet"] = Relationship(back_populates="class_")
 
 
-class DiceSet(SQLModel, table=False):
-    pass
+
+class DiceSet(SQLModel, table=True):
+    """Table model for dice sets."""
+    id: int | None = Field(default=None, primary_key=True)
+    name: str = Field(default="Dice set", nullable=False)
+    class_id: int = Field(foreign_key="class.id", nullable=False)
+
+    # Relationship to Class
+    class_: "Class" = Relationship(back_populates="dice_sets")
+
+    # Relationship to Dice
+    dices: List["Dice"] = Relationship(back_populates="dice_set")
 
 
-class Dice(SQLModel, table=False):
-    pass
+class Dice(SQLModel, table=True):
+    """Different dices table model."""
+    id: int | None = Field(default=None, primary_key=True)
+    name: str = Field(index=True, nullable=False)
+    dice_set_id: int = Field(foreign_key="diceset.id")
+    sides: int
+
+
+    # Link to DiceSet
+    dice_set: "DiceSet" = Relationship(back_populates="dices")
+
 
 
 class DiceLog(SQLModel, table=False):
