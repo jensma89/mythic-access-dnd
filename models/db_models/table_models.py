@@ -3,15 +3,15 @@ table_models.py
 
 Table models for DB.
 """
-from sqlmodel import Field, Relationship, SQLModel
-from sqlalchemy import UniqueConstraint
+from sqlmodel import Column, Field, Relationship, SQLModel
+from sqlalchemy import JSON, UniqueConstraint
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 
 
 class User(SQLModel, table=True):
-    """The table model for User."""
+    """The table model for users."""
     id: int | None = Field(default=None, primary_key=True)
     user_name: str = Field(unique=True, index=True)
     email: str = Field(unique=True, index=True)
@@ -25,14 +25,14 @@ class User(SQLModel, table=True):
 
 
 class Campaign(SQLModel, table=True):
-    """Model to create a campaign table."""
+    """Model to create a campaigns table."""
     __table_args__ = (
         UniqueConstraint("title",
                          "created_by",
                          name="uq_user_title"),
     )
     id: int | None = Field(default=None, primary_key=True)
-    title: str
+    title: str = Field(index=True)
     genre: str | None = None
     description: str | None = Field(default=None, description="Story of the campaign")
     max_classes: int
@@ -42,9 +42,43 @@ class Campaign(SQLModel, table=True):
     # ORM link to User
     creator: Optional[User] = Relationship(back_populates="campaigns")
 
+    # Relationship to Class
+    classes: List["Class"] = Relationship(back_populates="campaign")
 
-class Class(SQLModel, table=False):
-    pass
+
+
+class Class(SQLModel, table=True):
+    """Table model for classes."""
+    __table_args__ = (
+        UniqueConstraint(
+            "name",
+            "campaign_id",
+            name="uq_class_name_campaign"
+        ),
+    )
+    id: int | None = Field(default=None, primary_key=True)
+    name: str = Field(index=True, nullable=False)
+    race: str | None = None
+    skills: Dict[str, int] = Field(
+        sa_column=Column(JSON, nullable=False),
+        default_factory=lambda: {
+            "Strenght": 0,
+            "Stamina": 0,
+            "Dexterity": 0,
+            "Intelligence": 0,
+            "Charisma": 0
+
+        }
+    )
+    notes: str | None = None
+    inventory: str | None = None
+    campaign_id: int = Field(foreign_key="campaign.id",
+                             nullable=False,
+                             index=True)
+
+    # Link to Campaign
+    campaign: "Campaign" = Relationship(back_populates="classes")
+
 
 
 class DiceSet(SQLModel, table=False):
