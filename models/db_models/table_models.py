@@ -62,7 +62,7 @@ class Class(SQLModel, table=True):
     skills: Dict[str, int] = Field(
         sa_column=Column(JSON, nullable=False),
         default_factory=lambda: {
-            "Strenght": 0,
+            "Strength": 0,
             "Stamina": 0,
             "Dexterity": 0,
             "Intelligence": 0,

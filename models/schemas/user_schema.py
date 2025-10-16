@@ -15,7 +15,6 @@ class UserBase(SQLModel):
     user_name: str
 
 
-
 class UserCreate(SQLModel):
     """Model to create a user"""
     user_name: str
@@ -31,7 +30,7 @@ class UserUpdate(SQLModel):
 
 
 class UserPublic(UserBase):
-    """Model to respond public data"""
+    """Model to respond public data."""
     created_at: datetime
 
     class Config:
@@ -42,7 +41,7 @@ class UserPublic(UserBase):
 
 
 class UserMe(UserPublic):
-    """Fields to show user data by themselves"""
+    """Fields to show user data by themselves."""
     id: int
     email: EmailStr
     updated_at: datetime | None = None
