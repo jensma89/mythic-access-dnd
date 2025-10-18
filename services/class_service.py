@@ -3,7 +3,7 @@ class_service.py
 
 Business logic for classes.
 """
-from fastapi import HTTPException, status, Query
+from fastapi import HTTPException, Query
 from typing import Annotated, List, Optional
 from models.schemas.class_schema import *
 from repositories.class_repository import ClassRepository

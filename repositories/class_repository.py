@@ -37,7 +37,7 @@ class ClassRepository(ABC):
     @abstractmethod
     def update(self,
                class_id: int,
-               dnd_class: ClassUpdate) -> Optional[ClasPublic]:
+               dnd_class: ClassUpdate) -> Optional[ClassPublic]:
         """Model to change data."""
         pass
 

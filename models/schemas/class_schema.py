@@ -8,32 +8,34 @@ from typing import Dict, Optional
 
 
 
+class ClassSkills(SQLModel):
+    """Skills model for attribute-based systems."""
+    Strength: int = 0
+    Stamina: int = 0
+    Dexterity: int = 0
+    Intelligence: int = 0
+    Charisma: int = 0
+
+
 class ClassBase(SQLModel):
     """Base Class model that shares common definitions."""
     id: int
     name: str
     race: str
-    skills: Dict[str, int]
+    skills: ClassSkills
 
 
 class ClassCreate(SQLModel):
     """Model to create a class."""
     name: str
     race: str
-    skills: Optional[Dict[str, int]] = Field(
-        default_factory=lambda: {
-            "Strength": 0,
-            "Stamina": 0,
-            "Dexterity": 0,
-            "Intelligence": 0,
-            "Charisma": 0
-        }
-    )
+    campaign_id: int
+    skills: Optional[ClassSkills] = Field(default_factory=ClassSkills)
 
 
 class ClassUpdate(SQLModel):
     """Model to update a existing class."""
-    skills: Optional[Dict[str, int]] = None
+    skills: Optional[ClassSkills] = None
     notes: Optional[str] = None
     inventory: Optional[str] = None
 
@@ -42,7 +44,7 @@ class ClassPublic(SQLModel):
     """Model to respond public data."""
     name: str
     race: str
-    skills: Dict[str, int]
+    skills: ClassSkills
 
 
 class ClassMe(ClassBase):

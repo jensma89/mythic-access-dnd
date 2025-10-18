@@ -1,5 +1,5 @@
 """
-class.py
+classes.py
 
 The API endpoints for classes.
 """
