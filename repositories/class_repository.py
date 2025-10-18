@@ -29,7 +29,7 @@ class ClassRepository(ABC):
 
 
     @abstractmethod
-    def add(self, new_class: ClassCreate) -> ClassPublic:
+    def add(self, dnd_class: ClassCreate) -> ClassPublic:
         """Add new class method."""
         pass
 
@@ -37,7 +37,7 @@ class ClassRepository(ABC):
     @abstractmethod
     def update(self,
                class_id: int,
-               update_class: ClassUpdate) -> Optional[ClasPublic]:
+               dnd_class: ClassUpdate) -> Optional[ClasPublic]:
         """Model to change data."""
         pass
 
