@@ -14,13 +14,14 @@ from services.user_service import UserService
 router = APIRouter(tags=["users"])
 
 
-def get_user_service(session: SessionDep) -> UserService:
+async def get_user_service(session: SessionDep) -> UserService:
     """Factory to get the user service."""
     repo = SqlAlchemyUserRepository(session)
     return UserService(repo)
 
 
-@router.get("/users/", response_model=List[UserPublic])
+@router.get("/users/",
+            response_model=List[UserPublic])
 async def read_users(
         offset: Annotated[int, Query(ge=0)] = 0,
         limit: Annotated[int, Query(le=100)] = 100,
@@ -29,7 +30,8 @@ async def read_users(
     return service.list_users(offset, limit)
 
 
-@router.post("/users/", response_model=UserPublic)
+@router.post("/users/",
+             response_model=UserPublic)
 async def create_user(
         user: UserCreate,
         service: UserService = Depends(get_user_service)):
@@ -37,7 +39,8 @@ async def create_user(
     return service.create_user(user)
 
 
-@router.put("/users/{user_id}", response_model=UserPublic)
+@router.put("/users/{user_id}",
+            response_model=UserPublic)
 async def update_user(
         user_id: int,
         user: UserUpdate,
@@ -50,7 +53,8 @@ async def update_user(
     return updated
 
 
-@router.delete("/users/{user_id}", response_model=UserPublic)
+@router.delete("/users/{user_id}",
+               response_model=UserPublic)
 async def delete_user(
         user_id: int,
         service: UserService = Depends(get_user_service)):
