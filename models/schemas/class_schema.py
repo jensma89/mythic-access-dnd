@@ -40,11 +40,8 @@ class ClassUpdate(SQLModel):
     inventory: Optional[str] = None
 
 
-class ClassPublic(SQLModel):
+class ClassPublic(ClassBase):
     """Model to respond public data."""
-    name: str
-    race: str
-    skills: ClassSkills
 
 
 class ClassMe(ClassBase):

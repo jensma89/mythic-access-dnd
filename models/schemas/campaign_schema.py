@@ -10,6 +10,7 @@ from datetime import datetime
 
 class CampaignBase(SQLModel):
     """Base Campaign model that shares common definitions"""
+    id: int
     title: str
     genre: str
     description: str
