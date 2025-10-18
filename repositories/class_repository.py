@@ -46,3 +46,9 @@ class ClassRepository(ABC):
     def delete(self, class_id: int) -> bool:
         """Delete class method."""
         pass
+
+
+    @abstractmethod
+    def get_by_campaign_id(self, campaign_id: int) -> List[ClassPublic]:
+        """Get all classes belonging to a campaign"""
+        pass
