@@ -47,3 +47,9 @@ class CampaignRepository(ABC):
     def delete(self, campaign_id: int) -> bool:
         """Method to remove a campaign."""
         pass
+
+
+    @abstractmethod
+    def get_by_campaign_id(self, user_id: int) -> List[CampaignPublic]:
+        """Get all campaigns belonging to a user."""
+        pass

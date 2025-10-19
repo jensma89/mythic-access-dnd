@@ -50,5 +50,5 @@ class ClassRepository(ABC):
 
     @abstractmethod
     def get_by_campaign_id(self, campaign_id: int) -> List[ClassPublic]:
-        """Get all classes belonging to a campaign"""
+        """Get all classes belonging to a campaign."""
         pass
