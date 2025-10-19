@@ -4,7 +4,7 @@ sql_user_repository.py
 Concrete implementation for sqlalchemy, user management.
 """
 from fastapi import Query
-from typing import List, Optional, Annotated
+from typing import Annotated, List, Optional
 from sqlmodel import Session, select
 from models.db_models.table_models import User
 from models.schemas.user_schema import *

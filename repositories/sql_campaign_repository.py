@@ -4,7 +4,7 @@ sql_campaign_repository.py
 Concrete implementation for sqlalchemy, campaign management.
 """
 from fastapi import Query
-from typing import List, Optional, Annotated
+from typing import Annotated, List, Optional
 from sqlmodel import Session, select
 from models.db_models.table_models import Campaign
 from models.schemas.campaign_schema import *
