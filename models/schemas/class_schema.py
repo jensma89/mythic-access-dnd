@@ -4,7 +4,7 @@ class_schema.py
 Request/response schema for classes.
 """
 from sqlmodel import Field, SQLModel
-from typing import Dict, Optional
+from typing import Optional
 
 
 
