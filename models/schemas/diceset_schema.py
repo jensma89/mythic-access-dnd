@@ -3,3 +3,30 @@ diceset_schema.py
 
 Request/response schema for dice sets.
 """
+from sqlmodel import SQLModel
+from typing import List, Optional
+from models.schemas.dice_schema import DicePublic
+
+
+class DiceSetBase(SQLModel):
+    """Base model for dice sets
+    to share common definitions."""
+    id: int
+    name: str
+
+
+class DiceSetCreate(SQLModel):
+    """Model to create a dice set."""
+    name: str
+    dice_ids: Optional[List[int]] = None # IDs that contain in a dice set
+
+
+class DiceSetUpdate(SQLModel):
+    """Model to update a dice set."""
+    name: Optional[str] = None
+    dice_ids: Optional[List[int]] = None
+
+
+class DiceSetPublic(DiceSetBase):
+    """Model to respond public data."""
+    dices: Optional[List[DicePublic]]

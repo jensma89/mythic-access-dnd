@@ -3,8 +3,9 @@ dice_schema.py
 
 Request/response schema for dices.
 """
-from sqlmodel import Field, SQLModel
+from sqlmodel import SQLModel
 from typing import Optional
+
 
 
 class DiceBase(SQLModel):
@@ -27,4 +28,4 @@ class DiceUpdate(SQLModel):
 
 
 class DicePublic(DiceBase):
-    """Model to respond public date."""
+    """Model to respond public data."""
