@@ -1,0 +1,64 @@
+"""
+diceset_service.py
+
+Business logic for dice sets.
+"""
+from fastapi import HTTPException, Query
+from typing import Annotated, List, Optional
+from models.schemas.diceset_schema import *
+from repositories.diceset_repository import DiceSetRepository
+from repositories.dice_repository import DiceRepository
+
+
+class DiceSetService:
+    """Business logic for dice set service."""
+
+    def __init__(self,
+                 repository: DiceSetRepository,
+                 dice_repo: Optional[DiceRepository] = None):
+        self.repo = repository
+        self.dice_repo = dice_repo
+
+
+    def create_diceset(self, diceset: DiceSetCreate) -> DiceSetPublic:
+        """Create a new dice set (optionally with existing dice)."""
+
+        # Validation max 5 sets per dnd class
+        existing_sets = self.repo.get_by_class_id(diceset.class_id)
+        if len(existing_sets) >= 5:
+            raise HTTPException(status_code=400,
+                                detail="Maximum of 5 dice sets "
+                                       "per class reached.")
+
+        # Check for existing dice IDs
+        if self.dice_repo and diceset.dice_ids:
+            for dice_id in diceset.dice_ids:
+                if not self.dice_repo.get_by_id(dice_id):
+                    raise HTTPException(status_code=404,
+                                        detail=f"Dice {dice_id} not found.")
+        return self.repo.add(diceset)
+
+
+    def get_diceset(self, diceset_id: int) -> Optional[DiceSetPublic]:
+        """Get a dice set by ID."""
+        return self.repo.get_by_id(diceset_id)
+
+
+    def list_dicesets(self,
+                      offset: Annotated[int, Query(ge=0)] = 0,
+                      limit: Annotated[int, Query(le=100)] = 100
+                      ) -> List[DiceSetPublic]:
+        """Get a list of all dice sets."""
+        return self.repo.list_all(offset, limit)
+
+
+    def update_diceset(self,
+                       diceset_id: int,
+                       diceset: DiceSetUpdate) -> Optional[DiceSetPublic]:
+        """Change data from a dice set."""
+        return self.repo.update(diceset_id, diceset)
+
+
+    def delete_diceset(self, diceset_id: int) -> bool:
+        """Remove a dice set by ID."""
+        return self.repo.delete(diceset_id)
