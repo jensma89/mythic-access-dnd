@@ -13,7 +13,7 @@ from repositories.dice_repository import DiceRepository
 
 class SqlAlchemyDiceRepository(DiceRepository):
     """This class implement
-    the class handling methods with sqlalchemy."""
+    the dice handling methods with sqlalchemy."""
 
     def __init__(self, session: Session):
         self.session = session
