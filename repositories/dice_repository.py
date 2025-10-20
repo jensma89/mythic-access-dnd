@@ -38,7 +38,7 @@ class DiceRepository(ABC):
     def update(self,
                dice_id: int,
                dice: DiceUpdate) -> Optional[DicePublic]:
-        """Method to change date from a dice"""
+        """Method to change data from a dice"""
         pass
 
 
