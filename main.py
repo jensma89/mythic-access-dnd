@@ -6,7 +6,7 @@ Webserver entry
 from fastapi import FastAPI
 from dependencies import create_db_and_tables
 from contextlib import asynccontextmanager
-from routes import campaigns,classes,dices, users
+from routes import campaigns, classes, dices, dicesets, users
 
 
 @asynccontextmanager
@@ -25,3 +25,4 @@ app.include_router(users.router)
 app.include_router(campaigns.router)
 app.include_router(classes.router)
 app.include_router(dices.router)
+app.include_router(dicesets.router)
