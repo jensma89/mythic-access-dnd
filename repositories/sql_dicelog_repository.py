@@ -1,0 +1,49 @@
+"""
+sql_dicelog_repository.py
+
+Concrete implementation for sqlalchemy, campaign management.
+"""
+from fastapi import Query
+from typing import Annotated, List, Optional
+from sqlmodel import Session, select
+from models.db_models.table_models import DiceLog
+from models.schemas.dicelog_schema import *
+from repositories.dicelog_repository import DiceLogRepository
+
+
+
+class SqlAlchemyDiceLogRepository:
+    """This class implement
+    the dice log handling methods with sqlalchemy."""
+
+    def __init__(self, session: Session):
+        self.session = session
+
+
+    def get_by_id(self, dicelog_id: int) -> Optional[DiceLogPublic]:
+        """Method to get a dice log by ID."""
+        db_dicelog = self.session.get(DiceLog, dicelog_id)
+        if db_dicelog:
+            return DiceLogPublic.model_validate(db_dicelog)
+        return None
+
+
+    def add(self, log: DiceLogCreate) -> DiceLogPublic:
+        """Method to create a new dice log."""
+        db_dicelog: DiceLog(**log.dict())
+        self.session.add(db_dicelog)
+        self.session.commit()
+        self.session.refresh(db_dicelog)
+        return DiceLogPublic.model_validate(db_dicelog)
+
+
+    def list_all(self,
+                 offset: Annotated[int, Query(ge=0)] = 0,
+                 limit: Annotated[int, Query(le=100)] = 100
+                 ) -> List[DiceLogPublic]:
+        """Method to list all dice logs."""
+        dicelogs = self.session.exec(
+            select(DiceLog)
+            .offset(offset)
+            .limit(limit)).all()
+        return [DiceLogPublic.model_validate(d) for d in dicelogs]
