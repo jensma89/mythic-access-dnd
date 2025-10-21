@@ -29,3 +29,8 @@ class DiceUpdate(SQLModel):
 
 class DicePublic(DiceBase):
     """Model to respond public data."""
+
+
+class DiceRollResult(DiceBase):
+    """Model to respond the roll result."""
+    result: int

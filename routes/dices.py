@@ -65,9 +65,15 @@ async def delete_dice(
     return deleted
 
 
-@router.post("/dices/{dice_id}/roll", response_model=DicePublic)
+@router.post("/dices/{dice_id}/roll", response_model=DiceRollResult)
 async def roll_dice(
         dice_id: int,
         service: DiceService = Depends(get_dice_service)):
     """Endpoint to roll a specific dice and get the result (random)."""
-    return service.roll_dice(dice_id)
+    roll = service.roll_dice(dice_id)
+    return {
+        "id": roll.id,
+        "name": roll.name,
+        "sides": roll.sides,
+        "result": roll.result
+    }

@@ -59,7 +59,7 @@ class DiceService:
     def roll_dice(self,
                   dice_id: int,
                   user_id: int | None = None,
-                  campaign_id: int | None = None) -> dict:
+                  campaign_id: int | None = None):
         """Roll a dice (e.g. d6 -> random 1-6)
         and optionally log the result."""
         db_dice = self.repo.get_by_id(dice_id)
@@ -79,8 +79,9 @@ class DiceService:
             )
             self.log_repo.add(log_entry)
 
-        return {
-            "dice": db_dice.name,
-            "sides": db_dice.sides,
-            "result": result
-        }
+        return DiceRollResult(
+            id=db_dice.id,
+            name=db_dice.name,
+            sides=db_dice.sides,
+            result=result
+        )
