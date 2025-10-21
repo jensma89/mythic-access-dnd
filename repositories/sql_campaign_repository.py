@@ -27,6 +27,10 @@ class SqlAlchemyCampaignRepository(CampaignRepository):
         return None
 
 
+    def get_by_campaign_id(self, campaign_id: int) -> Optional[CampaignPublic]:
+        """Method to get campaign by id."""
+        return self.get_by_id(campaign_id)
+
     def list_all(self,
                  offset: Annotated[int, Query(ge=0)] = 0,
                  limit: Annotated[int, Query(le=100)] = 100

@@ -10,7 +10,7 @@ from models.schemas.dicelog_schema import *
 
 
 
-class DiceLogRepository(Annotated):
+class DiceLogRepository(ABC):
     """This class defines
     the management methods for dice logs."""
 

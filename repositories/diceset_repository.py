@@ -6,7 +6,7 @@ Defined methods for dice set management.
 from fastapi import Query
 from abc import ABC, abstractmethod
 from typing import Annotated, List, Optional
-from models.schemas.diceset_schemas import *
+from models.schemas.diceset_schema import *
 
 
 

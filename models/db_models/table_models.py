@@ -83,6 +83,11 @@ class Class(SQLModel, table=True):
     dice_sets: List["DiceSet"] = Relationship(back_populates="class_")
 
 
+class DiceSetDice(SQLModel, table=True):
+    """Table model for Dice to DiceSet relationships."""
+    dice_set_id: int = Field(foreign_key="diceset.id", primary_key=True)
+    dice_id: int = Field(foreign_key="dice.id", primary_key=True)
+
 
 class DiceSet(SQLModel, table=True):
     """Table model for dice sets."""
@@ -93,21 +98,24 @@ class DiceSet(SQLModel, table=True):
     # Relationship to Class
     class_: "Class" = Relationship(back_populates="dice_sets")
 
-    # Relationship to Dice
-    dices: List["Dice"] = Relationship(back_populates="dice_set")
+    # Many-to-many relationship to Dice
+    dices: List["Dice"] = Relationship(
+        back_populates="dice_sets",
+        link_model=DiceSetDice
+    )
 
 
 class Dice(SQLModel, table=True):
     """Different dices table model."""
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(index=True, nullable=False)
-    dice_set_id: int = Field(foreign_key="diceset.id")
     sides: int
 
-
-    # Link to DiceSet
-    dice_set: "DiceSet" = Relationship(back_populates="dices")
-
+    # Many-to-many relationship to DiceSet
+    dice_sets: List["DiceSet"] = Relationship(
+        back_populates="dices",
+        link_model=DiceSetDice
+    )
 
 
 class DiceLog(SQLModel, table=True):
@@ -120,4 +128,3 @@ class DiceLog(SQLModel, table=True):
     campaign_id: int = Field(foreign_key="campaign.id", nullable=False)
     roll: str = Field(nullable=False)
     result: int = Field(nullable=False)
-    # TODO FIFO db, just record 100 logs then overwrite the latest entity.

@@ -9,6 +9,7 @@ from contextlib import asynccontextmanager
 from routes import campaigns, classes, dices, dicesets,dicelogs, users
 
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Create the tables and start and stop the DB session"""
