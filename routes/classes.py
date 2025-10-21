@@ -21,6 +21,17 @@ async def get_class_service(session: SessionDep) -> ClassService:
     return ClassService(repo)
 
 
+@router.get("/classes/{class_id}", response_model=ClassPublic)
+async def read_class(class_id: int,
+                     service: ClassService = Depends(get_class_service)):
+    """Endpoint to get a single dnd class."""
+    dnd_class = service.get_class(class_id)
+    if not dnd_class:
+        raise HTTPException(status_code=404,
+                            detail="Class not found.")
+    return dnd_class
+
+
 @router.get("/classes/",
             response_model=List[ClassPublic])
 async def read_classes(

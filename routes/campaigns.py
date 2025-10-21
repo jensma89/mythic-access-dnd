@@ -20,6 +20,17 @@ async def get_campaign_service(session: SessionDep) -> CampaignService:
     return CampaignService(repo)
 
 
+@router.get("/campaigns/{campaign_id}", response_model=CampaignPublic)
+async def read_campaign(campaign_id: int,
+                        service: CampaignService = Depends(get_campaign_service)):
+    """Endpoint to get a single campaign."""
+    campaign = service.get_campaign(campaign_id)
+    if not campaign:
+        raise HTTPException(status_code=404,
+                            detail="Campaign not found.")
+    return campaign
+
+
 @router.get("/campaigns/",
             response_model=List[CampaignPublic])
 async def read_campaigns(

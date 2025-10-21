@@ -23,6 +23,17 @@ async def get_dice_service(session: SessionDep) -> DiceService:
     return DiceService(dice_repo, log_repo)
 
 
+@router.get("/dices/{dice_id}", response_model=DicePublic)
+async def read_dice(dice_id: int,
+                    service: DiceService = Depends(get_dice_service)):
+    """Endpoint to get a single dice."""
+    dice = service.get_dice(dice_id)
+    if not dice:
+        raise HTTPException(status_code=404,
+                            detail="Dice not found.")
+    return dice
+
+
 @router.get("/dices/", response_model=List[DicePublic])
 async def read_dices(
         offset: Annotated[int, Query(ge=0)] = 0,

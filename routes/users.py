@@ -20,6 +20,17 @@ async def get_user_service(session: SessionDep) -> UserService:
     return UserService(repo)
 
 
+@router.get("/users/{user_id}", response_model=UserPublic)
+async def read_user(user_id: int,
+                    service: UserService = Depends(get_user_service)):
+    """Endpoint to get a single user."""
+    user = service.get_user(user_id)
+    if not user:
+        raise HTTPException(status_code=404,
+                            detail="User not found.")
+    return user
+
+
 @router.get("/users/",
             response_model=List[UserPublic])
 async def read_users(
