@@ -8,6 +8,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from dependencies import SessionDep
 from models.schemas.diceset_schema import *
 from repositories.sql_diceset_repository import SqlAlchemyDiceSetRepository
+from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
+from repositories.sql_dice_repository import SqlAlchemyDiceRepository
 from services.diceset_service import DiceSetService
 
 
@@ -17,8 +19,10 @@ router = APIRouter(tags=["dicesets"])
 
 async def get_diceset_service(session: SessionDep) -> DiceSetService:
     """Factory to get the dice set service."""
-    repo = SqlAlchemyDiceSetRepository(session)
-    return DiceSetService(repo)
+    diceset_repo = SqlAlchemyDiceSetRepository(session)
+    log_repo = SqlAlchemyDiceLogRepository(session)
+    dice_repo = SqlAlchemyDiceRepository
+    return DiceSetService(dice_repo, log_repo, diceset_repo)
 
 
 @router.get("/dicesets/", response_model=List[DiceSetPublic])

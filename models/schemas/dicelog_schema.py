@@ -3,6 +3,7 @@ dicelog_schema.py
 
 Request/response schema for dice logs.
 """
+from typing import Optional
 from sqlmodel import SQLModel
 from datetime import datetime
 
@@ -25,4 +26,4 @@ class DiceLogCreate(DiceLogBase):
 class DiceLogPublic(DiceLogBase):
     """Model to respond public data."""
     id: int
-    timestamp = datetime
+    timestamp: Optional[datetime]

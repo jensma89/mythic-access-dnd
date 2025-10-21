@@ -3,12 +3,16 @@ diceset_service.py
 
 Business logic for dice sets.
 """
+from datetime import datetime, timezone
 from random import randint
 from fastapi import HTTPException, Query
 from typing import Annotated, List, Optional
 from models.schemas.diceset_schema import *
 from repositories.diceset_repository import DiceSetRepository
 from repositories.dice_repository import DiceRepository
+from repositories.dicelog_repository import *
+from models.schemas.dicelog_schema import *
+
 
 
 class DiceSetService:
@@ -16,9 +20,11 @@ class DiceSetService:
 
     def __init__(self,
                  repository: DiceSetRepository,
-                 dice_repo: Optional[DiceRepository] = None):
+                 dice_repo: Optional[DiceRepository] = None,
+                 log_repo: Optional[DiceLogRepository] = None):
         self.repo = repository
         self.dice_repo = dice_repo
+        self.log_repo = log_repo
 
 
     def create_diceset(self, diceset: DiceSetCreate) -> DiceSetPublic:
@@ -65,7 +71,10 @@ class DiceSetService:
         return self.repo.delete(diceset_id)
 
 
-    def roll_diceset(self, diceset_id: int):
+    def roll_diceset(self,
+                     user_id: int,
+                     campaign_id: int,
+                     diceset_id: int):
         """Roll all dices in a set
         and return each result + total sum."""
         diceset = self.repo.get_by_id(diceset_id)
@@ -84,6 +93,18 @@ class DiceSetService:
                 "result": roll
             })
             total_sum += roll
+
+        if self.log_repo:
+            log_entry = DiceLogCreate(
+                user_id=user_id,
+                campaign_id=campaign_id,
+                roll=f"Set {diceset.name}: "
+                     f"{[r['result'] 
+                         for r in results]}",
+                result=total_sum,
+                timestamp=datetime.now(timezone.utc)
+            )
+            self.log_repo.add(log_entry)
 
         return {
             "diceset_id": diceset.id,

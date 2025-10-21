@@ -3,7 +3,7 @@ dice_service.py
 
 Business logic for dice handling.
 """
-import random
+from random import randint
 from datetime import datetime, timezone
 from fastapi import HTTPException, Query
 from typing import Annotated, List, Optional
@@ -66,7 +66,7 @@ class DiceService:
         if not db_dice:
             raise HTTPException(status_code=404,
                                 detail="Dice not found.")
-        result = random.randint(1, db_dice.sides)
+        result = randint(1, db_dice.sides)
 
         # Save result (optional if dice log is connected)
         if self.log_repo and user_id and campaign_id:

@@ -30,20 +30,36 @@ class SqlAlchemyDiceLogRepository:
 
     def add(self, log: DiceLogCreate) -> DiceLogPublic:
         """Method to create a new dice log."""
-        db_dicelog: DiceLog(**log.dict())
+        db_dicelog = DiceLog(**log.dict())
         self.session.add(db_dicelog)
         self.session.commit()
         self.session.refresh(db_dicelog)
+
+        # FIFO cleanup delete oldest if bigger than 100
+        logs = self.session.exec(
+            select(DiceLog)
+            .where(DiceLog.user_id == log.user_id)
+            .order_by(DiceLog.timestamp.desc())
+        ).all()
+
+        if len(logs) > 100:
+            # Delete oldest, keep 100 newest
+            for old_log in logs[100:]:
+                self.session.delete(old_log)
+            self.session.commit()
         return DiceLogPublic.model_validate(db_dicelog)
 
 
-    def list_all(self,
-                 offset: Annotated[int, Query(ge=0)] = 0,
-                 limit: Annotated[int, Query(le=100)] = 100
-                 ) -> List[DiceLogPublic]:
-        """Method to list all dice logs."""
+    def list_logs(
+        self,
+        user_id: int,
+        limit: int = 100
+    ) -> List[DiceLogPublic]:
+        """List logs by user."""
         dicelogs = self.session.exec(
             select(DiceLog)
-            .offset(offset)
-            .limit(limit)).all()
+            .where(DiceLog.user_id == user_id)
+            .order_by(DiceLog.timestamp.desc())
+            .limit(limit)
+        ).all()
         return [DiceLogPublic.model_validate(d) for d in dicelogs]
