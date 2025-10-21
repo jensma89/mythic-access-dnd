@@ -3,6 +3,7 @@ diceset_service.py
 
 Business logic for dice sets.
 """
+from random import randint
 from fastapi import HTTPException, Query
 from typing import Annotated, List, Optional
 from models.schemas.diceset_schema import *
@@ -62,3 +63,31 @@ class DiceSetService:
     def delete_diceset(self, diceset_id: int) -> bool:
         """Remove a dice set by ID."""
         return self.repo.delete(diceset_id)
+
+
+    def roll_diceset(self, diceset_id: int):
+        """Roll all dices in a set
+        and return each result + total sum."""
+        diceset = self.repo.get_by_id(diceset_id)
+        if not diceset or not diceset.dices:
+            raise HTTPException(status_code=404,
+                                detail="Dice set not found "
+                                       "or has no dices.")
+        results = []
+        total_sum = 0
+
+        for dice in diceset.dices:
+            roll = randint(1, dice.sides) # E.g. sides 6 or 12
+            results.append({
+                "dice_id": dice.id,
+                "sides": dice.sides,
+                "result": roll
+            })
+            total_sum += roll
+
+        return {
+            "diceset_id": diceset.id,
+            "set_name": diceset.name,
+            "results": results,
+            "total": total_sum
+        }
