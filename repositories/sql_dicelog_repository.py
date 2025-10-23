@@ -29,6 +29,15 @@ class SqlAlchemyDiceLogRepository:
         return [DiceLogPublic.model_validate(l) for l in dicelogs]
 
 
+    def list_by_campaign(self, campaign_id: int) -> List[DiceLogPublic]:
+        """List all dice logs belonging to a specific campaign."""
+        dicelogs = self.session.exec(
+            select(DiceLog)
+            .where(DiceLog.campaign_id == campaign_id)
+        ).all()
+        return [DiceLogPublic.model_validate(l) for l in dicelogs]
+
+
     def get_by_id(self, dicelog_id: int) -> Optional[DiceLogPublic]:
         """Method to get a dice log by ID."""
         db_dicelog = self.session.get(DiceLog, dicelog_id)

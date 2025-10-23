@@ -28,6 +28,15 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
         return [DiceSetPublic.model_validate(d) for d in dicesets]
 
 
+    def list_by_campaign(self, campaign_id: int) -> List[DiceSetPublic]:
+        """List all dice sets belonging to a specific campaign."""
+        dicesets = self.session.exec(
+            select(DiceSet)
+            .where(DiceSet.campaign_id == campaign_id)
+        ).all()
+        return [DiceSetPublic.model_validate(d) for d in dicesets]
+
+
     def get_by_id(self, diceset_id: int) -> Optional[DiceSetPublic]:
         """Method to get the dice set by ID."""
         db_diceset = self.session.get(DiceSet, diceset_id)

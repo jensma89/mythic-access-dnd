@@ -30,6 +30,15 @@ class SqlAlchemyClassRepository(ClassRepository):
         return [ClassPublic.model_validate(c) for c in dnd_classes]
 
 
+    def list_by_campaign(self, campaign_id: int) -> List[ClassPublic]:
+        """List all classes belonging to a specific campaign."""
+        dnd_classes = self.session.exec(
+            select(Class)
+            .where(Class.campaign_id == campaign_id)
+        ).all()
+        return [ClassPublic.model_validate(c) for c in dnd_classes]
+
+
     def get_by_id(self, class_id: int) -> Optional[ClassPublic]:
         """Method to get a class by ID."""
         db_class = self.session.get(Class, class_id)
