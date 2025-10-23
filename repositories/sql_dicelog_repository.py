@@ -53,6 +53,7 @@ class SqlAlchemyDiceLogRepository:
     def list_logs(
         self,
         user_id: int,
+        offset: int = 0,
         limit: int = 100
     ) -> List[DiceLogPublic]:
         """List logs by user."""
@@ -60,6 +61,7 @@ class SqlAlchemyDiceLogRepository:
             select(DiceLog)
             .where(DiceLog.user_id == user_id)
             .order_by(DiceLog.timestamp.desc())
+            .offset(offset)
             .limit(limit)
         ).all()
         return [DiceLogPublic.model_validate(d) for d in dicelogs]
