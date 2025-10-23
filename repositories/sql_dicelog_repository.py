@@ -38,6 +38,24 @@ class SqlAlchemyDiceLogRepository:
         return [DiceLogPublic.model_validate(l) for l in dicelogs]
 
 
+    def list_by_class(self, class_id: int) -> List[DiceLogPublic]:
+        """List all dice logs belonging to a specific DnD class."""
+        dicelogs = self.session.exec(
+            select(DiceLog)
+            .where(DiceLog.class_id == class_id)
+        ).all()
+        return [DiceLogPublic.model_validate(d) for d in dicelogs]
+
+
+    def list_by_diceset(self, diceset_id: int) -> List[DiceLogPublic]:
+        """List all dice logs belonging to a specific dice set."""
+        dicelogs = self.session.exec(
+            select(DiceLog)
+            .where(DiceLog.diceset_id == diceset_id)
+        ).all()
+        return [DiceLogPublic.model_validate(log) for log in dicelogs]
+
+
     def get_by_id(self, dicelog_id: int) -> Optional[DiceLogPublic]:
         """Method to get a dice log by ID."""
         db_dicelog = self.session.get(DiceLog, dicelog_id)
