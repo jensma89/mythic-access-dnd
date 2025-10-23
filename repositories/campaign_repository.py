@@ -53,3 +53,15 @@ class CampaignRepository(ABC):
     def get_by_campaign_id(self, user_id: int) -> List[CampaignPublic]:
         """Get all campaigns belonging to a user."""
         pass
+
+
+    @abstractmethod
+    def list_by_user(self, user_id: int) -> List[CampaignPublic]:
+        """List all campaigns belonging to a specific user."""
+        pass
+
+
+    @abstractmethod
+    def list_by_campaign(self, campaign_id: int) -> List[CampaignPublic]:
+        """Optional for nested operations."""
+        pass

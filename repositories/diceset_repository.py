@@ -52,3 +52,21 @@ class DiceSetRepository(ABC):
     def get_by_class_id(self, class_id: int) -> List[DiceSetPublic]:
         """Get all dice sets belonging to a class."""
         pass
+
+
+    @abstractmethod
+    def list_by_user(self, user_id: int) -> List[DiceSetPublic]:
+        """List all dice sets belonging to a specific user."""
+        pass
+
+
+    @abstractmethod
+    def list_by_campaign(self, campaign_id: int) -> List[DiceSetPublic]:
+        """List all dice sets belonging to a specific campaign."""
+        pass
+
+
+    @abstractmethod
+    def list_by_class(self, class_id: int) -> List[DiceSetPublic]:
+        """List all dice sets belonging to a specific DnD class."""
+        pass

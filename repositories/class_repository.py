@@ -52,3 +52,21 @@ class ClassRepository(ABC):
     def get_by_campaign_id(self, campaign_id: int) -> List[ClassPublic]:
         """Get all classes belonging to a campaign."""
         pass
+
+
+    @abstractmethod
+    def list_by_user(self, user_id: int) -> List[ClassPublic]:
+        """List all classes belonging to a specific user."""
+        pass
+
+
+    @abstractmethod
+    def list_by_campaign(self, campaign_id: int) -> List[ClassPublic]:
+        """List all classes belonging to a specific campaign."""
+        pass
+
+
+    @abstractmethod
+    def list_by_class(self, class_id: int) -> List[ClassPublic]:
+        """Optional for nested operations."""
+        pass

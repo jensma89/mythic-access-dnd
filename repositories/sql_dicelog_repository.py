@@ -66,7 +66,7 @@ class SqlAlchemyDiceLogRepository:
 
     def add(self, log: DiceLogCreate) -> DiceLogPublic:
         """Method to create a new dice log."""
-        db_dicelog = DiceLog(**log.dict())
+        db_dicelog = DiceLog(**log.model_dump())
         self.session.add(db_dicelog)
         self.session.commit()
         self.session.refresh(db_dicelog)

@@ -9,15 +9,28 @@ from dependencies import SessionDep
 from models.schemas.user_schema import *
 from repositories.sql_user_repository import SqlAlchemyUserRepository
 from services.user_service import UserService
+from services.campaign_service import CampaignService
+from repositories.sql_campaign_repository import SqlAlchemyCampaignRepository
+from repositories.sql_class_repository import SqlAlchemyClassRepository
+from repositories.sql_diceset_repository import SqlAlchemyDiceSetRepository
+from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
+
 
 
 router = APIRouter(tags=["users"])
 
 
 async def get_user_service(session: SessionDep) -> UserService:
-    """Factory to get the user service."""
-    repo = SqlAlchemyUserRepository(session)
-    return UserService(repo)
+    user_repo = SqlAlchemyUserRepository(session)
+    campaign_repo = SqlAlchemyCampaignRepository(session)
+    class_repo = SqlAlchemyClassRepository(session)
+    diceset_repo = SqlAlchemyDiceSetRepository(session)
+    dicelog_repo = SqlAlchemyDiceLogRepository(session)
+    return UserService(user_repo,
+                       campaign_repo,
+                       class_repo,
+                       diceset_repo,
+                       dicelog_repo)
 
 
 @router.get("/users/{user_id}", response_model=UserPublic)

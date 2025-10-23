@@ -11,6 +11,8 @@ from repositories.sql_diceset_repository import SqlAlchemyDiceSetRepository
 from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
 from repositories.sql_dice_repository import SqlAlchemyDiceRepository
 from services.diceset_service import DiceSetService
+from services.campaign_service import CampaignService
+
 
 
 router = APIRouter(tags=["dicesets"])
@@ -18,11 +20,10 @@ router = APIRouter(tags=["dicesets"])
 
 
 async def get_diceset_service(session: SessionDep) -> DiceSetService:
-    """Factory to get the dice set service."""
     diceset_repo = SqlAlchemyDiceSetRepository(session)
-    dice_repo = SqlAlchemyDiceRepository(session)
-    log_repo = SqlAlchemyDiceLogRepository(session)
-    return DiceSetService(diceset_repo, dice_repo, log_repo)
+    dicelog_repo = SqlAlchemyDiceLogRepository(session)
+    return DiceSetService(diceset_repo,
+                          dicelog_repo)
 
 
 @router.get("/dicesets/{diceset_id}", response_model=DiceSetPublic)

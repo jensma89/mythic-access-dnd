@@ -7,17 +7,26 @@ from typing import Annotated, List
 from fastapi import APIRouter, Depends, HTTPException, Query
 from dependencies import SessionDep
 from models.schemas.campaign_schema import *
-from repositories.sql_campaign_repository import SqlAlchemyCampaignRepository
 from services.campaign_service import CampaignService
+from repositories.sql_campaign_repository import SqlAlchemyCampaignRepository
+from repositories.sql_class_repository import SqlAlchemyClassRepository
+from repositories.sql_diceset_repository import SqlAlchemyDiceSetRepository
+from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
 
 
 router = APIRouter(tags=["campaigns"])
 
 
 async def get_campaign_service(session: SessionDep) -> CampaignService:
-    """Factory to get the campaign service."""
-    repo = SqlAlchemyCampaignRepository(session)
-    return CampaignService(repo)
+    """Factory to get the campaign service with all dependencies."""
+    campaign_repo = SqlAlchemyCampaignRepository(session)
+    class_repo = SqlAlchemyClassRepository(session)
+    diceset_repo = SqlAlchemyDiceSetRepository(session)
+    dicelog_repo = SqlAlchemyDiceLogRepository(session)
+    return CampaignService(campaign_repo,
+                           class_repo,
+                           diceset_repo,
+                           dicelog_repo)
 
 
 @router.get("/campaigns/{campaign_id}", response_model=CampaignPublic)

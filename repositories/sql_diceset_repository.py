@@ -111,11 +111,3 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
         self.session.delete(db_diceset)
         self.session.commit()
         return DiceSetPublic.model_validate(db_diceset)
-
-
-    def get_by_class_id(self, class_id: int) -> List[DiceSetPublic]:
-        """Get all dice sets belonging to a class."""
-        dices = self.session.exec(
-            select(DiceSet).where(DiceSet.class_id == class_id)
-        ).all()
-        return [DiceSetPublic.model_validate(d) for d in dices]

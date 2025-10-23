@@ -9,6 +9,11 @@ from dependencies import SessionDep
 from models.schemas.class_schema import *
 from repositories.sql_class_repository import SqlAlchemyClassRepository
 from services.class_service import ClassService
+from services.campaign_service import CampaignService
+from repositories.sql_class_repository import SqlAlchemyClassRepository
+from repositories.sql_diceset_repository import SqlAlchemyDiceSetRepository
+from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
+
 
 
 router = APIRouter(tags=["classes"])
@@ -16,9 +21,12 @@ router = APIRouter(tags=["classes"])
 
 
 async def get_class_service(session: SessionDep) -> ClassService:
-    """Factory to get class service."""
-    repo = SqlAlchemyClassRepository(session)
-    return ClassService(repo)
+    class_repo = SqlAlchemyClassRepository(session)
+    diceset_repo = SqlAlchemyDiceSetRepository(session)
+    dicelog_repo = SqlAlchemyDiceLogRepository(session)
+    return ClassService(class_repo,
+                        diceset_repo,
+                        dicelog_repo)
 
 
 @router.get("/classes/{class_id}", response_model=ClassPublic)

@@ -90,11 +90,3 @@ class SqlAlchemyClassRepository(ClassRepository):
         self.session.delete(db_class)
         self.session.commit()
         return ClassPublic.model_validate(db_class)
-
-
-    def get_by_campaign_id(self, campaign_id: int) -> List[ClassPublic]:
-        """Get all classes belonging to a campaign."""
-        classes = self.session.exec(
-            select(Class).where(Class.campaign_id == campaign_id)
-        ).all()
-        return [ClassPublic.model_validate(c) for c in classes]

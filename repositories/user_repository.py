@@ -44,3 +44,9 @@ class UserRepository(ABC):
     def delete(self, user_id: int) -> bool:
         """Remove a user method."""
         pass
+
+
+    @abstractmethod
+    def list_by_user(self, user_id: int) -> List[UserPublic]:
+        """List by user method."""
+        pass
