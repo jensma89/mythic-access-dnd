@@ -4,7 +4,7 @@ sql_dicelog_repository.py
 Concrete implementation for sqlalchemy, campaign management.
 """
 from fastapi import Query
-from typing import Annotated, List, Optional
+from typing import List, Optional
 from sqlmodel import Session, select
 from models.db_models.table_models import DiceLog
 from models.schemas.dicelog_schema import *
@@ -18,6 +18,15 @@ class SqlAlchemyDiceLogRepository:
 
     def __init__(self, session: Session):
         self.session = session
+
+
+    def list_by_user(self, user_id: int) -> List[DiceLogPublic]:
+        """List all dice logs belonging to a specific user."""
+        dicelogs = self.session.exec(
+            select(DiceLog)
+            .where(DiceLog.user_id == user_id)
+        ).all()
+        return [DiceLogPublic.model_validate(l) for l in dicelogs]
 
 
     def get_by_id(self, dicelog_id: int) -> Optional[DiceLogPublic]:

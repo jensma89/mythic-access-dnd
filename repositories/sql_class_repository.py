@@ -21,6 +21,15 @@ class SqlAlchemyClassRepository(ClassRepository):
         self.session = session
 
 
+    def list_by_user(self, user_id: int) -> List[ClassPublic]:
+        """List all classes belonging to a specific user."""
+        dnd_classes = self.session.exec(
+            select(Class)
+            .where(Class.user_id == user_id)
+        ).all()
+        return [ClassPublic.model_validate(c) for c in dnd_classes]
+
+
     def get_by_id(self, class_id: int) -> Optional[ClassPublic]:
         """Method to get a class by ID."""
         db_class = self.session.get(Class, class_id)

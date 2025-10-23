@@ -19,6 +19,15 @@ class SqlAlchemyCampaignRepository(CampaignRepository):
         self.session = session
 
 
+    def list_by_user(self, user_id: int) -> List[CampaignPublic]:
+        """List all campaigns belonging to a specific user."""
+        campaigns = self.session.exec(
+            select(Campaign)
+            .where(Campaign.user_id == user_id)
+        ).all()
+        return [CampaignPublic.model_validate(c) for c in campaigns]
+
+
     def get_by_id(self, campaign_id: int) -> Optional[CampaignPublic]:
         """Method to get campaign by ID."""
         db_campaign = self.session.get(Campaign, campaign_id)

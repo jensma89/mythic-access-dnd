@@ -19,6 +19,15 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
         self.session = session
 
 
+    def list_by_user(self, user_id: int) -> List[DiceSetPublic]:
+        """List all dice sets belonging to a specific user."""
+        dicesets = self.session.exec(
+            select(DiceSet)
+            .where(DiceSet.user_id == user_id)
+        ).all()
+        return [DiceSetPublic.model_validate(d) for d in dicesets]
+
+
     def get_by_id(self, diceset_id: int) -> Optional[DiceSetPublic]:
         """Method to get the dice set by ID."""
         db_diceset = self.session.get(DiceSet, diceset_id)
