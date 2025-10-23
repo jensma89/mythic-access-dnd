@@ -8,8 +8,8 @@ from random import randint
 from fastapi import HTTPException, Query
 from typing import Annotated, List, Optional
 from models.schemas.diceset_schema import *
-from repositories.diceset_repository import DiceSetRepository
-from repositories.dice_repository import DiceRepository
+from repositories.diceset_repository import *
+from repositories.dice_repository import *
 from repositories.dicelog_repository import *
 from models.schemas.dicelog_schema import *
 
@@ -71,6 +71,25 @@ class DiceSetService:
         return self.repo.delete(diceset_id)
 
 
+    def _log_roll(self,
+                  user_id: int,
+                  campaign_id: int,
+                  name: str,
+                  results: list,
+                  total: int):
+        """Function for dice set log entrys."""
+        if not self.log_repo:
+            return
+        log_entry = DiceLogCreate(
+            user_id=user_id,
+            campaign_id=campaign_id,
+            roll=f"{name}: {[r.result for r in results]}",
+            result=total,
+            timestamp=datetime.now(timezone.utc)
+        )
+        self.log_repo.add(log_entry)
+
+
     def roll_diceset(self,
                      user_id: int,
                      campaign_id: int,
@@ -86,29 +105,24 @@ class DiceSetService:
         total_sum = 0
 
         for dice in diceset.dices:
-            roll = randint(1, dice.sides) # E.g. sides 6 or 12
-            results.append({
-                "dice_id": dice.id,
-                "sides": dice.sides,
-                "result": roll
-            })
-            total_sum += roll
+            roll_value = randint(1, dice.sides) # E.g. sides 6 or 12
+            results.append(DiceRollResult(
+                id=dice.id,
+                name=dice.name,
+                sides=dice.sides,
+                result=roll_value
+            ))
+            total_sum += roll_value
 
-        if self.log_repo:
-            log_entry = DiceLogCreate(
-                user_id=user_id,
-                campaign_id=campaign_id,
-                roll=f"Set {diceset.name}: "
-                     f"{[r['result'] 
-                         for r in results]}",
-                result=total_sum,
-                timestamp=datetime.now(timezone.utc)
-            )
-            self.log_repo.add(log_entry)
+        self._log_roll(user_id,
+                       campaign_id,
+                       diceset.name,
+                       results,
+                       total_sum)
 
-        return {
-            "diceset_id": diceset.id,
-            "set_name": diceset.name,
-            "results": results,
-            "total": total_sum
-        }
+        return DiceSetRollResult(
+            diceset_id=diceset.id,
+            name=diceset.name,
+            results=results,
+            total=total_sum
+        )

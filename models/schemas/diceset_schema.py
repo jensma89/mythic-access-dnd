@@ -5,7 +5,7 @@ Request/response schema for dice sets.
 """
 from sqlmodel import SQLModel
 from typing import List, Optional
-from models.schemas.dice_schema import DicePublic
+from models.schemas.dice_schema import DicePublic, DiceRollResult
 
 
 class DiceSetBase(SQLModel):
@@ -31,3 +31,11 @@ class DiceSetPublic(DiceSetBase):
     """Model to respond public data."""
     id: int
     dices: Optional[List[DicePublic]]
+
+
+class DiceSetRollResult(SQLModel):
+    """Model to respond the data after roll a dice set."""
+    diceset_id: int
+    name: str
+    results: List[DiceRollResult]
+    total: int

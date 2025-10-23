@@ -55,7 +55,25 @@ class DiceService:
         return self.repo.delete(dice_id)
 
 
-    # Dice logic
+    def _log_roll(self,
+                  user_id: int,
+                  campaign_id: int,
+                  name: str,
+                  result: int):
+        """Log the dice data after a roll."""
+        if not self.log_repo:
+            return
+        log_entry = DiceLogCreate(
+            user_id=user_id,
+            campaign_id=campaign_id,
+            roll=name,
+            result=result,
+            timestamp=datetime.now(timezone.utc)
+        )
+        self.log_repo.add(log_entry)
+
+
+    # Dice roll logic
     def roll_dice(self,
                   dice_id: int,
                   user_id: int | None = None,
@@ -68,16 +86,11 @@ class DiceService:
                                 detail="Dice not found.")
         result = randint(1, db_dice.sides)
 
-        # Save result (optional if dice log is connected)
-        if self.log_repo and user_id and campaign_id:
-            log_entry = DiceLogCreate(
-                user_id=user_id,
-                campaign_id=campaign_id,
-                roll=db_dice.name,
-                result=result,
-                timestamp=datetime.now(timezone.utc)
-            )
-            self.log_repo.add(log_entry)
+        if user_id and campaign_id:
+            self._log_roll(user_id,
+                           campaign_id,
+                           db_dice.name,
+                           result)
 
         return DiceRollResult(
             id=db_dice.id,

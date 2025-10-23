@@ -77,7 +77,7 @@ async def delete_diceset(diceset_id: int,
     return deleted
 
 
-@router.post("/dicesets/{diceset_id}/roll", response_model=DiceSetPublic)
+@router.post("/dicesets/{diceset_id}/roll", response_model=DiceSetRollResult)
 async def roll_diceset(diceset_id: int,
                        user_id: int = 1,
                        campaign_id: int =1, # placeholder until auth finished
