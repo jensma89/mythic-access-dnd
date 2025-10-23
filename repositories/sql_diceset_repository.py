@@ -6,7 +6,7 @@ Concrete implementation for sqlalchemy, dice set management.
 from fastapi import Query
 from typing import Annotated, List, Optional
 from sqlmodel import Session, select
-from models.db_models.table_models import DiceSet
+from models.db_models.table_models import Dice, DiceSet
 from models.schemas.diceset_schema import *
 from repositories.diceset_repository import DiceSetRepository
 
@@ -55,8 +55,21 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
         db_diceset = self.session.get(DiceSet, diceset_id)
         if not db_diceset:
             return None
-        for key, value in diceset.model_dump(exclude_unset=True).items():
-            setattr(db_diceset, key, value)
+
+        update_data = diceset.model_dump(exclude_unset=True)
+
+        for key, value in update_data.items():
+            if hasattr(db_diceset, key):
+                setattr(db_diceset, key, value)
+
+        # If dice_id updated, set the relationship
+        if "dice_ids" in update_data:
+            db_diceset.dices.clear()
+            for dice_id in update_data["dice_ids"]:
+                dice = self.session.get(Dice, dice_id)
+                if dice:
+                    db_diceset.dices.append(dice)
+
         self.session.add(db_diceset)
         self.session.commit()
         self.session.refresh(db_diceset)
