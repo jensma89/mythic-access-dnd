@@ -82,9 +82,4 @@ async def roll_dice(
         service: DiceService = Depends(get_dice_service)):
     """Endpoint to roll a specific dice and get the result (random)."""
     roll = service.roll_dice(dice_id)
-    return {
-        "id": roll.id,
-        "name": roll.name,
-        "sides": roll.sides,
-        "result": roll.result
-    }
+    return roll
