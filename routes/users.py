@@ -50,7 +50,7 @@ async def create_user(
     return service.create_user(user)
 
 
-@router.put("/users/{user_id}",
+@router.patch("/users/{user_id}",
             response_model=UserPublic)
 async def update_user(
         user_id: int,

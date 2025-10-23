@@ -5,6 +5,7 @@ Request/response schemas for campaigns.
 """
 from sqlmodel import SQLModel
 from datetime import datetime
+from typing import Optional
 
 
 
@@ -23,9 +24,9 @@ class CampaignCreate(CampaignBase):
 
 class CampaignUpdate(SQLModel):
     """Fields to update a campaign."""
-    title: str | None = None
-    genre: str | None = None
-    description: str | None = None
+    title: Optional[str] = None
+    genre: Optional[str] =  None
+    description: Optional[str] = None
 
 
 class CampaignPublic(CampaignBase):

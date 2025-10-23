@@ -20,7 +20,7 @@ router = APIRouter(tags=["dicesets"])
 async def get_diceset_service(session: SessionDep) -> DiceSetService:
     """Factory to get the dice set service."""
     diceset_repo = SqlAlchemyDiceSetRepository(session)
-    dice_repo = SqlAlchemyDiceRepository
+    dice_repo = SqlAlchemyDiceRepository(session)
     log_repo = SqlAlchemyDiceLogRepository(session)
     return DiceSetService(diceset_repo, dice_repo, log_repo)
 
@@ -53,7 +53,7 @@ async def create_diceset(
     return service.create_diceset(diceset)
 
 
-@router.put("/dicesets/{diceset_id}", response_model=DiceSetPublic)
+@router.patch("/dicesets/{diceset_id}", response_model=DiceSetPublic)
 async def update_diceset(
         diceset_id: int,
         diceset: DiceSetUpdate,

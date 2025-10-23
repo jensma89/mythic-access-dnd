@@ -51,7 +51,7 @@ async def create_dice(
     return service.create_dice(dice)
 
 
-@router.put("/dices/{dice_id}", response_model=DicePublic)
+@router.patch("/dices/{dice_id}", response_model=DicePublic)
 async def update_dice(
         dice_id: int,
         dice: DiceUpdate,

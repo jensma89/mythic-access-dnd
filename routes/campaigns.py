@@ -50,7 +50,7 @@ async def create_campaign(
     return service.create_campaign(campaign)
 
 
-@router.put("/campaigns/{campaign_id}",
+@router.patch("/campaigns/{campaign_id}",
             response_model=CampaignPublic)
 async def update_campaign(
         campaign_id: int,

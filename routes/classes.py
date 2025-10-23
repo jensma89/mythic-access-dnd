@@ -51,7 +51,7 @@ async def create_class(
     return service.create_class(dnd_class)
 
 
-@router.put("/classes/{class_id}",
+@router.patch("/classes/{class_id}",
             response_model=ClassPublic)
 async def update_class(
         class_id: int,

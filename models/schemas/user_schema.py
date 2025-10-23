@@ -6,6 +6,7 @@ Request/response schema for users.
 from sqlmodel import SQLModel
 from pydantic import EmailStr
 from datetime import datetime
+from typing import Optional
 
 
 
@@ -23,9 +24,9 @@ class UserCreate(SQLModel):
 
 class UserUpdate(SQLModel):
     """Fields (optional) to update a user."""
-    user_name: str | None = None
-    email: EmailStr | None = None
-    hashed_password: str | None = None
+    user_name: Optional[str] = None
+    email: Optional[EmailStr]  = None
+    hashed_password: Optional[str] = None
 
 
 class UserPublic(UserBase):
