@@ -78,7 +78,7 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
 
     def delete(self, diceset_id: int) -> Optional[DiceSetPublic]:
         """Method to remove a dice set by ID."""
-        db_diceset: self.session.get(DiceSet, diceset_id)
+        db_diceset = self.session.get(DiceSet, diceset_id)
         if not db_diceset:
             return None
         self.session.delete(db_diceset)

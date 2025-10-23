@@ -43,7 +43,6 @@ class UserPublic(UserBase):
 
 class UserMe(UserPublic):
     """Fields to show user data by themselves."""
-    id: int
     email: EmailStr
     updated_at: datetime | None = None
 

@@ -27,3 +27,8 @@ class DiceLogPublic(DiceLogBase):
     """Model to respond public data."""
     id: int
     timestamp: Optional[datetime]
+
+    class Config:
+        json_encoders = {
+            datetime: lambda v: v.strftime("%Y-%m-%d %H:%M:%S")
+        }
