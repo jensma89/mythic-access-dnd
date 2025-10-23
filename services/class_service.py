@@ -7,6 +7,8 @@ from fastapi import HTTPException, Query
 from typing import Annotated, List, Optional
 from models.schemas.class_schema import *
 from repositories.class_repository import ClassRepository
+from repositories.diceset_repository import DiceSetRepository
+from repositories.dicelog_repository import DiceLogRepository
 
 
 
@@ -14,15 +16,20 @@ class ClassService:
     """Business logic
     for class service operations."""
 
-    def __init__(self, repository: ClassRepository):
-        self.repo = repository
+    def __init__(self,
+                 class_repo: ClassRepository,
+                 diceset_repo: DiceSetRepository,
+                 dicelog_repo: DiceLogRepository):
+        self.class_repo = class_repo
+        self.diceset_repo = diceset_repo
+        self.dicelog_repo = dicelog_repo
 
 
     def create_class(self, dnd_class: ClassCreate) -> ClassPublic:
         """Create a new class (max. 4 per campaign)."""
 
         #Get the count of classes for a campaign
-        existing_classes = self.repo.get_by_campaign_id(dnd_class.campaign_id)
+        existing_classes = self.class_repo.get_by_campaign_id(dnd_class.campaign_id)
 
         if len(existing_classes) >= 4:
             raise HTTPException(
@@ -31,12 +38,12 @@ class ClassService:
                        "Maximum reached."
             )
         # If limit not reached, create a new class
-        return self.repo.add(dnd_class)
+        return self.class_repo.add(dnd_class)
 
 
     def get_class(self, class_id: int) -> Optional[ClassPublic]:
         """Get the class by id."""
-        return self.repo.get_by_id(class_id)
+        return self.class_repo.get_by_id(class_id)
 
 
     def list_classes(self,
@@ -44,16 +51,29 @@ class ClassService:
                      limit: Annotated[int, Query(le=100)] = 100
                      ) -> List[ClassPublic]:
         """Get a list of all classes."""
-        return self.repo.list_all(offset, limit)
+        return self.class_repo.list_all(offset, limit)
 
 
     def update_class(self,
                      class_id: int,
                      dnd_class: ClassUpdate) -> Optional[ClassPublic]:
         """Make changes by a class."""
-        return self.repo.update(class_id, dnd_class)
+        return self.class_repo.update(class_id, dnd_class)
 
 
     def delete_class(self, class_id: int) -> bool:
-        """Delete a class by ID."""
-        return self.repo.delete(class_id)
+        """Remove a class and the belonging entries:
+        dice sets and dice logs."""
+
+        # Delete dice logs
+        logs = self.dicelog_repo.list_by_class(class_id)
+        for log in logs:
+            self.dicelog_repo.delete(log.id)
+
+        # Delete dice sets
+        dicesets = self.diceset_repo.list_by_class(class_id)
+        for diceset in dicesets:
+            self.diceset_repo.delete(diceset.id)
+
+        # Finally delete campaign
+        return self.class_repo.delete(class_id)

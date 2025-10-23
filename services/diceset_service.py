@@ -19,19 +19,19 @@ class DiceSetService:
     """Business logic for dice set service."""
 
     def __init__(self,
-                 repository: DiceSetRepository,
-                 dice_repo: Optional[DiceRepository] = None,
-                 log_repo: Optional[DiceLogRepository] = None):
-        self.repo = repository
+                 dice_repo: DiceRepository,
+                 diceset_repo: DiceSetRepository,
+                 dicelog_repo: DiceLogRepository):
         self.dice_repo = dice_repo
-        self.log_repo = log_repo
+        self.diceset_repo = diceset_repo
+        self.dicelog_repo = dicelog_repo
 
 
     def create_diceset(self, diceset: DiceSetCreate) -> DiceSetPublic:
         """Create a new dice set (optionally with existing dice)."""
 
         # Validation max 5 sets per dnd class
-        existing_sets = self.repo.get_by_class_id(diceset.class_id)
+        existing_sets = self.diceset_repo.get_by_class_id(diceset.class_id)
         if len(existing_sets) >= 5:
             raise HTTPException(status_code=400,
                                 detail="Maximum of 5 dice sets "
@@ -43,12 +43,12 @@ class DiceSetService:
                 if not self.dice_repo.get_by_id(dice_id):
                     raise HTTPException(status_code=404,
                                         detail=f"Dice {dice_id} not found.")
-        return self.repo.add(diceset)
+        return self.diceset_repo.add(diceset)
 
 
     def get_diceset(self, diceset_id: int) -> Optional[DiceSetPublic]:
         """Get a dice set by ID."""
-        return self.repo.get_by_id(diceset_id)
+        return self.diceset_repo.get_by_id(diceset_id)
 
 
     def list_dicesets(self,
@@ -56,19 +56,27 @@ class DiceSetService:
                       limit: Annotated[int, Query(le=100)] = 100
                       ) -> List[DiceSetPublic]:
         """Get a list of all dice sets."""
-        return self.repo.list_all(offset, limit)
+        return self.diceset_repo.list_all(offset, limit)
 
 
     def update_diceset(self,
                        diceset_id: int,
                        diceset: DiceSetUpdate) -> Optional[DiceSetPublic]:
         """Change data from a dice set."""
-        return self.repo.update(diceset_id, diceset)
+        return self.diceset_repo.update(diceset_id, diceset)
 
 
     def delete_diceset(self, diceset_id: int) -> bool:
-        """Remove a dice set by ID."""
-        return self.repo.delete(diceset_id)
+        """Remove a class and the belonging entries:
+        dice sets and dice logs."""
+
+        # Delete dice logs
+        logs = self.dicelog_repo.list_by_diceset(diceset_id)
+        for log in logs:
+            self.dicelog_repo.delete(log.id)
+
+        # Finally delete diceset
+        return self.diceset_repo.delete(diceset_id)
 
 
     def _log_roll(self,
@@ -78,7 +86,7 @@ class DiceSetService:
                   results: list,
                   total: int):
         """Function for dice set log entrys."""
-        if not self.log_repo:
+        if not self.dicelog_repo:
             return
         log_entry = DiceLogCreate(
             user_id=user_id,
@@ -87,7 +95,7 @@ class DiceSetService:
             result=total,
             timestamp=datetime.now(timezone.utc)
         )
-        self.log_repo.add(log_entry)
+        self.dicelog_repo.add(log_entry)
 
 
     def roll_diceset(self,
@@ -96,7 +104,7 @@ class DiceSetService:
                      diceset_id: int):
         """Roll all dices in a set
         and return each result + total sum."""
-        diceset = self.repo.get_by_id(diceset_id)
+        diceset = self.diceset_repo.get_by_id(diceset_id)
         if not diceset or not diceset.dices:
             raise HTTPException(status_code=404,
                                 detail="Dice set not found "
