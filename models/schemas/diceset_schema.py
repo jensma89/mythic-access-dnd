@@ -11,13 +11,13 @@ from models.schemas.dice_schema import DicePublic
 class DiceSetBase(SQLModel):
     """Base model for dice sets
     to share common definitions."""
-    id: int
     name: str
 
 
 class DiceSetCreate(SQLModel):
     """Model to create a dice set."""
     name: str
+    class_id: int
     dice_ids: Optional[List[int]] = None # IDs that contain in a dice set
 
 
@@ -29,4 +29,5 @@ class DiceSetUpdate(SQLModel):
 
 class DiceSetPublic(DiceSetBase):
     """Model to respond public data."""
+    id: int
     dices: Optional[List[DicePublic]]

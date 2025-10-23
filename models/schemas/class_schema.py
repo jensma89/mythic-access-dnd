@@ -19,7 +19,6 @@ class ClassSkills(SQLModel):
 
 class ClassBase(SQLModel):
     """Base Class model that shares common definitions."""
-    id: int
     name: str
     race: str
     skills: ClassSkills
@@ -42,6 +41,7 @@ class ClassUpdate(SQLModel):
 
 class ClassPublic(ClassBase):
     """Model to respond public data."""
+    id: int
 
 
 class ClassMe(ClassBase):

@@ -20,9 +20,9 @@ router = APIRouter(tags=["dicesets"])
 async def get_diceset_service(session: SessionDep) -> DiceSetService:
     """Factory to get the dice set service."""
     diceset_repo = SqlAlchemyDiceSetRepository(session)
-    log_repo = SqlAlchemyDiceLogRepository(session)
     dice_repo = SqlAlchemyDiceRepository
-    return DiceSetService(dice_repo, log_repo, diceset_repo)
+    log_repo = SqlAlchemyDiceLogRepository(session)
+    return DiceSetService(diceset_repo, dice_repo, log_repo)
 
 
 @router.get("/dicesets/{diceset_id}", response_model=DiceSetPublic)
@@ -77,12 +77,14 @@ async def delete_diceset(diceset_id: int,
     return deleted
 
 
-@router.post("/dicesets/diceset_id}/roll", response_model=DiceSetPublic)
+@router.post("/dicesets/{diceset_id}/roll", response_model=DiceSetPublic)
 async def roll_diceset(diceset_id: int,
+                       user_id: int = 1,
+                       campaign_id: int =1, # placeholder until auth finished
                        service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to roll a specific dice set
     and get the individual results and the total sum."""
-    result = service.roll_diceset(diceset_id)
+    result = service.roll_diceset(user_id, campaign_id, diceset_id)
     if not result:
         raise HTTPException(status_code=404,
                             detail="Dice set not found.")

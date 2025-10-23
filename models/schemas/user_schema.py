@@ -10,20 +10,19 @@ from datetime import datetime
 
 
 class UserBase(SQLModel):
-    """Base User model that shares common definitions"""
-    id: int
+    """Base User model that shares common definitions."""
     user_name: str
 
 
 class UserCreate(SQLModel):
-    """Model to create a user"""
+    """Model to create a user."""
     user_name: str
     email: EmailStr
     hashed_password: str
 
 
 class UserUpdate(SQLModel):
-    """Fields (optional) to update a user"""
+    """Fields (optional) to update a user."""
     user_name: str | None = None
     email: EmailStr | None = None
     hashed_password: str | None = None
@@ -31,10 +30,11 @@ class UserUpdate(SQLModel):
 
 class UserPublic(UserBase):
     """Model to respond public data."""
+    id: int
     created_at: datetime
 
     class Config:
-        """Formatted timestamp"""
+        """Formatted timestamp."""
         json_encoders = {
             datetime: lambda v: v.strftime("%Y-%m-%d %H:%M:%S")
         }
@@ -47,5 +47,5 @@ class UserMe(UserPublic):
     updated_at: datetime | None = None
 
     class Config(UserPublic.Config):
-        """Formatting timestamp get config from UserPublic.Config"""
+        """Formatting timestamp get config from UserPublic.Config."""
         pass

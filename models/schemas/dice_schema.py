@@ -10,7 +10,6 @@ from typing import Optional
 
 class DiceBase(SQLModel):
     """Base dice model to share common definitions."""
-    id: int
     name: str
     sides: int
 
@@ -29,6 +28,7 @@ class DiceUpdate(SQLModel):
 
 class DicePublic(DiceBase):
     """Model to respond public data."""
+    id: int
 
 
 class DiceRollResult(DiceBase):
