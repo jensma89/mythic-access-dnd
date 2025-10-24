@@ -28,6 +28,12 @@ class DiceLogRepository(ABC):
 
 
     @abstractmethod
+    def delete(self, dicelog_id: int) -> DiceLogPublic:
+        """Remove a dice log entry."""
+        pass
+
+
+    @abstractmethod
     def list_logs(self,
                   user_id: int,
                   limit: int = 100) -> List[DiceLogPublic]:

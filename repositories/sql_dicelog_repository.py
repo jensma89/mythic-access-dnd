@@ -12,7 +12,7 @@ from repositories.dicelog_repository import DiceLogRepository
 
 
 
-class SqlAlchemyDiceLogRepository:
+class SqlAlchemyDiceLogRepository(DiceLogRepository):
     """This class implement
     the dice log handling methods with sqlalchemy."""
 
@@ -83,6 +83,16 @@ class SqlAlchemyDiceLogRepository:
             for old_log in logs[100:]:
                 self.session.delete(old_log)
             self.session.commit()
+        return DiceLogPublic.model_validate(db_dicelog)
+
+
+    def delete(self, dicelog_id: int) -> Optional[DiceLogPublic]:
+        """Delete a dice log by ID."""
+        db_dicelog = self.session.get(DiceLog, dicelog_id)
+        if not db_dicelog:
+            return None
+        self.session.delete(db_dicelog)
+        self.session.commit()
         return DiceLogPublic.model_validate(db_dicelog)
 
 

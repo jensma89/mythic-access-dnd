@@ -94,6 +94,7 @@ class DiceSet(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(default="Dice set", nullable=False)
     class_id: int = Field(foreign_key="class.id", nullable=False)
+    campaign_id: int = Field(foreign_key="campaign.id", nullable=False)
 
     # Relationship to Class
     class_: "Class" = Relationship(back_populates="dice_sets")
