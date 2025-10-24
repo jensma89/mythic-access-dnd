@@ -73,7 +73,9 @@ class ClassService:
         # Delete dice sets
         dicesets = self.diceset_repo.list_by_class(class_id)
         for diceset in dicesets:
-            self.diceset_repo.delete(diceset.id)
+            set_logs = self.dicelog_repo.list_by_diceset(diceset.id)
+            for log in set_logs:
+                self.dicelog_repo.delete(log.id)
 
         # Finally delete campaign
         return self.class_repo.delete(class_id)
