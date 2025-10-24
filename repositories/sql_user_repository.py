@@ -71,3 +71,12 @@ class SqlAlchemyUserRepository(UserRepository):
         self.session.delete(db_user)
         self.session.commit()
         return UserPublic.model_validate(db_user)
+
+
+    def list_by_user(self, user_id: int) -> List[UserPublic]:
+        """Method to list by user."""
+        db_users = (self.session.exec(
+            select(User)
+            .where(User.id == user_id))
+                    .all())
+        return [UserPublic.model_validate(u) for u in db_users]
