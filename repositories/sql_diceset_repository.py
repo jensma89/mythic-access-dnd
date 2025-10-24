@@ -46,6 +46,11 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
         return [DiceSetPublic.model_validate(d) for d in dicesets]
 
 
+    def get_by_class_id(self, class_id: int) -> List[DiceSetPublic]:
+        """Alias for list_by_class for abstractmethod compliance."""
+        return self.list_by_class(class_id)
+
+
     def get_by_id(self, diceset_id: int) -> Optional[DiceSetPublic]:
         """Method to get the dice set by ID."""
         db_diceset = self.session.get(DiceSet, diceset_id)

@@ -39,6 +39,20 @@ class SqlAlchemyClassRepository(ClassRepository):
         return [ClassPublic.model_validate(c) for c in dnd_classes]
 
 
+    def list_by_class(self, class_id: int) -> List[ClassPublic]:
+        """Return a single class as list."""
+        dnd_class = self.session.exec(
+            select(Class)
+            .where(Class.id == class_id)
+        ).all()
+        return [ClassPublic.model_validate(c) for c in dnd_class]
+
+
+    def get_by_campaign_id(self, campaign_id: int) -> List[ClassPublic]:
+        """Legacy alias for list_by_campaign."""
+        return self.list_by_campaign(campaign_id)
+
+
     def get_by_id(self, class_id: int) -> Optional[ClassPublic]:
         """Method to get a class by ID."""
         db_class = self.session.get(Class, class_id)

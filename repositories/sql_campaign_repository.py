@@ -28,6 +28,15 @@ class SqlAlchemyCampaignRepository(CampaignRepository):
         return [CampaignPublic.model_validate(c) for c in campaigns]
 
 
+    def list_by_campaign(self, campaign_id: int) -> List[CampaignPublic]:
+        """Return a single campaign as list for uniformity."""
+        campaign = self.session.exec(
+            select(Campaign)
+            .where(Campaign.id == campaign_id)
+        ).all()
+        return [CampaignPublic.model_validate(c) for c in campaign]
+
+
     def get_by_id(self, campaign_id: int) -> Optional[CampaignPublic]:
         """Method to get campaign by ID."""
         db_campaign = self.session.get(Campaign, campaign_id)
@@ -35,10 +44,6 @@ class SqlAlchemyCampaignRepository(CampaignRepository):
             return CampaignPublic.model_validate(db_campaign)
         return None
 
-
-    def get_by_campaign_id(self, campaign_id: int) -> Optional[CampaignPublic]:
-        """Method to get campaign by id."""
-        return self.get_by_id(campaign_id)
 
     def list_all(self,
                  offset: Annotated[int, Query(ge=0)] = 0,
