@@ -18,6 +18,7 @@ class DiceSetCreate(SQLModel):
     """Model to create a dice set."""
     name: str
     class_id: int
+    campaign_id: int
     dice_ids: Optional[List[int]] = None # IDs that contain in a dice set
 
 

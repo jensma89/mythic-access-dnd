@@ -14,6 +14,7 @@ class DiceLogBase(SQLModel):
         to share common definitions."""
     user_id: int
     campaign_id: int
+    diceset_id: int
     roll: str
     result: int
 

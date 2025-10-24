@@ -82,6 +82,7 @@ class DiceSetService:
     def _log_roll(self,
                   user_id: int,
                   campaign_id: int,
+                  diceset_id: int,
                   name: str,
                   results: list,
                   total: int):
@@ -91,6 +92,7 @@ class DiceSetService:
         log_entry = DiceLogCreate(
             user_id=user_id,
             campaign_id=campaign_id,
+            diceset_id=diceset_id,
             roll=f"{name}: {[r.result for r in results]}",
             result=total,
             timestamp=datetime.now(timezone.utc)
@@ -124,6 +126,7 @@ class DiceSetService:
 
         self._log_roll(user_id,
                        campaign_id,
+                       diceset_id,
                        diceset.name,
                        results,
                        total_sum)

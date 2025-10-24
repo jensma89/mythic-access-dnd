@@ -15,8 +15,7 @@ router = APIRouter(tags=["dicelogs"])
 
 
 async def get_dicelog_service(session: SessionDep):
-    dicelog_repo = SqlAlchemyDiceLogRepository(session)
-    return DiceLogService(dicelog_repo)
+    return SqlAlchemyDiceLogRepository(session)
 
 
 

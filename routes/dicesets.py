@@ -10,8 +10,8 @@ from models.schemas.diceset_schema import *
 from repositories.sql_diceset_repository import SqlAlchemyDiceSetRepository
 from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
 from repositories.sql_dice_repository import SqlAlchemyDiceRepository
+from repositories.sql_class_repository import SqlAlchemyClassRepository
 from services.diceset_service import DiceSetService
-from services.campaign_service import CampaignService
 
 
 
@@ -20,9 +20,11 @@ router = APIRouter(tags=["dicesets"])
 
 
 async def get_diceset_service(session: SessionDep) -> DiceSetService:
+    dice_repo = SqlAlchemyDiceRepository(session)
     diceset_repo = SqlAlchemyDiceSetRepository(session)
     dicelog_repo = SqlAlchemyDiceLogRepository(session)
-    return DiceSetService(diceset_repo,
+    return DiceSetService(dice_repo,
+                          diceset_repo,
                           dicelog_repo)
 
 

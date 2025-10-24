@@ -74,6 +74,14 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
     def add(self, diceset: DiceSetCreate) -> Optional[DiceSetPublic]:
         """Method to create a new dice set."""
         db_diceset = DiceSet(**diceset.model_dump())
+
+        # Add a dice to the set by dice ID
+        if hasattr(diceset, "dice_ids") and diceset.dice_ids:
+            for dice_id in diceset.dice_ids:
+                dice = self.session.get(Dice, dice_id)
+                if dice:
+                    db_diceset.dices.append(dice)
+
         self.session.add(db_diceset)
         self.session.commit()
         self.session.refresh(db_diceset)
