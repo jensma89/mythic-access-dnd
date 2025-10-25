@@ -23,7 +23,7 @@ class SqlAlchemyCampaignRepository(CampaignRepository):
         """List all campaigns belonging to a specific user."""
         campaigns = self.session.exec(
             select(Campaign)
-            .where(Campaign.user_id == user_id)
+            .where(Campaign.created_by == user_id)
         ).all()
         return [CampaignPublic.model_validate(c) for c in campaigns]
 

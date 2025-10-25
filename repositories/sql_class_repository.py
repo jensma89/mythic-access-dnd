@@ -6,7 +6,7 @@ Concrete implementation for sqlalchemy, class management.
 from fastapi import Query
 from typing import Annotated, List, Optional
 from sqlmodel import Session, select
-from models.db_models.table_models import Class
+from models.db_models.table_models import Class, Campaign
 from models.schemas.class_schema import *
 from repositories.class_repository import ClassRepository
 
@@ -25,7 +25,8 @@ class SqlAlchemyClassRepository(ClassRepository):
         """List all classes belonging to a specific user."""
         dnd_classes = self.session.exec(
             select(Class)
-            .where(Class.user_id == user_id)
+            .join(Campaign)
+            .where(Campaign.created_by == user_id)
         ).all()
         return [ClassPublic.model_validate(c) for c in dnd_classes]
 
