@@ -1,12 +1,12 @@
 """
 main.py
 
-Webserver entry
+Webserver entry and links to routes.
 """
 from fastapi import FastAPI
 from dependencies import create_db_and_tables
 from contextlib import asynccontextmanager
-from routes import campaigns, classes, dices, dicesets,dicelogs, users
+from routes import campaigns, classes, dices, dicesets, dicelogs, users
 
 
 

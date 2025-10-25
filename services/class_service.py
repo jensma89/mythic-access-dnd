@@ -3,9 +3,8 @@ class_service.py
 
 Business logic for classes.
 """
-from fastapi import Depends, HTTPException, Query
+from fastapi import HTTPException
 from typing import List, Optional
-from dependencies import Pagination
 from models.schemas.class_schema import *
 from repositories.class_repository import ClassRepository
 from repositories.diceset_repository import DiceSetRepository
@@ -49,11 +48,12 @@ class ClassService:
 
 
     def list_classes(self,
-                     pagination: Pagination = Depends()
+                     offset: int = 0,
+                     limit: int = 100
                      ) -> List[ClassPublic]:
         """Get a list of all classes."""
-        return self.class_repo.list_all(offset=pagination.offset,
-                                        limit=pagination.limit)
+        return self.class_repo.list_all(offset=offset,
+                                        limit=limit)
 
 
     def update_class(self,

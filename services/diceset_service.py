@@ -5,8 +5,7 @@ Business logic for dice sets.
 """
 from datetime import datetime, timezone
 from random import randint
-from dependencies import Pagination
-from fastapi import Depends, HTTPException, Query
+from fastapi import HTTPException
 from typing import List, Optional
 from models.schemas.diceset_schema import *
 from repositories.diceset_repository import *
@@ -32,7 +31,8 @@ class DiceSetService:
         """Create a new dice set (optionally with existing dice)."""
 
         # Validation max 5 sets per dnd class
-        existing_sets = self.diceset_repo.get_by_class_id(diceset.class_id)
+        existing_sets = (self.diceset_repo
+                         .get_by_class_id(diceset.class_id))
         if len(existing_sets) >= 5:
             raise HTTPException(status_code=400,
                                 detail="Maximum of 5 dice sets "
@@ -53,11 +53,12 @@ class DiceSetService:
 
 
     def list_dicesets(self,
-                      pagination: Pagination = Depends()
+                      offset: int = 0,
+                      limit: int = 100
                       ) -> List[DiceSetPublic]:
         """Get a list of all dice sets."""
-        return self.diceset_repo.list_all(offset=pagination.offset,
-                                          limit=pagination.limit)
+        return self.diceset_repo.list_all(offset=offset,
+                                          limit=limit)
 
 
     def update_diceset(self,

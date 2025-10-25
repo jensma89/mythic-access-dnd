@@ -3,9 +3,8 @@ campaign_service.py
 
 Business logic for campaign.
 """
-from fastapi import Depends, Query
-from typing import List, Optional, Annotated
-from dependencies import Pagination
+from fastapi import HTTPException
+from typing import List, Optional
 from models.schemas.campaign_schema import *
 from repositories.campaign_repository import CampaignRepository
 from repositories.class_repository import ClassRepository
@@ -41,11 +40,12 @@ class CampaignService:
 
 
     def list_campaigns(self,
-                       pagination: Pagination = Depends()
+                       offset: int = 0,
+                       limit: int = 100
                        ) -> List[CampaignPublic]:
         """Get a list of all campaigns."""
-        return self.campaign_repo.list_all(offset=pagination.offset,
-                                           limit=pagination.limit)
+        return self.campaign_repo.list_all(offset=offset,
+                                           limit=limit)
 
 
     def update_campaign(self,

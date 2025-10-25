@@ -3,8 +3,7 @@ user_service.py
 
 Business logic for user.
 """
-from fastapi import Depends
-from dependencies import Pagination
+from fastapi import HTTPException
 from typing import List, Optional
 from models.schemas.user_schema import *
 from repositories.user_repository import UserRepository
@@ -42,11 +41,12 @@ class UserService:
 
 
     def list_users(self,
-                   pagination: Pagination = Depends()
+                   offset: int = 0,
+                   limit: int = 100
                    ) -> List[UserPublic]:
         """Get a list of all users."""
-        return self.user_repo.list_all(offset=pagination.offset,
-                                       limit=pagination.limit)
+        return self.user_repo.list_all(offset=offset,
+                                       limit=limit)
 
 
     def update_user(self,
