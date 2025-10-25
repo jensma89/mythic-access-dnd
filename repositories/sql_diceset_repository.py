@@ -12,38 +12,49 @@ from repositories.diceset_repository import DiceSetRepository
 
 
 class SqlAlchemyDiceSetRepository(DiceSetRepository):
-    """This class implements the diceset handling methods with sqlalchemy."""
+    """Implements the diceset handling methods."""
 
     def __init__(self, session: Session):
         self.session = session
 
 
     def list_by_user(self, user_id: int) -> List[DiceSetPublic]:
+        """List all dice sets belonging to a specific user."""
         dicesets = self.session.exec(
-            select(DiceSet).where(DiceSet.user_id == user_id)
+            select(DiceSet)
+            .where(DiceSet.user_id == user_id)
         ).all()
-        return [DiceSetPublic.model_validate(d) for d in dicesets]
+        return [DiceSetPublic.model_validate(d)
+                for d in dicesets]
 
 
     def list_by_campaign(self, campaign_id: int) -> List[DiceSetPublic]:
+        """List all dice sets belonging to a specific campaign."""
         dicesets = self.session.exec(
-            select(DiceSet).where(DiceSet.campaign_id == campaign_id)
+            select(DiceSet)
+            .where(DiceSet.campaign_id == campaign_id)
         ).all()
-        return [DiceSetPublic.model_validate(d) for d in dicesets]
+        return [DiceSetPublic.model_validate(d)
+                for d in dicesets]
 
 
     def list_by_class(self, class_id: int) -> List[DiceSetPublic]:
+        """List all dice sets belonging to a specific class."""
         dicesets = self.session.exec(
-            select(DiceSet).where(DiceSet.class_id == class_id)
+            select(DiceSet)
+            .where(DiceSet.class_id == class_id)
         ).all()
-        return [DiceSetPublic.model_validate(d) for d in dicesets]
+        return [DiceSetPublic.model_validate(d)
+                for d in dicesets]
 
 
     def get_by_class_id(self, class_id: int) -> List[DiceSetPublic]:
+        """Legacy alias for list_by_class."""
         return self.list_by_class(class_id)
 
 
     def get_by_id(self, diceset_id: int) -> Optional[DiceSetPublic]:
+        """Method to get a dice set by ID."""
         db_diceset = self.session.get(DiceSet, diceset_id)
         if db_diceset:
             return DiceSetPublic.model_validate(db_diceset)
@@ -54,13 +65,18 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
                  offset: Annotated[int, Query(ge=0)] = 0,
                  limit: Annotated[int, Query(le=100)] = 100
                  ) -> List[DiceSetPublic]:
+        """Method to get a list of all dice sets."""
         dicesets = self.session.exec(
-            select(DiceSet).offset(offset).limit(limit)
+            select(DiceSet)
+            .offset(offset)
+            .limit(limit)
         ).all()
-        return [DiceSetPublic.model_validate(d) for d in dicesets]
+        return [DiceSetPublic.model_validate(d)
+                for d in dicesets]
 
 
     def add(self, diceset: DiceSetCreate) -> Optional[DiceSetPublic]:
+        """Method to add a new dice set."""
         db_diceset = DiceSet(**diceset.model_dump())
         self.session.add(db_diceset)
         self.session.commit()
@@ -71,7 +87,8 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
             for dice_id in diceset.dice_ids:
                 dice = self.session.get(Dice, dice_id)
                 if dice:
-                    link = DiceSetDice(dice_set_id=db_diceset.id, dice_id=dice.id)
+                    link = DiceSetDice(dice_set_id=db_diceset.id,
+                                       dice_id=dice.id)
                     self.session.add(link)
             self.session.commit()
 
@@ -81,6 +98,7 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
     def update(self,
                diceset_id: int,
                diceset: DiceSetUpdate) -> Optional[DiceSetPublic]:
+        """Update a dice set."""
         db_diceset = self.session.get(DiceSet, diceset_id)
         if not db_diceset:
             return None
@@ -97,14 +115,17 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
         # Update dices (allow duplicates)
         if "dice_ids" in update_data:
             # Delete all existing links for this diceset
-            self.session.exec(delete(DiceSetDice).where(DiceSetDice.dice_set_id == diceset_id))
+            self.session.exec(
+                delete(DiceSetDice)
+                .where(DiceSetDice.dice_set_id == diceset_id))
             self.session.commit()
 
             # Add new links
             for dice_id in update_data["dice_ids"]:
                 dice = self.session.get(Dice, dice_id)
                 if dice:
-                    link = DiceSetDice(dice_set_id=db_diceset.id, dice_id=dice.id)
+                    link = DiceSetDice(dice_set_id=db_diceset.id,
+                                       dice_id=dice.id)
                     self.session.add(link)
             self.session.commit()
 
@@ -113,12 +134,15 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
 
 
     def delete(self, diceset_id: int) -> Optional[DiceSetPublic]:
+        """Remove a dice set."""
         db_diceset = self.session.get(DiceSet, diceset_id)
         if not db_diceset:
             return None
 
         # Delete all links first
-        self.session.exec(delete(DiceSetDice).where(DiceSetDice.dice_set_id == diceset_id))
+        self.session.exec(
+            delete(DiceSetDice)
+            .where(DiceSetDice.dice_set_id == diceset_id))
         self.session.commit()
 
         # Delete the diceset

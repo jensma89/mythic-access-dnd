@@ -3,7 +3,6 @@ sql_dicelog_repository.py
 
 Concrete implementation for sqlalchemy, campaign management.
 """
-from fastapi import Query
 from typing import List, Optional
 from sqlmodel import Session, select
 from models.db_models.table_models import DiceLog

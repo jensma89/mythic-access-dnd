@@ -18,8 +18,8 @@ from services.diceset_service import DiceSetService
 router = APIRouter(tags=["dicesets"])
 
 
-
 async def get_diceset_service(session: SessionDep) -> DiceSetService:
+    """Factory to get the dice set service."""
     dice_repo = SqlAlchemyDiceRepository(session)
     diceset_repo = SqlAlchemyDiceSetRepository(session)
     dicelog_repo = SqlAlchemyDiceLogRepository(session)
