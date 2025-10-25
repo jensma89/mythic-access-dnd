@@ -3,8 +3,7 @@ sql_user_repository.py
 
 Concrete implementation for sqlalchemy, user management.
 """
-from fastapi import Query
-from typing import Annotated, List, Optional
+from typing import List, Optional
 from sqlmodel import Session, select
 from models.db_models.table_models import User
 from models.schemas.user_schema import *
@@ -19,7 +18,8 @@ class SqlAlchemyUserRepository(UserRepository):
         self.session = session
 
 
-    def get_by_id(self, user_id: int) -> Optional[UserPublic]:
+    def get_by_id(self, user_id: int) \
+            -> Optional[UserPublic]:
         """Method to get a user by ID."""
         db_user = self.session.get(User, user_id)
         if db_user:
@@ -28,18 +28,20 @@ class SqlAlchemyUserRepository(UserRepository):
 
 
     def list_all(self,
-                 offset: Annotated[int, Query(ge=0)] = 0,
-                 limit: Annotated[int, Query(le=100)] = 100
+                 offset: int = 0,
+                 limit: int = 100
                  ) -> List[UserPublic]:
         """Method to show all users."""
         users = self.session.exec(
             select(User)
             .offset(offset)
             .limit(limit)).all()
-        return [UserPublic.model_validate(u) for u in users]
+        return [UserPublic.model_validate(u)
+                for u in users]
 
 
-    def add(self, user: UserCreate) -> UserPublic:
+    def add(self, user: UserCreate) \
+            -> UserPublic:
         """Method to add a new user."""
         db_user = User(**user.model_dump())
         self.session.add(db_user)
@@ -50,12 +52,14 @@ class SqlAlchemyUserRepository(UserRepository):
 
     def update(self,
                user_id: int,
-               user: UserUpdate) -> Optional[UserPublic]:
-        """Method to change the data of a user."""
+               user: UserUpdate) \
+            -> Optional[UserPublic]:
+        """Method to update the data of a user."""
         db_user = self.session.get(User, user_id)
         if not db_user:
             return None
-        for key, value in user.model_dump(exclude_unset=True).items():
+        for key, value in user.model_dump(
+                exclude_unset=True).items():
             setattr(db_user, key, value)
         self.session.add(db_user)
         self.session.commit()
@@ -63,7 +67,8 @@ class SqlAlchemyUserRepository(UserRepository):
         return UserPublic.model_validate(db_user)
 
 
-    def delete(self, user_id: int) -> Optional[UserPublic]:
+    def delete(self, user_id: int) \
+            -> Optional[UserPublic]:
         """Method to remove a user."""
         db_user = self.session.get(User, user_id)
         if not db_user:
@@ -73,10 +78,12 @@ class SqlAlchemyUserRepository(UserRepository):
         return UserPublic.model_validate(db_user)
 
 
-    def list_by_user(self, user_id: int) -> List[UserPublic]:
+    def list_by_user(self, user_id: int) \
+            -> List[UserPublic]:
         """Method to list by user."""
         db_users = (self.session.exec(
             select(User)
             .where(User.id == user_id))
                     .all())
-        return [UserPublic.model_validate(u) for u in db_users]
+        return [UserPublic.model_validate(u)
+                for u in db_users]

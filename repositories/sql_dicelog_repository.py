@@ -19,43 +19,52 @@ class SqlAlchemyDiceLogRepository(DiceLogRepository):
         self.session = session
 
 
-    def list_by_user(self, user_id: int) -> List[DiceLogPublic]:
+    def list_by_user(self, user_id: int) \
+            -> List[DiceLogPublic]:
         """List all dice logs belonging to a specific user."""
         dicelogs = self.session.exec(
             select(DiceLog)
             .where(DiceLog.user_id == user_id)
         ).all()
-        return [DiceLogPublic.model_validate(l) for l in dicelogs]
+        return [DiceLogPublic.model_validate(l)
+                for l in dicelogs]
 
 
-    def list_by_campaign(self, campaign_id: int) -> List[DiceLogPublic]:
+    def list_by_campaign(self, campaign_id: int) \
+            -> List[DiceLogPublic]:
         """List all dice logs belonging to a specific campaign."""
         dicelogs = self.session.exec(
             select(DiceLog)
             .where(DiceLog.campaign_id == campaign_id)
         ).all()
-        return [DiceLogPublic.model_validate(l) for l in dicelogs]
+        return [DiceLogPublic.model_validate(l)
+                for l in dicelogs]
 
 
-    def list_by_class(self, class_id: int) -> List[DiceLogPublic]:
+    def list_by_class(self, class_id: int) \
+            -> List[DiceLogPublic]:
         """List all dice logs belonging to a specific DnD class."""
         dicelogs = self.session.exec(
             select(DiceLog)
             .where(DiceLog.class_id == class_id)
         ).all()
-        return [DiceLogPublic.model_validate(d) for d in dicelogs]
+        return [DiceLogPublic.model_validate(d)
+                for d in dicelogs]
 
 
-    def list_by_diceset(self, diceset_id: int) -> List[DiceLogPublic]:
+    def list_by_diceset(self, diceset_id: int) \
+            -> List[DiceLogPublic]:
         """List all dice logs belonging to a specific dice set."""
         dicelogs = self.session.exec(
             select(DiceLog)
             .where(DiceLog.diceset_id == diceset_id)
         ).all()
-        return [DiceLogPublic.model_validate(log) for log in dicelogs]
+        return [DiceLogPublic.model_validate(log)
+                for log in dicelogs]
 
 
-    def get_by_id(self, dicelog_id: int) -> Optional[DiceLogPublic]:
+    def get_by_id(self, dicelog_id: int) \
+            -> Optional[DiceLogPublic]:
         """Method to get a dice log by ID."""
         db_dicelog = self.session.get(DiceLog, dicelog_id)
         if db_dicelog:
@@ -63,7 +72,8 @@ class SqlAlchemyDiceLogRepository(DiceLogRepository):
         return None
 
 
-    def add(self, log: DiceLogCreate) -> DiceLogPublic:
+    def add(self, log: DiceLogCreate) \
+            -> DiceLogPublic:
         """Method to create a new dice log."""
         db_dicelog = DiceLog(**log.model_dump())
         self.session.add(db_dicelog)
@@ -85,7 +95,8 @@ class SqlAlchemyDiceLogRepository(DiceLogRepository):
         return DiceLogPublic.model_validate(db_dicelog)
 
 
-    def delete(self, dicelog_id: int) -> Optional[DiceLogPublic]:
+    def delete(self, dicelog_id: int) \
+            -> Optional[DiceLogPublic]:
         """Delete a dice log by ID."""
         db_dicelog = self.session.get(DiceLog, dicelog_id)
         if not db_dicelog:
@@ -109,4 +120,5 @@ class SqlAlchemyDiceLogRepository(DiceLogRepository):
             .offset(offset)
             .limit(limit)
         ).all()
-        return [DiceLogPublic.model_validate(d) for d in dicelogs]
+        return [DiceLogPublic.model_validate(d)
+                for d in dicelogs]

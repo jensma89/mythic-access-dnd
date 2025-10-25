@@ -3,8 +3,7 @@ sql_diceset_repository.py
 
 Concrete implementation for sqlalchemy, dice set management.
 """
-from fastapi import Query
-from typing import Annotated, List, Optional
+from typing import List, Optional
 from sqlmodel import Session, select, delete
 from models.db_models.table_models import Dice, DiceSet, DiceSetDice
 from models.schemas.diceset_schema import *
@@ -18,7 +17,8 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
         self.session = session
 
 
-    def list_by_user(self, user_id: int) -> List[DiceSetPublic]:
+    def list_by_user(self, user_id: int) \
+            -> List[DiceSetPublic]:
         """List all dice sets belonging to a specific user."""
         dicesets = self.session.exec(
             select(DiceSet)
@@ -28,7 +28,8 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
                 for d in dicesets]
 
 
-    def list_by_campaign(self, campaign_id: int) -> List[DiceSetPublic]:
+    def list_by_campaign(self, campaign_id: int) \
+            -> List[DiceSetPublic]:
         """List all dice sets belonging to a specific campaign."""
         dicesets = self.session.exec(
             select(DiceSet)
@@ -38,7 +39,8 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
                 for d in dicesets]
 
 
-    def list_by_class(self, class_id: int) -> List[DiceSetPublic]:
+    def list_by_class(self, class_id: int) \
+            -> List[DiceSetPublic]:
         """List all dice sets belonging to a specific class."""
         dicesets = self.session.exec(
             select(DiceSet)
@@ -48,12 +50,14 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
                 for d in dicesets]
 
 
-    def get_by_class_id(self, class_id: int) -> List[DiceSetPublic]:
+    def get_by_class_id(self, class_id: int) \
+            -> List[DiceSetPublic]:
         """Legacy alias for list_by_class."""
         return self.list_by_class(class_id)
 
 
-    def get_by_id(self, diceset_id: int) -> Optional[DiceSetPublic]:
+    def get_by_id(self, diceset_id: int) \
+            -> Optional[DiceSetPublic]:
         """Method to get a dice set by ID."""
         db_diceset = self.session.get(DiceSet, diceset_id)
         if db_diceset:
@@ -62,8 +66,8 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
 
 
     def list_all(self,
-                 offset: Annotated[int, Query(ge=0)] = 0,
-                 limit: Annotated[int, Query(le=100)] = 100
+                 offset: int = 0,
+                 limit: int = 100
                  ) -> List[DiceSetPublic]:
         """Method to get a list of all dice sets."""
         dicesets = self.session.exec(
@@ -75,7 +79,8 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
                 for d in dicesets]
 
 
-    def add(self, diceset: DiceSetCreate) -> Optional[DiceSetPublic]:
+    def add(self, diceset: DiceSetCreate) \
+            -> Optional[DiceSetPublic]:
         """Method to add a new dice set."""
         db_diceset = DiceSet(**diceset.model_dump())
         self.session.add(db_diceset)
@@ -97,13 +102,15 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
 
     def update(self,
                diceset_id: int,
-               diceset: DiceSetUpdate) -> Optional[DiceSetPublic]:
+               diceset: DiceSetUpdate) \
+            -> Optional[DiceSetPublic]:
         """Update a dice set."""
         db_diceset = self.session.get(DiceSet, diceset_id)
         if not db_diceset:
             return None
 
-        update_data = diceset.model_dump(exclude_unset=True)
+        update_data = diceset.model_dump(
+            exclude_unset=True)
 
         # Update normal fields
         for key, value in update_data.items():
@@ -133,7 +140,8 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
         return DiceSetPublic.model_validate(db_diceset)
 
 
-    def delete(self, diceset_id: int) -> Optional[DiceSetPublic]:
+    def delete(self, diceset_id: int) \
+            -> Optional[DiceSetPublic]:
         """Remove a dice set."""
         db_diceset = self.session.get(DiceSet, diceset_id)
         if not db_diceset:

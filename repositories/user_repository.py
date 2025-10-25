@@ -3,9 +3,8 @@ user_repository.py
 
 Defined methods for user management.
 """
-from fastapi import Query
 from abc import ABC, abstractmethod
-from typing import Annotated, List, Optional
+from typing import List, Optional
 from models.schemas.user_schema import *
 
 
@@ -14,28 +13,33 @@ class UserRepository(ABC):
     """This class defines the management methods for users."""
 
     @abstractmethod
-    def get_by_id(self, user_id: int) -> Optional[UserPublic]:
+    def get_by_id(self, user_id: int) \
+            -> Optional[UserPublic]:
         """Get user by ID method."""
         pass
 
 
     @abstractmethod
     def list_all(self,
-                 offset: Annotated[int, Query(ge=0)] = 0,
-                 limit: Annotated[int, Query(le=100)] = 100
+                 offset: int = 0,
+                 limit: int = 100
                  ) -> List[UserPublic]:
         """Show all users method."""
         pass
 
 
     @abstractmethod
-    def add(self, user: UserCreate) -> UserPublic:
+    def add(self, user: UserCreate) \
+            -> UserPublic:
         """Add new user method."""
         pass
 
 
     @abstractmethod
-    def update(self, user_id: int, user: UserUpdate) -> Optional[UserPublic]:
+    def update(self,
+               user_id: int,
+               user: UserUpdate) \
+            -> Optional[UserPublic]:
         """Change user data method."""
         pass
 
@@ -47,6 +51,7 @@ class UserRepository(ABC):
 
 
     @abstractmethod
-    def list_by_user(self, user_id: int) -> List[UserPublic]:
+    def list_by_user(self, user_id: int) \
+            -> List[UserPublic]:
         """List by user method."""
         pass

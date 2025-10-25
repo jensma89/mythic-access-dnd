@@ -3,9 +3,8 @@ campaign_repository.py
 
 Defined methods for campaign management.
 """
-from fastapi import Query
 from abc import ABC, abstractmethod
-from typing import Annotated, List, Optional
+from typing import List, Optional
 from models.schemas.campaign_schema import *
 
 
@@ -14,22 +13,24 @@ class CampaignRepository(ABC):
     """This class defines the management methods for campaigns."""
 
     @abstractmethod
-    def get_by_id(self, campaign_id: int) -> Optional[CampaignPublic]:
+    def get_by_id(self, campaign_id: int) \
+            -> Optional[CampaignPublic]:
         """Method to get campaign by ID."""
         pass
 
 
     @abstractmethod
     def list_all(self,
-                 offset: Annotated[int, Query(ge=0)] = 0,
-                 limit: Annotated[int, Query(le=100)] = 100
+                 offset: int = 0,
+                 limit: int = 100
                  ) -> List[CampaignPublic]:
         """Show all campaigns method."""
         pass
 
 
     @abstractmethod
-    def add(self, campaign: CampaignCreate) -> CampaignPublic:
+    def add(self, campaign: CampaignCreate) \
+            -> CampaignPublic:
         """Create a new campaign method."""
         pass
 
@@ -50,12 +51,14 @@ class CampaignRepository(ABC):
 
 
     @abstractmethod
-    def list_by_user(self, user_id: int) -> List[CampaignPublic]:
+    def list_by_user(self, user_id: int) \
+            -> List[CampaignPublic]:
         """List all campaigns belonging to a specific user."""
         pass
 
 
     @abstractmethod
-    def list_by_campaign(self, campaign_id: int) -> List[CampaignPublic]:
+    def list_by_campaign(self, campaign_id: int) \
+            -> List[CampaignPublic]:
         """Optional for nested operations."""
         pass
