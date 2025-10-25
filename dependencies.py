@@ -3,8 +3,7 @@ dependencies.py
 
 DB-Session, Config...
 """
-from pickletools import name2i
-from typing import Annotated, Optional
+from typing import Annotated
 from fastapi import Depends, Query
 from sqlmodel import create_engine, Session, SQLModel
 from dotenv import load_dotenv
@@ -48,10 +47,10 @@ class UserQueryParams:
     """Optional filters for users."""
     def __init__(
             self,
-        username: str | None = Query(
+        name: str | None = Query(
             None,
             description="Filter by username.")):
-        self.name = username
+        self.name = name
 
 
 class CampaignQueryParams:

@@ -4,6 +4,7 @@ class_service.py
 Business logic for classes.
 """
 from fastapi import HTTPException
+from dependencies import ClassQueryParams
 from typing import List, Optional
 from models.schemas.class_schema import *
 from repositories.class_repository import ClassRepository
@@ -25,12 +26,14 @@ class ClassService:
         self.dicelog_repo = dicelog_repo
 
 
-    def create_class(self, dnd_class: ClassCreate) -> ClassPublic:
+    def create_class(self, dnd_class: ClassCreate) \
+            -> ClassPublic:
         """Create a new class (max. 4 per campaign)."""
 
         #Get the count of classes for a campaign
-        existing_classes = (self.class_repo
-                            .get_by_campaign_id(dnd_class.campaign_id))
+        existing_classes = (
+            self.class_repo
+            .get_by_campaign_id(dnd_class.campaign_id))
 
         if len(existing_classes) >= 4:
             raise HTTPException(
@@ -42,23 +45,29 @@ class ClassService:
         return self.class_repo.add(dnd_class)
 
 
-    def get_class(self, class_id: int) -> Optional[ClassPublic]:
+    def get_class(self, class_id: int) \
+            -> Optional[ClassPublic]:
         """Get the class by id."""
         return self.class_repo.get_by_id(class_id)
 
 
     def list_classes(self,
+                     filters: ClassQueryParams,
                      offset: int = 0,
                      limit: int = 100
                      ) -> List[ClassPublic]:
         """Get a list of all classes."""
-        return self.class_repo.list_all(offset=offset,
-                                        limit=limit)
+        return self.class_repo.list_all(
+            campaign_id=filters.campaign_id,
+            name=filters.name,
+            offset=offset,
+            limit=limit)
 
 
     def update_class(self,
                      class_id: int,
-                     dnd_class: ClassUpdate) -> Optional[ClassPublic]:
+                     dnd_class: ClassUpdate) \
+            -> Optional[ClassPublic]:
         """Make changes by a class."""
         return self.class_repo.update(class_id, dnd_class)
 

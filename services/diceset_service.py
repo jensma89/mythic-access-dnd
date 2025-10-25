@@ -27,12 +27,14 @@ class DiceSetService:
         self.dicelog_repo = dicelog_repo
 
 
-    def create_diceset(self, diceset: DiceSetCreate) -> DiceSetPublic:
+    def create_diceset(self, diceset: DiceSetCreate) \
+            -> DiceSetPublic:
         """Create a new dice set (optionally with existing dice)."""
 
         # Validation max 5 sets per dnd class
-        existing_sets = (self.diceset_repo
-                         .get_by_class_id(diceset.class_id))
+        existing_sets = (
+            self.diceset_repo
+            .get_by_class_id(diceset.class_id))
         if len(existing_sets) >= 5:
             raise HTTPException(status_code=400,
                                 detail="Maximum of 5 dice sets "
@@ -42,12 +44,14 @@ class DiceSetService:
         if self.dice_repo and diceset.dice_ids:
             for dice_id in diceset.dice_ids:
                 if not self.dice_repo.get_by_id(dice_id):
-                    raise HTTPException(status_code=404,
-                                        detail=f"Dice {dice_id} not found.")
+                    raise HTTPException(
+                        status_code=404,
+                        detail=f"Dice {dice_id} not found.")
         return self.diceset_repo.add(diceset)
 
 
-    def get_diceset(self, diceset_id: int) -> Optional[DiceSetPublic]:
+    def get_diceset(self, diceset_id: int) \
+            -> Optional[DiceSetPublic]:
         """Get a dice set by ID."""
         return self.diceset_repo.get_by_id(diceset_id)
 
@@ -63,7 +67,8 @@ class DiceSetService:
 
     def update_diceset(self,
                        diceset_id: int,
-                       diceset: DiceSetUpdate) -> Optional[DiceSetPublic]:
+                       diceset: DiceSetUpdate) \
+            -> Optional[DiceSetPublic]:
         """Change data from a dice set."""
         return self.diceset_repo.update(diceset_id, diceset)
 

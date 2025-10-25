@@ -5,7 +5,7 @@ The API routes for campaigns.
 """
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
-from dependencies import Pagination, SessionDep
+from dependencies import CampaignQueryParams, Pagination, SessionDep
 from models.schemas.campaign_schema import *
 from services.campaign_service import CampaignService
 from repositories.sql_campaign_repository import SqlAlchemyCampaignRepository
@@ -47,10 +47,12 @@ async def read_campaign(
             response_model=List[CampaignPublic])
 async def read_campaigns(
         pagination: Pagination = Depends(),
+        filters: CampaignQueryParams = Depends(),
         service: CampaignService = Depends(get_campaign_service)):
     """Endpoint to get all campaigns."""
     return service.list_campaigns(offset=pagination.offset,
-                                  limit=pagination.limit)
+                                  limit=pagination.limit,
+                                  filters=filters)
 
 
 @router.post("/campaigns/",

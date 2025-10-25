@@ -5,6 +5,7 @@ Business logic for user.
 """
 from fastapi import HTTPException
 from typing import List, Optional
+from dependencies import UserQueryParams
 from models.schemas.user_schema import *
 from repositories.user_repository import UserRepository
 from repositories.campaign_repository import CampaignRepository
@@ -30,28 +31,34 @@ class UserService:
         self.dicelog_repo = dicelog_repo
 
 
-    def create_user(self, user: UserCreate) -> UserPublic:
+    def create_user(self, user: UserCreate) \
+            -> UserPublic:
         """Create a new user."""
         return self.user_repo.add(user)
 
 
-    def get_user(self, user_id: int) -> Optional[UserPublic]:
+    def get_user(self, user_id: int) \
+            -> Optional[UserPublic]:
         """Get a user by id."""
         return self.user_repo.get_by_id(user_id)
 
 
     def list_users(self,
+                   filters: UserQueryParams,
                    offset: int = 0,
                    limit: int = 100
                    ) -> List[UserPublic]:
         """Get a list of all users."""
-        return self.user_repo.list_all(offset=offset,
-                                       limit=limit)
+        return self.user_repo.list_all(
+            name=filters.name,
+            offset=offset,
+            limit=limit)
 
 
     def update_user(self,
                     user_id: int,
-                    user: UserUpdate) -> Optional[UserPublic]:
+                    user: UserUpdate) \
+            -> Optional[UserPublic]:
         """Make changes by a user."""
         return self.user_repo.update(user_id, user)
 

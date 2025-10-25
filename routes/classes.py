@@ -5,7 +5,7 @@ The API endpoints for classes.
 """
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
-from dependencies import Pagination, SessionDep
+from dependencies import ClassQueryParams, Pagination, SessionDep
 from models.schemas.class_schema import *
 from repositories.sql_class_repository import SqlAlchemyClassRepository
 from services.class_service import ClassService
@@ -47,10 +47,12 @@ async def read_class(
             response_model=List[ClassPublic])
 async def read_classes(
         pagination: Pagination = Depends(),
+        filters: ClassQueryParams = Depends(),
         service: ClassService = Depends(get_class_service)):
     """Endpoint to get a list of all classes."""
     return service.list_classes(offset=pagination.offset,
-                                limit=pagination.limit)
+                                limit=pagination.limit,
+                                filters=filters)
 
 
 @router.post("/classes/",

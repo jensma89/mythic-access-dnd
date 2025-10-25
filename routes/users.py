@@ -5,7 +5,7 @@ The API endpoints for users.
 """
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
-from dependencies import Pagination, SessionDep
+from dependencies import Pagination, SessionDep, UserQueryParams
 from models.schemas.user_schema import *
 from repositories.sql_user_repository import SqlAlchemyUserRepository
 from services.user_service import UserService
@@ -52,10 +52,13 @@ async def read_user(
             response_model=List[UserPublic])
 async def read_users(
         pagination: Pagination = Depends(),
+        filters: UserQueryParams = Depends(),
         service: UserService = Depends(get_user_service)):
     """Endpoint to get all users."""
-    return service.list_users(offset=pagination.offset,
-                              limit=pagination.limit)
+    return service.list_users(
+        offset=pagination.offset,
+        limit=pagination.limit,
+        filters=filters)
 
 
 @router.post("/users/",

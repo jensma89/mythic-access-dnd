@@ -18,19 +18,22 @@ class DiceService:
     """Business logic
     for dice service operations."""
 
-    def __init__(self,
-                 repository: DiceRepository,
-                 log_repository: Optional[DiceLogRepository] = None):
+    def __init__(
+            self,
+            repository: DiceRepository,
+            log_repository: Optional[DiceLogRepository] = None):
         self.repo = repository
         self.log_repo = log_repository
 
 
-    def create_dice(self, dice: DiceCreate) -> Optional[DicePublic]:
+    def create_dice(self, dice: DiceCreate) \
+            -> Optional[DicePublic]:
         """Create a new dice."""
         return self.repo.add(dice)
 
 
-    def get_dice(self, dice_id: int) -> Optional[DicePublic]:
+    def get_dice(self, dice_id: int) \
+            -> Optional[DicePublic]:
         """Get the dice by ID."""
         return self.repo.get_by_id(dice_id)
 
@@ -46,7 +49,8 @@ class DiceService:
 
     def update_dice(self,
                     dice_id: int,
-                    dice: DiceUpdate) -> Optional[DicePublic]:
+                    dice: DiceUpdate) \
+            -> Optional[DicePublic]:
         """Change the data from a dice."""
         return self.repo.update(dice_id, dice)
 

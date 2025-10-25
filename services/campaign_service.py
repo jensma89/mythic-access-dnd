@@ -5,6 +5,7 @@ Business logic for campaign.
 """
 from fastapi import HTTPException
 from typing import List, Optional
+from dependencies import CampaignQueryParams
 from models.schemas.campaign_schema import *
 from repositories.campaign_repository import CampaignRepository
 from repositories.class_repository import ClassRepository
@@ -28,24 +29,30 @@ class CampaignService:
 
 
     def create_campaign(self,
-                        campaign: CampaignCreate) -> CampaignPublic:
+                        campaign: CampaignCreate) \
+            -> CampaignPublic:
         """Create a new campaign."""
         return self.campaign_repo.add(campaign)
 
 
     def get_campaign(self,
-                     campaign_id: int) -> Optional[CampaignPublic]:
+                     campaign_id: int) \
+            -> Optional[CampaignPublic]:
         """Get a campaign by ID."""
         return self.campaign_repo.get_by_id(campaign_id)
 
 
     def list_campaigns(self,
+                       filters: CampaignQueryParams,
                        offset: int = 0,
-                       limit: int = 100
+                       limit: int = 100,
                        ) -> List[CampaignPublic]:
         """Get a list of all campaigns."""
-        return self.campaign_repo.list_all(offset=offset,
-                                           limit=limit)
+        return self.campaign_repo.list_all(
+            user_id=filters.user_id,
+            name=filters.name,
+            offset=offset,
+            limit=limit)
 
 
     def update_campaign(self,
