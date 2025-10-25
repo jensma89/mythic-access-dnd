@@ -22,9 +22,12 @@ class CampaignRepository(ABC):
     @abstractmethod
     def list_all(self,
                  offset: int = 0,
-                 limit: int = 100
+                 limit: int = 100,
+                 name: Optional[str] = None,
+                 user_id: Optional[int] = None
                  ) -> List[CampaignPublic]:
-        """Show all campaigns method."""
+        """Show all campaigns method,
+        optional filtered by name or user."""
         pass
 
 

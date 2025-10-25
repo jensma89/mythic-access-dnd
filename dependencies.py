@@ -63,7 +63,7 @@ class CampaignQueryParams:
                 description="Filter by user ID."),
             name: str | None = Query(
                 None,
-                description="Filter by campaign name.")):
+                description="Filter by campaign title.")):
         self.user_id = user_id
         self.name = name
 

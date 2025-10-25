@@ -22,7 +22,8 @@ class UserRepository(ABC):
     @abstractmethod
     def list_all(self,
                  offset: int = 0,
-                 limit: int = 100
+                 limit: int = 100,
+                 name: Optional[str] = None
                  ) -> List[UserPublic]:
         """Show all users method."""
         pass

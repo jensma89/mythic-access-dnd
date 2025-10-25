@@ -51,12 +51,25 @@ class SqlAlchemyCampaignRepository(CampaignRepository):
 
     def list_all(self,
                  offset: int = 0,
-                 limit: int = 100
+                 limit: int = 100,
+                 name: Optional[str] = None,
+                 user_id: Optional[int] = None
                  ) -> List[CampaignPublic]:
-        """Method to show all campaigns."""
+        """Method to show all users,
+        optional filtered by name or user."""
+        query = select(Campaign)
+
+        if name:
+            query = (
+                query
+                .where(Campaign.title.ilike(f"%{name}%")))
+        if user_id:
+            query = (
+                query
+                .where(Campaign.created_by == user_id))
+
         campaigns = self.session.exec(
-            select(Campaign)
-            .offset(offset)
+            query.offset(offset)
             .limit(limit)).all()
         return [CampaignPublic.model_validate(c)
                 for c in campaigns]

@@ -22,7 +22,9 @@ class ClassRepository(ABC):
     @abstractmethod
     def list_all(self,
                  offset: int = 0,
-                 limit: int = 100
+                 limit: int = 100,
+                 campaign_id: Optional[int] = None,
+                 name: Optional[str] = None
                  ) -> List[ClassPublic]:
         """Show all classes method."""
         pass

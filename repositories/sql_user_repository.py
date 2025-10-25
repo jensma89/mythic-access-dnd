@@ -29,12 +29,18 @@ class SqlAlchemyUserRepository(UserRepository):
 
     def list_all(self,
                  offset: int = 0,
-                 limit: int = 100
+                 limit: int = 100,
+                 name: Optional[str] = None
                  ) -> List[UserPublic]:
-        """Method to show all users."""
+        """Method to show all users,
+        optional filter by username."""
+        query = select(User)
+        if name:
+            query = (
+                query
+                .where(User.user_name.ilike(f"%{name}%")))
         users = self.session.exec(
-            select(User)
-            .offset(offset)
+            query.offset(offset)
             .limit(limit)).all()
         return [UserPublic.model_validate(u)
                 for u in users]

@@ -70,12 +70,25 @@ class SqlAlchemyClassRepository(ClassRepository):
 
     def list_all(self,
                  offset: int = 0,
-                 limit: int = 100
+                 limit: int = 100,
+                 campaign_id: Optional[int] = None,
+                 name: Optional[str] = None
                  ) -> List[ClassPublic]:
-        """Method to show all classes."""
+        """Method to show all classes
+        with optional campaign or name filter."""
+        query = select(Class)
+
+        if name:
+            query = (
+                query
+                .where(Class.name.ilike(f"%{name}%")))
+        if campaign_id:
+            query = (
+                query
+                .where(Class.campaign_id == campaign_id))
+
         classes = self.session.exec(
-            select(Class)
-            .offset(offset)
+            query.offset(offset)
             .limit(limit)).all()
         return [ClassPublic.model_validate(c)
                 for c in classes]
