@@ -3,9 +3,9 @@ classes.py
 
 The API endpoints for classes.
 """
-from typing import Annotated, List
-from fastapi import APIRouter, Depends, HTTPException, Query
-from dependencies import SessionDep
+from typing import List
+from fastapi import APIRouter, Depends, HTTPException
+from dependencies import Pagination, SessionDep
 from models.schemas.class_schema import *
 from repositories.sql_class_repository import SqlAlchemyClassRepository
 from services.class_service import ClassService
@@ -21,6 +21,7 @@ router = APIRouter(tags=["classes"])
 
 
 async def get_class_service(session: SessionDep) -> ClassService:
+    """Factory to get the class, dice set and dice log service."""
     class_repo = SqlAlchemyClassRepository(session)
     diceset_repo = SqlAlchemyDiceSetRepository(session)
     dicelog_repo = SqlAlchemyDiceLogRepository(session)
@@ -29,9 +30,11 @@ async def get_class_service(session: SessionDep) -> ClassService:
                         dicelog_repo)
 
 
-@router.get("/classes/{class_id}", response_model=ClassPublic)
-async def read_class(class_id: int,
-                     service: ClassService = Depends(get_class_service)):
+@router.get("/classes/{class_id}",
+            response_model=ClassPublic)
+async def read_class(
+        class_id: int,
+        service: ClassService = Depends(get_class_service)):
     """Endpoint to get a single dnd class."""
     dnd_class = service.get_class(class_id)
     if not dnd_class:
@@ -43,11 +46,11 @@ async def read_class(class_id: int,
 @router.get("/classes/",
             response_model=List[ClassPublic])
 async def read_classes(
-        offset: Annotated[int, Query(ge=0)] = 0,
-        limit: Annotated[int, Query(le=100)] = 100,
+        pagination: Pagination = Depends(),
         service: ClassService = Depends(get_class_service)):
     """Endpoint to get a list of all classes."""
-    return service.list_classes(offset, limit)
+    return service.list_classes(offset=pagination.offset,
+                                limit=pagination.limit)
 
 
 @router.post("/classes/",

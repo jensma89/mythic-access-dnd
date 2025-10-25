@@ -3,9 +3,9 @@ campaigns.py
 
 The API routes for campaigns.
 """
-from typing import Annotated, List
-from fastapi import APIRouter, Depends, HTTPException, Query
-from dependencies import SessionDep
+from typing import List
+from fastapi import APIRouter, Depends, HTTPException
+from dependencies import Pagination, SessionDep
 from models.schemas.campaign_schema import *
 from services.campaign_service import CampaignService
 from repositories.sql_campaign_repository import SqlAlchemyCampaignRepository
@@ -18,7 +18,8 @@ router = APIRouter(tags=["campaigns"])
 
 
 async def get_campaign_service(session: SessionDep) -> CampaignService:
-    """Factory to get the campaign service with all dependencies."""
+    """Factory to get the campaign, class,
+    dice set and dice log service."""
     campaign_repo = SqlAlchemyCampaignRepository(session)
     class_repo = SqlAlchemyClassRepository(session)
     diceset_repo = SqlAlchemyDiceSetRepository(session)
@@ -29,9 +30,11 @@ async def get_campaign_service(session: SessionDep) -> CampaignService:
                            dicelog_repo)
 
 
-@router.get("/campaigns/{campaign_id}", response_model=CampaignPublic)
-async def read_campaign(campaign_id: int,
-                        service: CampaignService = Depends(get_campaign_service)):
+@router.get("/campaigns/{campaign_id}",
+            response_model=CampaignPublic)
+async def read_campaign(
+        campaign_id: int,
+        service: CampaignService = Depends(get_campaign_service)):
     """Endpoint to get a single campaign."""
     campaign = service.get_campaign(campaign_id)
     if not campaign:
@@ -43,11 +46,11 @@ async def read_campaign(campaign_id: int,
 @router.get("/campaigns/",
             response_model=List[CampaignPublic])
 async def read_campaigns(
-        offset: Annotated[int, Query(ge=0)] = 0,
-        limit: Annotated[int, Query(le=100)] = 100,
+        pagination: Pagination = Depends(),
         service: CampaignService = Depends(get_campaign_service)):
     """Endpoint to get all campaigns."""
-    return service.list_campaigns(offset, limit)
+    return service.list_campaigns(offset=pagination.offset,
+                                  limit=pagination.limit)
 
 
 @router.post("/campaigns/",

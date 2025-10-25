@@ -3,9 +3,9 @@ dices.py
 
 API endpoints for dices.
 """
-from typing import Annotated, List
-from fastapi import APIRouter, Depends, HTTPException, Query
-from dependencies import SessionDep
+from typing import List
+from fastapi import APIRouter, Depends, HTTPException
+from dependencies import Pagination, SessionDep
 from models.schemas.dice_schema import *
 from repositories.sql_dice_repository import SqlAlchemyDiceRepository
 from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
@@ -17,15 +17,17 @@ router = APIRouter(tags=["dices"])
 
 
 async def get_dice_service(session: SessionDep) -> DiceService:
-    """Factory to get the dice service."""
+    """Factory to get the dice and dice log service."""
     dice_repo = SqlAlchemyDiceRepository(session)
     log_repo = SqlAlchemyDiceLogRepository(session)
     return DiceService(dice_repo, log_repo)
 
 
-@router.get("/dices/{dice_id}", response_model=DicePublic)
-async def read_dice(dice_id: int,
-                    service: DiceService = Depends(get_dice_service)):
+@router.get("/dices/{dice_id}",
+            response_model=DicePublic)
+async def read_dice(
+        dice_id: int,
+        service: DiceService = Depends(get_dice_service)):
     """Endpoint to get a single dice."""
     dice = service.get_dice(dice_id)
     if not dice:
@@ -34,16 +36,18 @@ async def read_dice(dice_id: int,
     return dice
 
 
-@router.get("/dices/", response_model=List[DicePublic])
+@router.get("/dices/",
+            response_model=List[DicePublic])
 async def read_dices(
-        offset: Annotated[int, Query(ge=0)] = 0,
-        limit: Annotated[int, Query(le=100)] = 100,
+        pagination: Pagination = Depends(),
         service: DiceService = Depends(get_dice_service)):
     """Endpoint to list all dices."""
-    return service.list_dices(offset, limit)
+    return service.list_dices(offset=pagination.offset,
+                              limit=pagination.limit)
 
 
-@router.post("/dices/", response_model=DicePublic)
+@router.post("/dices/",
+             response_model=DicePublic)
 async def create_dice(
         dice: DiceCreate,
         service: DiceService = Depends(get_dice_service)):
@@ -51,7 +55,8 @@ async def create_dice(
     return service.create_dice(dice)
 
 
-@router.patch("/dices/{dice_id}", response_model=DicePublic)
+@router.patch("/dices/{dice_id}",
+              response_model=DicePublic)
 async def update_dice(
         dice_id: int,
         dice: DiceUpdate,
@@ -64,7 +69,8 @@ async def update_dice(
     return updated
 
 
-@router.delete("/dices/{dice_id}", response_model=DicePublic)
+@router.delete("/dices/{dice_id}",
+               response_model=DicePublic)
 async def delete_dice(
         dice_id: int,
         service: DiceService = Depends(get_dice_service)):
@@ -76,7 +82,8 @@ async def delete_dice(
     return deleted
 
 
-@router.post("/dices/{dice_id}/roll", response_model=DiceRollResult)
+@router.post("/dices/{dice_id}/roll",
+             response_model=DiceRollResult)
 async def roll_dice(
         dice_id: int,
         service: DiceService = Depends(get_dice_service)):

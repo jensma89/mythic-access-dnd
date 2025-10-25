@@ -4,10 +4,8 @@ dependencies.py
 DB-Session, Config...
 """
 from typing import Annotated
-from fastapi import Depends
+from fastapi import Depends, Query
 from sqlmodel import create_engine, Session, SQLModel
-from services.user_service import UserService
-from repositories.sql_user_repository import SqlAlchemyUserRepository
 from dotenv import load_dotenv
 import os
 
@@ -30,3 +28,14 @@ def get_session():
 
 
 SessionDep = Annotated[Session, Depends(get_session)]
+
+
+class Pagination:
+    """Pagination parameters for endpoints."""
+    def __init__(
+            self,
+            offset: Annotated[int, Query(ge=0)] = 0,
+            limit: Annotated[int, Query(le=100)] = 100
+    ):
+        self.offset = offset
+        self.limit = limit

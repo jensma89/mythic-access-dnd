@@ -3,9 +3,9 @@ users.py
 
 The API endpoints for users.
 """
-from typing import Annotated, List
-from fastapi import APIRouter, Depends, HTTPException, Query
-from dependencies import SessionDep
+from typing import List
+from fastapi import APIRouter, Depends, HTTPException
+from dependencies import Pagination, SessionDep
 from models.schemas.user_schema import *
 from repositories.sql_user_repository import SqlAlchemyUserRepository
 from services.user_service import UserService
@@ -21,6 +21,8 @@ router = APIRouter(tags=["users"])
 
 
 async def get_user_service(session: SessionDep) -> UserService:
+    """Factory to get the user, campaign,
+    class, dice set and dice log service."""
     user_repo = SqlAlchemyUserRepository(session)
     campaign_repo = SqlAlchemyCampaignRepository(session)
     class_repo = SqlAlchemyClassRepository(session)
@@ -33,9 +35,11 @@ async def get_user_service(session: SessionDep) -> UserService:
                        dicelog_repo)
 
 
-@router.get("/users/{user_id}", response_model=UserPublic)
-async def read_user(user_id: int,
-                    service: UserService = Depends(get_user_service)):
+@router.get("/users/{user_id}",
+            response_model=UserPublic)
+async def read_user(
+        user_id: int,
+        service: UserService = Depends(get_user_service)):
     """Endpoint to get a single user."""
     user = service.get_user(user_id)
     if not user:
@@ -47,11 +51,11 @@ async def read_user(user_id: int,
 @router.get("/users/",
             response_model=List[UserPublic])
 async def read_users(
-        offset: Annotated[int, Query(ge=0)] = 0,
-        limit: Annotated[int, Query(le=100)] = 100,
+        pagination: Pagination = Depends(),
         service: UserService = Depends(get_user_service)):
     """Endpoint to get all users."""
-    return service.list_users(offset, limit)
+    return service.list_users(offset=pagination.offset,
+                              limit=pagination.limit)
 
 
 @router.post("/users/",

@@ -3,9 +3,9 @@ dicesets.py
 
 API endpoints for handling dice sets.
 """
-from typing import Annotated, List
-from fastapi import APIRouter, Depends, HTTPException, Query
-from dependencies import SessionDep
+from typing import List
+from fastapi import APIRouter, Depends, HTTPException
+from dependencies import Pagination, SessionDep
 from models.schemas.diceset_schema import *
 from repositories.sql_diceset_repository import SqlAlchemyDiceSetRepository
 from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
@@ -19,7 +19,7 @@ router = APIRouter(tags=["dicesets"])
 
 
 async def get_diceset_service(session: SessionDep) -> DiceSetService:
-    """Factory to get the dice set service."""
+    """Factory to get the dice, dice set and dice log service."""
     dice_repo = SqlAlchemyDiceRepository(session)
     diceset_repo = SqlAlchemyDiceSetRepository(session)
     dicelog_repo = SqlAlchemyDiceLogRepository(session)
@@ -28,9 +28,11 @@ async def get_diceset_service(session: SessionDep) -> DiceSetService:
                           dicelog_repo)
 
 
-@router.get("/dicesets/{diceset_id}", response_model=DiceSetPublic)
-async def read_diceset(diceset_id: int,
-                       service: DiceSetService = Depends(get_diceset_service)):
+@router.get("/dicesets/{diceset_id}",
+            response_model=DiceSetPublic)
+async def read_diceset(
+        diceset_id: int,
+        service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to get a single dice set."""
     diceset = service.get_diceset(diceset_id)
     if not diceset:
@@ -39,16 +41,18 @@ async def read_diceset(diceset_id: int,
     return diceset
 
 
-@router.get("/dicesets/", response_model=List[DiceSetPublic])
+@router.get("/dicesets/",
+            response_model=List[DiceSetPublic])
 async def read_dicesets(
-        offset: Annotated[int, Query(ge=0)] = 0,
-        limit: Annotated[int, Query(le=100)] = 100,
+        pagination: Pagination = Depends(),
         service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to list all dice sets."""
-    return service.list_dicesets(offset, limit)
+    return service.list_dicesets(offset=pagination.offset,
+                                 limit=pagination.limit)
 
 
-@router.post("/dicesets/", response_model=DiceSetPublic)
+@router.post("/dicesets/",
+             response_model=DiceSetPublic)
 async def create_diceset(
         diceset: DiceSetCreate,
         service: DiceSetService = Depends(get_diceset_service)):
@@ -56,7 +60,8 @@ async def create_diceset(
     return service.create_diceset(diceset)
 
 
-@router.patch("/dicesets/{diceset_id}", response_model=DiceSetPublic)
+@router.patch("/dicesets/{diceset_id}",
+              response_model=DiceSetPublic)
 async def update_diceset(
         diceset_id: int,
         diceset: DiceSetUpdate,
@@ -69,28 +74,34 @@ async def update_diceset(
     return updated
 
 
-@router.post("/dicesets/{diceset_id}/roll", response_model=DiceSetRollResult)
-async def roll_diceset(user_id: int,    # remove after auth implementation!
-                       campaign_id: int,
-                       class_id: int,
-                       diceset_id: int,
-                       service: DiceSetService = Depends(get_diceset_service)):
+@router.post("/dicesets/{diceset_id}/roll",
+             response_model=DiceSetRollResult)
+async def roll_diceset(
+        user_id: int,    # remove after auth implementation!
+        campaign_id: int,
+        class_id: int,
+        diceset_id: int,
+        service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to roll a specific dice set
     and get the individual results and the total sum."""
-    result = service.roll_diceset(user_id, campaign_id, class_id, diceset_id)
+    result = service.roll_diceset(user_id,
+                                  campaign_id,
+                                  class_id,
+                                  diceset_id)
     if not result:
         raise HTTPException(status_code=404,
                             detail="Dice set not found.")
     return result
 
 
-@router.delete("/dicesets/{diceset_id}", response_model=DiceSetPublic)
-async def delete_diceset(diceset_id: int,
-                         service: DiceSetService = Depends(get_diceset_service)):
+@router.delete("/dicesets/{diceset_id}",
+               response_model=DiceSetPublic)
+async def delete_diceset(
+        diceset_id: int,
+        service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to delete a dice set by ID."""
     deleted = service.delete_diceset(diceset_id)
     if not deleted:
         raise HTTPException(status_code=404,
                             detail="Dice set not found.")
     return deleted
-
