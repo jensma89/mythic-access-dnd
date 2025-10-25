@@ -17,6 +17,7 @@ class DiceSetBase(SQLModel):
 class DiceSetCreate(SQLModel):
     """Model to create a dice set."""
     name: str
+    user_id: int    # remove after auth implementation!
     class_id: int
     campaign_id: int
     dice_ids: Optional[List[int]] = None # IDs that contain in a dice set
@@ -31,7 +32,7 @@ class DiceSetUpdate(SQLModel):
 class DiceSetPublic(DiceSetBase):
     """Model to respond public data."""
     id: int
-    dices: Optional[List[DicePublic]]
+    dices: List[DicePublic]
 
 
 class DiceSetRollResult(SQLModel):

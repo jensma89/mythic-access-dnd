@@ -82,6 +82,7 @@ class DiceSetService:
     def _log_roll(self,
                   user_id: int,
                   campaign_id: int,
+                  class_id: int,
                   diceset_id: int,
                   name: str,
                   results: list,
@@ -92,6 +93,7 @@ class DiceSetService:
         log_entry = DiceLogCreate(
             user_id=user_id,
             campaign_id=campaign_id,
+            class_id=class_id,
             diceset_id=diceset_id,
             roll=f"{name}: {[r.result for r in results]}",
             result=total,
@@ -103,6 +105,7 @@ class DiceSetService:
     def roll_diceset(self,
                      user_id: int,
                      campaign_id: int,
+                     class_id: int,
                      diceset_id: int):
         """Roll all dices in a set
         and return each result + total sum."""
@@ -126,6 +129,7 @@ class DiceSetService:
 
         self._log_roll(user_id,
                        campaign_id,
+                       class_id,
                        diceset_id,
                        diceset.name,
                        results,

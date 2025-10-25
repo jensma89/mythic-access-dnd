@@ -69,6 +69,21 @@ async def update_diceset(
     return updated
 
 
+@router.post("/dicesets/{diceset_id}/roll", response_model=DiceSetRollResult)
+async def roll_diceset(user_id: int,    # remove after auth implementation!
+                       campaign_id: int,
+                       class_id: int,
+                       diceset_id: int,
+                       service: DiceSetService = Depends(get_diceset_service)):
+    """Endpoint to roll a specific dice set
+    and get the individual results and the total sum."""
+    result = service.roll_diceset(user_id, campaign_id, class_id, diceset_id)
+    if not result:
+        raise HTTPException(status_code=404,
+                            detail="Dice set not found.")
+    return result
+
+
 @router.delete("/dicesets/{diceset_id}", response_model=DiceSetPublic)
 async def delete_diceset(diceset_id: int,
                          service: DiceSetService = Depends(get_diceset_service)):
@@ -78,18 +93,4 @@ async def delete_diceset(diceset_id: int,
         raise HTTPException(status_code=404,
                             detail="Dice set not found.")
     return deleted
-
-
-@router.post("/dicesets/{diceset_id}/roll", response_model=DiceSetRollResult)
-async def roll_diceset(diceset_id: int,
-                       user_id: int = 1,
-                       campaign_id: int =1, # placeholder until auth finished
-                       service: DiceSetService = Depends(get_diceset_service)):
-    """Endpoint to roll a specific dice set
-    and get the individual results and the total sum."""
-    result = service.roll_diceset(user_id, campaign_id, diceset_id)
-    if not result:
-        raise HTTPException(status_code=404,
-                            detail="Dice set not found.")
-    return result
 

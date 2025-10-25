@@ -85,8 +85,9 @@ class Class(SQLModel, table=True):
 
 class DiceSetDice(SQLModel, table=True):
     """Table model for Dice to DiceSet relationships."""
-    dice_set_id: int = Field(foreign_key="diceset.id", primary_key=True)
-    dice_id: int = Field(foreign_key="dice.id", primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
+    dice_set_id: int = Field(foreign_key="diceset.id")
+    dice_id: int = Field(foreign_key="dice.id")
 
 
 class DiceSet(SQLModel, table=True):
@@ -103,7 +104,8 @@ class DiceSet(SQLModel, table=True):
     # Many-to-many relationship to Dice
     dices: List["Dice"] = Relationship(
         back_populates="dice_sets",
-        link_model=DiceSetDice
+        link_model=DiceSetDice,
+        sa_relationship_kwargs={}
     )
 
 
