@@ -3,8 +3,9 @@ user_service.py
 
 Business logic for user.
 """
-from fastapi import Query
-from typing import List, Optional, Annotated
+from fastapi import Depends
+from dependencies import Pagination
+from typing import List, Optional
 from models.schemas.user_schema import *
 from repositories.user_repository import UserRepository
 from repositories.campaign_repository import CampaignRepository
@@ -15,7 +16,7 @@ from repositories.dicelog_repository import DiceLogRepository
 
 
 class UserService:
-    """Initialise the bussines logic
+    """Initialise the business logic
     for user service operations."""
     def __init__(self,
                  user_repo: UserRepository,
@@ -41,11 +42,11 @@ class UserService:
 
 
     def list_users(self,
-                   offset: Annotated[int, Query(ge=0)] = 0,
-                   limit: Annotated[int, Query(le=100)] = 100
+                   pagination: Pagination = Depends()
                    ) -> List[UserPublic]:
         """Get a list of all users."""
-        return self.user_repo.list_all(offset, limit)
+        return self.user_repo.list_all(offset=pagination.offset,
+                                       limit=pagination.limit)
 
 
     def update_user(self,
@@ -56,7 +57,8 @@ class UserService:
 
 
     def delete_user(self, user_id: int) -> bool:
-        """Delete a user and the belonging campaign, classes, dice sets and logs."""
+        """Delete a user and the belonging campaign,
+        classes, dice sets and logs."""
 
         # Delete dice logs
         logs = self.dicelog_repo.list_by_user(user_id)

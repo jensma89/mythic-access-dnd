@@ -3,8 +3,9 @@ campaign_service.py
 
 Business logic for campaign.
 """
-from fastapi import Query
+from fastapi import Depends, Query
 from typing import List, Optional, Annotated
+from dependencies import Pagination
 from models.schemas.campaign_schema import *
 from repositories.campaign_repository import CampaignRepository
 from repositories.class_repository import ClassRepository
@@ -27,22 +28,24 @@ class CampaignService:
         self.dicelog_repo = dicelog_repo
 
 
-    def create_campaign(self, campaign: CampaignCreate) -> CampaignPublic:
+    def create_campaign(self,
+                        campaign: CampaignCreate) -> CampaignPublic:
         """Create a new campaign."""
         return self.campaign_repo.add(campaign)
 
 
-    def get_campaign(self, campaign_id: int) -> Optional[CampaignPublic]:
+    def get_campaign(self,
+                     campaign_id: int) -> Optional[CampaignPublic]:
         """Get a campaign by ID."""
         return self.campaign_repo.get_by_id(campaign_id)
 
 
     def list_campaigns(self,
-                       offset: Annotated[int, Query(ge=0)] = 0,
-                       limit: Annotated[int, Query(le=100)] = 100
+                       pagination: Pagination = Depends()
                        ) -> List[CampaignPublic]:
         """Get a list of all campaigns."""
-        return self.campaign_repo.list_all(offset, limit)
+        return self.campaign_repo.list_all(offset=pagination.offset,
+                                           limit=pagination.limit)
 
 
     def update_campaign(self,

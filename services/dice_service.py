@@ -5,8 +5,9 @@ Business logic for dice handling.
 """
 from random import randint
 from datetime import datetime, timezone
-from fastapi import HTTPException, Query
-from typing import Annotated, List, Optional
+from fastapi import Depends, HTTPException, Query
+from typing import List, Optional
+from dependencies import Pagination
 from models.schemas.dice_schema import *
 from models.schemas.dicelog_schema import *
 from repositories.dice_repository import DiceRepository
@@ -36,11 +37,11 @@ class DiceService:
 
 
     def list_dices(self,
-                   offset: Annotated[int, Query(ge=0)] = 0,
-                   limit: Annotated[int, Query(le=100)] = 100
+                   pagination: Pagination = Depends()
                    ) -> List[DicePublic]:
         """Get a list of all dices."""
-        return self.repo.list_all(offset, limit)
+        return self.repo.list_all(offset=pagination.offset,
+                                  limit=pagination.limit)
 
 
     def update_dice(self,
