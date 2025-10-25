@@ -3,7 +3,8 @@ dependencies.py
 
 DB-Session, Config...
 """
-from typing import Annotated
+from pickletools import name2i
+from typing import Annotated, Optional
 from fastapi import Depends, Query
 from sqlmodel import create_engine, Session, SQLModel
 from dotenv import load_dotenv
@@ -39,3 +40,45 @@ class Pagination:
     ):
         self.offset = offset
         self.limit = limit
+
+
+# Query parameter classes
+
+class UserQueryParams:
+    """Optional filters for users."""
+    def __init__(
+            self,
+        username: str | None = Query(
+            None,
+            description="Filter by username.")):
+        self.name = username
+
+
+class CampaignQueryParams:
+    """Optional filters for campaigns."""
+    def __init__(
+            self,
+            user_id: int | None = Query(
+                None,
+                ge=1,
+                description="Filter by user ID."),
+            name: str | None = Query(
+                None,
+                description="Filter by campaign name.")):
+        self.user_id = user_id
+        self.name = name
+
+
+class ClassQueryParams:
+    """Optional filters for dnd classes."""
+    def __init__(
+            self,
+    campaign_id: int | None = Query(
+        None,
+        ge=1,
+        description="Filter by campaign ID."),
+    name: str | None = Query(
+        None,
+        description="Filter by class name.")):
+        self.campaign_id = campaign_id
+        self.name = name
