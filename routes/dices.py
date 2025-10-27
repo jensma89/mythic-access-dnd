@@ -49,42 +49,42 @@ async def read_dices(
         limit=pagination.limit)
 
 
-@router.post("/dices/",
-             response_model=DicePublic)
-async def create_dice(
-        dice: DiceCreate,
-        service: DiceService = Depends(get_dice_service)):
-    """Endpoint to create a new dice."""
-    return service.create_dice(dice)
+#@router.post("/dices/",
+#             response_model=DicePublic)
+#async def create_dice(
+#        dice: DiceCreate,
+#        service: DiceService = Depends(get_dice_service)):
+#    """Endpoint to create a new dice."""
+#    return service.create_dice(dice)
 
 
-@router.patch("/dices/{dice_id}",
-              response_model=DicePublic)
-async def update_dice(
-        dice_id: int,
-        dice: DiceUpdate,
-        service: DiceService = Depends(get_dice_service)):
-    """Endpoint to change data from a dice."""
-    updated = service.update_dice(dice_id, dice)
-    if not updated:
-        raise HTTPException(
-            status_code=404,
-            detail="Dice not found.")
-    return updated
+#@router.patch("/dices/{dice_id}",
+#              response_model=DicePublic)
+#async def update_dice(
+#        dice_id: int,
+#        dice: DiceUpdate,
+#        service: DiceService = Depends(get_dice_service)):
+#    """Endpoint to change data from a dice."""
+#    updated = service.update_dice(dice_id, dice)
+#    if not updated:
+#        raise HTTPException(
+#            status_code=404,
+#            detail="Dice not found.")
+#    return updated
 
 
-@router.delete("/dices/{dice_id}",
-               response_model=DicePublic)
-async def delete_dice(
-        dice_id: int,
-        service: DiceService = Depends(get_dice_service)):
-    """Endpoint to delete a dice."""
-    deleted = service.delete_dice(dice_id)
-    if not deleted:
-        raise HTTPException(
-            status_code=404,
-            detail="Dice not found.")
-    return deleted
+#@router.delete("/dices/{dice_id}",
+#               response_model=DicePublic)
+#async def delete_dice(
+#        dice_id: int,
+#        service: DiceService = Depends(get_dice_service)):
+#    """Endpoint to delete a dice."""
+#    deleted = service.delete_dice(dice_id)
+#    if not deleted:
+#        raise HTTPException(
+#            status_code=404,
+#            detail="Dice not found.")
+#   return deleted
 
 
 @router.post("/dices/{dice_id}/roll",
