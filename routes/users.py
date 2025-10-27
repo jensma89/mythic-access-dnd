@@ -20,7 +20,8 @@ from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
 router = APIRouter(tags=["users"])
 
 
-async def get_user_service(session: SessionDep) -> UserService:
+async def get_user_service(session: SessionDep) \
+        -> UserService:
     """Factory to get the user, campaign,
     class, dice set and dice log service."""
     user_repo = SqlAlchemyUserRepository(session)
@@ -43,8 +44,9 @@ async def read_user(
     """Endpoint to get a single user."""
     user = service.get_user(user_id)
     if not user:
-        raise HTTPException(status_code=404,
-                            detail="User not found.")
+        raise HTTPException(
+            status_code=404,
+            detail="User not found.")
     return user
 
 
@@ -79,8 +81,9 @@ async def update_user(
     """Endpoint to change user data."""
     updated = service.update_user(user_id, user)
     if not updated:
-        raise HTTPException(status_code=404,
-                            detail="User not found")
+        raise HTTPException(
+            status_code=404,
+            detail="User not found")
     return updated
 
 
@@ -92,6 +95,7 @@ async def delete_user(
     """Endpoint to delete a user by id."""
     deleted = service.delete_user(user_id)
     if not deleted:
-        raise HTTPException(status_code=404,
-                            detail="User not found")
+        raise HTTPException(
+            status_code=404,
+            detail="User not found")
     return deleted

@@ -20,14 +20,17 @@ router = APIRouter(tags=["classes"])
 
 
 
-async def get_class_service(session: SessionDep) -> ClassService:
+async def get_class_service(session: SessionDep) \
+        -> ClassService:
     """Factory to get the class, dice set and dice log service."""
     class_repo = SqlAlchemyClassRepository(session)
     diceset_repo = SqlAlchemyDiceSetRepository(session)
     dicelog_repo = SqlAlchemyDiceLogRepository(session)
-    return ClassService(class_repo,
-                        diceset_repo,
-                        dicelog_repo)
+    return ClassService(
+        class_repo,
+        diceset_repo,
+        dicelog_repo
+    )
 
 
 @router.get("/classes/{class_id}",
@@ -38,8 +41,9 @@ async def read_class(
     """Endpoint to get a single dnd class."""
     dnd_class = service.get_class(class_id)
     if not dnd_class:
-        raise HTTPException(status_code=404,
-                            detail="Class not found.")
+        raise HTTPException(
+            status_code=404,
+            detail="Class not found.")
     return dnd_class
 
 
@@ -50,9 +54,10 @@ async def read_classes(
         filters: ClassQueryParams = Depends(),
         service: ClassService = Depends(get_class_service)):
     """Endpoint to get a list of all classes."""
-    return service.list_classes(offset=pagination.offset,
-                                limit=pagination.limit,
-                                filters=filters)
+    return service.list_classes(
+        offset=pagination.offset,
+        limit=pagination.limit,
+        filters=filters)
 
 
 @router.post("/classes/",
@@ -73,8 +78,9 @@ async def update_class(
     """Endpoint to make changes by a class."""
     updated = service.update_class(class_id, dnd_class)
     if not updated:
-        raise HTTPException(status_code=404,
-                            detail="Class not found.")
+        raise HTTPException(
+            status_code=404,
+            detail="Class not found.")
     return updated
 
 
@@ -86,6 +92,7 @@ async def delete_class(
     """Endpoint to delete a class by ID."""
     deleted = service.delete_class(class_id)
     if not deleted:
-        raise HTTPException(status_code=404,
-                            detail="Class not found.")
+        raise HTTPException(
+            status_code=404,
+            detail="Class not found.")
     return deleted

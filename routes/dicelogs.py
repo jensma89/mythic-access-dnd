@@ -26,10 +26,12 @@ async def list_logs(
         user_id: int,
         pagination: Pagination = Depends(),
         dicelog_repo: SqlAlchemyDiceLogRepository = Depends(get_dicelog_repo)):
-    """Endpoint to list all dice logs by a specific user."""
-    return dicelog_repo.list_logs(user_id=user_id,
-                                  offset=pagination.offset,
-                                  limit=pagination.limit)
+    """Endpoint to list all dice logs
+    by a specific user."""
+    return dicelog_repo.list_logs(
+        user_id=user_id,
+        offset=pagination.offset,
+        limit=pagination.limit)
 
 
 @router.get("/dicelogs/{dicelog_id}",
@@ -40,6 +42,7 @@ async def get_log(
     """Endpoint to get a single dice log by ID."""
     dicelog = repo.get_by_id(dicelog_id)
     if not dicelog:
-        raise HTTPException(status_code=404,
-                            detail="Dice log not found.")
+        raise HTTPException(
+            status_code=404,
+            detail="Dice log not found.")
     return dicelog

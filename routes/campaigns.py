@@ -17,17 +17,20 @@ from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
 router = APIRouter(tags=["campaigns"])
 
 
-async def get_campaign_service(session: SessionDep) -> CampaignService:
+async def get_campaign_service(session: SessionDep) \
+        -> CampaignService:
     """Factory to get the campaign, class,
     dice set and dice log service."""
     campaign_repo = SqlAlchemyCampaignRepository(session)
     class_repo = SqlAlchemyClassRepository(session)
     diceset_repo = SqlAlchemyDiceSetRepository(session)
     dicelog_repo = SqlAlchemyDiceLogRepository(session)
-    return CampaignService(campaign_repo,
-                           class_repo,
-                           diceset_repo,
-                           dicelog_repo)
+    return CampaignService(
+        campaign_repo,
+        class_repo,
+        diceset_repo,
+        dicelog_repo
+    )
 
 
 @router.get("/campaigns/{campaign_id}",
@@ -38,8 +41,9 @@ async def read_campaign(
     """Endpoint to get a single campaign."""
     campaign = service.get_campaign(campaign_id)
     if not campaign:
-        raise HTTPException(status_code=404,
-                            detail="Campaign not found.")
+        raise HTTPException(
+            status_code=404,
+            detail="Campaign not found.")
     return campaign
 
 
@@ -50,9 +54,11 @@ async def read_campaigns(
         filters: CampaignQueryParams = Depends(),
         service: CampaignService = Depends(get_campaign_service)):
     """Endpoint to get all campaigns."""
-    return service.list_campaigns(offset=pagination.offset,
-                                  limit=pagination.limit,
-                                  filters=filters)
+    return service.list_campaigns(
+        offset=pagination.offset,
+        limit=pagination.limit,
+        filters=filters
+    )
 
 
 @router.post("/campaigns/",
@@ -73,8 +79,9 @@ async def update_campaign(
     """Endpoint to change campaign data."""
     updated = service.update_campaign(campaign_id, campaign)
     if not updated:
-        raise HTTPException(status_code=404,
-                            detail="Campaign not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Campaign not found")
     return updated
 
 
@@ -86,6 +93,7 @@ async def delete_campaign(
     """Endpoint to remove a campaign."""
     deleted = service.delete_campaign(campaign_id)
     if not deleted:
-        raise HTTPException(status_code=404,
-                            detail="Campaign not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Campaign not found")
     return deleted

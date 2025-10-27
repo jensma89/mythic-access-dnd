@@ -16,7 +16,8 @@ router = APIRouter(tags=["dices"])
 
 
 
-async def get_dice_service(session: SessionDep) -> DiceService:
+async def get_dice_service(session: SessionDep) \
+        -> DiceService:
     """Factory to get the dice and dice log service."""
     dice_repo = SqlAlchemyDiceRepository(session)
     log_repo = SqlAlchemyDiceLogRepository(session)
@@ -31,8 +32,9 @@ async def read_dice(
     """Endpoint to get a single dice."""
     dice = service.get_dice(dice_id)
     if not dice:
-        raise HTTPException(status_code=404,
-                            detail="Dice not found.")
+        raise HTTPException(
+            status_code=404,
+            detail="Dice not found.")
     return dice
 
 
@@ -42,8 +44,9 @@ async def read_dices(
         pagination: Pagination = Depends(),
         service: DiceService = Depends(get_dice_service)):
     """Endpoint to list all dices."""
-    return service.list_dices(offset=pagination.offset,
-                              limit=pagination.limit)
+    return service.list_dices(
+        offset=pagination.offset,
+        limit=pagination.limit)
 
 
 @router.post("/dices/",
@@ -64,8 +67,9 @@ async def update_dice(
     """Endpoint to change data from a dice."""
     updated = service.update_dice(dice_id, dice)
     if not updated:
-        raise HTTPException(status_code=404,
-                            detail="Dice not found.")
+        raise HTTPException(
+            status_code=404,
+            detail="Dice not found.")
     return updated
 
 
@@ -77,8 +81,9 @@ async def delete_dice(
     """Endpoint to delete a dice."""
     deleted = service.delete_dice(dice_id)
     if not deleted:
-        raise HTTPException(status_code=404,
-                            detail="Dice not found.")
+        raise HTTPException(
+            status_code=404,
+            detail="Dice not found.")
     return deleted
 
 
@@ -87,6 +92,7 @@ async def delete_dice(
 async def roll_dice(
         dice_id: int,
         service: DiceService = Depends(get_dice_service)):
-    """Endpoint to roll a specific dice and get the result (random)."""
+    """Endpoint to roll a specific dice
+    and get the result (random)."""
     roll = service.roll_dice(dice_id)
     return roll

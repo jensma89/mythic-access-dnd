@@ -18,7 +18,8 @@ from services.diceset_service import DiceSetService
 router = APIRouter(tags=["dicesets"])
 
 
-async def get_diceset_service(session: SessionDep) -> DiceSetService:
+async def get_diceset_service(session: SessionDep) \
+        -> DiceSetService:
     """Factory to get the dice, dice set and dice log service."""
     dice_repo = SqlAlchemyDiceRepository(session)
     diceset_repo = SqlAlchemyDiceSetRepository(session)
@@ -36,8 +37,9 @@ async def read_diceset(
     """Endpoint to get a single dice set."""
     diceset = service.get_diceset(diceset_id)
     if not diceset:
-        raise HTTPException(status_code=404,
-                            detail="Diceset not found.")
+        raise HTTPException(
+            status_code=404,
+            detail="Diceset not found.")
     return diceset
 
 
@@ -47,8 +49,9 @@ async def read_dicesets(
         pagination: Pagination = Depends(),
         service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to list all dice sets."""
-    return service.list_dicesets(offset=pagination.offset,
-                                 limit=pagination.limit)
+    return service.list_dicesets(
+        offset=pagination.offset,
+        limit=pagination.limit)
 
 
 @router.post("/dicesets/",
@@ -69,28 +72,32 @@ async def update_diceset(
     """Endpoint to change data from a dice set."""
     updated = service.update_diceset(diceset_id, diceset)
     if not updated:
-        raise HTTPException(status_code=404,
-                            detail="Dice set not found.")
+        raise HTTPException(
+            status_code=404,
+            detail="Dice set not found.")
     return updated
 
 
 @router.post("/dicesets/{diceset_id}/roll",
              response_model=DiceSetRollResult)
 async def roll_diceset(
-        user_id: int,    # remove after auth implementation!
+        user_id: int,    # remove after auth implementation?
         campaign_id: int,
         class_id: int,
         diceset_id: int,
         service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to roll a specific dice set
     and get the individual results and the total sum."""
-    result = service.roll_diceset(user_id,
-                                  campaign_id,
-                                  class_id,
-                                  diceset_id)
+    result = service.roll_diceset(
+        user_id,
+        campaign_id,
+        class_id,
+        diceset_id
+    )
     if not result:
-        raise HTTPException(status_code=404,
-                            detail="Dice set not found.")
+        raise HTTPException(
+            status_code=404,
+            detail="Dice set not found.")
     return result
 
 
@@ -102,6 +109,7 @@ async def delete_diceset(
     """Endpoint to delete a dice set by ID."""
     deleted = service.delete_diceset(diceset_id)
     if not deleted:
-        raise HTTPException(status_code=404,
-                            detail="Dice set not found.")
+        raise HTTPException(
+            status_code=404,
+            detail="Dice set not found.")
     return deleted
