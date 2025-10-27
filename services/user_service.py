@@ -43,11 +43,11 @@ class UserService:
                     detail="Failed to create User."
                 )
             return created_user
-        except SQLAlchemyError as e:
+        except SQLAlchemyError:
             raise HTTPException(
                 status_code=500,
                 detail=f"Database error "
-                       f"while creating user: {str(e)}."
+                       f"while creating user."
             )
 
 
@@ -63,11 +63,11 @@ class UserService:
                            f"{user_id} not found."
                 )
             return user
-        except SQLAlchemyError as e:
+        except SQLAlchemyError:
             raise HTTPException(
                 status_code=500,
                 detail=f"Database error "
-                       f"while retrieving user: {str(e)}."
+                       f"while retrieving user."
             )
 
 
@@ -84,11 +84,11 @@ class UserService:
                 limit=limit
             )
             return users
-        except SQLAlchemyError as e:
+        except SQLAlchemyError:
             raise HTTPException(
                 status_code=500,
                 detail=f"Database error "
-                       f"while listing users: {str(e)}."
+                       f"while listing users."
             )
 
 
@@ -113,11 +113,11 @@ class UserService:
                     detail="Failed to update user."
                 )
             return updated_user
-        except SQLAlchemyError as e:
+        except SQLAlchemyError:
             raise HTTPException(
                 status_code=500,
                 detail=f"Database error "
-                       f"while updating user: {str(e)}."
+                       f"while updating user."
             )
 
 
@@ -134,19 +134,23 @@ class UserService:
                 )
 
             # Delete dice logs
-            for log in self.dicelog_repo.list_by_user(user_id):
+            for log in (self.dicelog_repo
+                    .list_by_user(user_id)):
                 self.dicelog_repo.delete(log.id)
 
             # Delete dice sets
-            for diceset in self.diceset_repo.list_by_user(user_id):
+            for diceset in (self.diceset_repo
+                    .list_by_user(user_id)):
                 self.diceset_repo.delete(diceset.id)
 
             # Delete classes
-            for dnd_class in self.class_repo.list_by_user(user_id):
+            for dnd_class in (self.class_repo
+                    .list_by_user(user_id)):
                 self.class_repo.delete(dnd_class.id)
 
             # Delete campaigns
-            for campaign in self.campaign_repo.list_by_user(user_id):
+            for campaign in (self.campaign_repo
+                    .list_by_user(user_id)):
                 self.campaign_repo.delete(campaign.id)
 
             # Finally delete user
@@ -157,9 +161,14 @@ class UserService:
                     detail="Failed to delete user."
                 )
             return deleted_user
-        except SQLAlchemyError as e:
+        except SQLAlchemyError:
             raise HTTPException(
                 status_code=500,
                 detail=f"Database error "
-                       f"while deleting user: {str(e)}."
+                       f"while deleting user."
             )
+        except Exception:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Unexpected error "
+                       f"while deleting user.")

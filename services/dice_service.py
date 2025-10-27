@@ -6,6 +6,7 @@ Business logic for dice handling.
 from random import randint
 from datetime import datetime, timezone
 from fastapi import HTTPException
+from sqlalchemy.exc import SQLAlchemyError
 from typing import List, Optional
 from models.schemas.dice_schema import *
 from models.schemas.dicelog_schema import *
@@ -29,73 +30,186 @@ class DiceService:
     def create_dice(self, dice: DiceCreate) \
             -> Optional[DicePublic]:
         """Create a new dice."""
-        return self.repo.add(dice)
+        try:
+            return self.repo.add(dice)
+        except SQLAlchemyError:
+            raise HTTPException(
+                status_code=500,
+                detail="Database error "
+                       "while creating dice."
+            )
+        except Exception:
+            raise HTTPException(
+                status_code=500,
+                detail="Unexpected error "
+                       "while creating dice."
+            )
 
 
     def get_dice(self, dice_id: int) \
             -> Optional[DicePublic]:
         """Get the dice by ID."""
-        return self.repo.get_by_id(dice_id)
+        try:
+            db_dice = self.repo.get_by_id(dice_id)
+            if not db_dice:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Dice with ID {dice_id} "
+                           f"not found."
+                )
+            return db_dice
+        except SQLAlchemyError:
+            raise HTTPException(
+                status_code=500,
+                detail="Database error "
+                       "while fetching dice."
+            )
+        except Exception:
+            raise HTTPException(
+                status_code=500,
+                detail="Unexpected error "
+                       "while fetching dice."
+            )
 
 
-    def list_dices(self,
-                   offset: int = 0,
-                   limit: int = 100
-                   ) -> List[DicePublic]:
+    def list_dices(
+            self,
+            offset: int = 0,
+            limit: int = 100) \
+            -> List[DicePublic]:
         """Get a list of all dices."""
-        return self.repo.list_all(offset=offset,
-                                  limit=limit)
+        try:
+            return self.repo.list_all(
+                offset=offset,
+                limit=limit)
+        except SQLAlchemyError:
+            raise HTTPException(
+                status_code=500,
+                detail="Database error "
+                       "while listing dices."
+            )
+        except Exception:
+            raise HTTPException(
+                status_code=500,
+                detail="Unexpected error "
+                       "while listing dices."
+            )
 
 
-    def update_dice(self,
-                    dice_id: int,
-                    dice: DiceUpdate) \
+    def update_dice(
+            self,
+            dice_id: int,
+            dice: DiceUpdate) \
             -> Optional[DicePublic]:
         """Change the data from a dice."""
-        return self.repo.update(dice_id, dice)
+        try:
+            updated = self.repo.update(dice_id, dice)
+            if not updated:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Dice with ID {dice_id} "
+                           f"not found."
+                )
+            return updated
+
+        except SQLAlchemyError:
+            raise HTTPException(
+                status_code=500,
+                detail="Database error "
+                       "while updating dice."
+            )
+        except Exception:
+            raise HTTPException(
+                status_code=500,
+                detail="Unexpected error "
+                       "while updating dice."
+            )
 
 
-    def delete_dice(self, dice_id: int) -> bool:
+    def delete_dice(
+            self,
+            dice_id: int) \
+            -> Optional[DicePublic]:
         """Remove a dice by ID."""
-        return self.repo.delete(dice_id)
+        try:
+            deleted = self.repo.delete(dice_id)
+            if not deleted:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Dice with ID {dice_id} "
+                           f"not found."
+                )
+            return deleted
+        except SQLAlchemyError:
+            raise HTTPException(
+                status_code=500,
+                detail="Database error "
+                       "while deleting dice."
+            )
+        except Exception:
+            raise HTTPException(
+                status_code=500,
+                detail="Unexpected error "
+                       "while deleting dice."
+            )
 
 
-    def _log_roll(self,
-                  user_id: int,
-                  campaign_id: int,
-                  name: str,
-                  result: int):
+    def _log_roll(
+            self,
+            user_id: int,
+            campaign_id: int,
+            name: str,
+            result: int):
         """Log the dice data after a roll."""
         if not self.log_repo:
             return
-        log_entry = DiceLogCreate(
-            user_id=user_id,
-            campaign_id=campaign_id,
-            roll=name,
-            result=result,
-            timestamp=datetime.now(timezone.utc)
-        )
-        self.log_repo.add(log_entry)
+        try:
+            log_entry = DiceLogCreate(
+                user_id=user_id,
+                campaign_id=campaign_id,
+                roll=name,
+                result=result,
+                timestamp=datetime.now(timezone.utc)
+            )
+            self.log_repo.add(log_entry)
+        except SQLAlchemyError:
+            raise HTTPException(
+                status_code=500,
+                detail="Database error "
+                       "while logging dice roll."
+            )
+        except Exception:
+            raise HTTPException(
+                status_code=500,
+                detail="Unexpected error "
+                       "while logging dice roll."
+            )
 
 
     # Dice roll logic
-    def roll_dice(self,
-                  dice_id: int,
-                  user_id: int | None = None,
-                  campaign_id: int | None = None):
+    def roll_dice(
+            self,
+            dice_id: int,
+            user_id: int | None = None,
+            campaign_id: int | None = None):
         """Roll a dice (e.g. d6 -> random 1-6)
         and optionally log the result."""
         db_dice = self.repo.get_by_id(dice_id)
         if not db_dice:
-            raise HTTPException(status_code=404,
-                                detail="Dice not found.")
+            raise HTTPException(
+                status_code=404,
+                detail=f"Dice with ID {dice_id} "
+                       f"not found."
+            )
         result = randint(1, db_dice.sides)
 
         if user_id and campaign_id:
-            self._log_roll(user_id,
-                           campaign_id,
-                           db_dice.name,
-                           result)
+            self._log_roll(
+                user_id,
+                campaign_id,
+                db_dice.name,
+                result
+            )
 
         return DiceRollResult(
             id=db_dice.id,
