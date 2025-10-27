@@ -19,7 +19,7 @@ class UserCreate(SQLModel):
     """Model to create a user."""
     user_name: str
     email: EmailStr
-    hashed_password: str
+    password: str
 
 
 class UserUpdate(SQLModel):

@@ -8,6 +8,7 @@ from sqlmodel import Session, select
 from models.db_models.table_models import User
 from models.schemas.user_schema import *
 from repositories.user_repository import UserRepository
+from auth.utils import hash_password
 
 
 
@@ -48,8 +49,12 @@ class SqlAlchemyUserRepository(UserRepository):
 
     def add(self, user: UserCreate) \
             -> UserPublic:
-        """Method to add a new user."""
-        db_user = User(**user.model_dump())
+        """Add a new user with hashed password."""
+        db_user = User(
+            user_name=user.user_name,
+            email=user.email,
+            hashed_password=hash_password(user.password)
+        )
         self.session.add(db_user)
         self.session.commit()
         self.session.refresh(db_user)
