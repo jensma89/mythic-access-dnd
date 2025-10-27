@@ -4,6 +4,7 @@ user_service.py
 Business logic for user.
 """
 from fastapi import HTTPException
+from sqlalchemy.exc import SQLAlchemyError
 from typing import List, Optional
 from dependencies import UserQueryParams
 from models.schemas.user_schema import *
@@ -34,13 +35,40 @@ class UserService:
     def create_user(self, user: UserCreate) \
             -> UserPublic:
         """Create a new user."""
-        return self.user_repo.add(user)
+        try:
+            created_user = self.user_repo.add(user)
+            if not created_user:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Failed to create User."
+                )
+            return created_user
+        except SQLAlchemyError as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Database error "
+                       f"while creating user: {str(e)}."
+            )
 
 
     def get_user(self, user_id: int) \
             -> Optional[UserPublic]:
         """Get a user by id."""
-        return self.user_repo.get_by_id(user_id)
+        try:
+            user = self.user_repo.get_by_id(user_id)
+            if not user:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"User with user ID "
+                           f"{user_id} not found."
+                )
+            return user
+        except SQLAlchemyError as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Database error "
+                       f"while retrieving user: {str(e)}."
+            )
 
 
     def list_users(self,
@@ -49,10 +77,19 @@ class UserService:
                    limit: int = 100
                    ) -> List[UserPublic]:
         """Get a list of all users."""
-        return self.user_repo.list_all(
-            name=filters.name,
-            offset=offset,
-            limit=limit)
+        try:
+            users = self.user_repo.list_all(
+                name=filters.name,
+                offset=offset,
+                limit=limit
+            )
+            return users
+        except SQLAlchemyError as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Database error "
+                       f"while listing users: {str(e)}."
+            )
 
 
     def update_user(self,
@@ -60,32 +97,69 @@ class UserService:
                     user: UserUpdate) \
             -> Optional[UserPublic]:
         """Make changes by a user."""
-        return self.user_repo.update(user_id, user)
+        try:
+            existing = self.user_repo.get_by_id(user_id)
+            if not existing:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"User with ID {user_id} "
+                           f"not found"
+                )
+
+            updated_user =self.user_repo.update(user_id, user)
+            if not updated_user:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Failed to update user."
+                )
+            return updated_user
+        except SQLAlchemyError as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Database error "
+                       f"while updating user: {str(e)}."
+            )
 
 
-    def delete_user(self, user_id: int) -> bool:
+    def delete_user(self, user_id: int) -> Optional[UserPublic]:
         """Delete a user and the belonging campaign,
         classes, dice sets and logs."""
+        try:
+            user = self.user_repo.get_by_id(user_id)
+            if not user:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"User with ID {user_id} "
+                           f"not found."
+                )
 
-        # Delete dice logs
-        logs = self.dicelog_repo.list_by_user(user_id)
-        for log in logs:
-            self.dicelog_repo.delete(log.id)
+            # Delete dice logs
+            for log in self.dicelog_repo.list_by_user(user_id):
+                self.dicelog_repo.delete(log.id)
 
-        # Delete dice sets
-        dicesets = self.diceset_repo.list_by_user(user_id)
-        for diceset in dicesets:
-            self.diceset_repo.delete(diceset.id)
+            # Delete dice sets
+            for diceset in self.diceset_repo.list_by_user(user_id):
+                self.diceset_repo.delete(diceset.id)
 
-        # Delete classes
-        dnd_classes = self.class_repo.list_by_user(user_id)
-        for dnd_class in dnd_classes:
-            self.class_repo.delete(dnd_class.id)
+            # Delete classes
+            for dnd_class in self.class_repo.list_by_user(user_id):
+                self.class_repo.delete(dnd_class.id)
 
-        # Delete campaigns
-        campaigns = self.campaign_repo.list_by_user(user_id)
-        for campaign in campaigns:
-            self.campaign_repo.delete(campaign.id)
+            # Delete campaigns
+            for campaign in self.campaign_repo.list_by_user(user_id):
+                self.campaign_repo.delete(campaign.id)
 
-        # Finally delete user
-        return self.user_repo.delete(user_id)
+            # Finally delete user
+            deleted_user = self.user_repo.delete(user_id)
+            if not deleted_user:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Failed to delete user."
+                )
+            return deleted_user
+        except SQLAlchemyError as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Database error "
+                       f"while deleting user: {str(e)}."
+            )
