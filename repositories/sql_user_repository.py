@@ -32,13 +32,13 @@ class SqlAlchemyUserRepository(UserRepository):
 
     def add_user_secure(
             self,
-            email: str,
-            hashed_pw: str) -> UserPublic:
+            user: UserCreate) -> UserPublic:
         """Add a user with secure data."""
         db_user = User(
-            email=email,
-            hashed_password=hashed_pw,
-            user_name=email.split("@")[0])
+            user_name=user.user_name,
+            email=user.email,
+            hashed_password=hash_password(user.password)
+        )
         self.session.add(db_user)
         self.session.commit()
         self.session.refresh(db_user)
