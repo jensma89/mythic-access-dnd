@@ -1,5 +1,5 @@
 """
-auth_schema.py
+auth_schemas.py
 
 JWT-related auth schemas: login requests and tokens.
 """

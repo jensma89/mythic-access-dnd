@@ -4,7 +4,7 @@ jwt.py
 from datetime import datetime, timedelta, timezone
 import jwt
 from jwt.exceptions import InvalidTokenError
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 import os
 
 
