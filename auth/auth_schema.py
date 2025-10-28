@@ -3,17 +3,20 @@ auth_schema.py
 
 JWT-related auth schemas: login requests and tokens.
 """
-from sqlmodel import SQLModel
+from pydantic import BaseModel
 
 
 
-class UserLogin(SQLModel):
-    """User login credentials."""
-    user_name: str
-    password: str
-
-
-class Token(SQLModel):
-    """JWT token response."""
+class Token(BaseModel):
+    """Token base model."""
     access_token: str
     token_type: str = "bearer"
+
+
+class TokenData(BaseModel):
+    sub: str | None = None
+
+
+class UserLogin(BaseModel):
+    email: str
+    password: str

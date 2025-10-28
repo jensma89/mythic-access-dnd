@@ -42,10 +42,3 @@ class ClassUpdate(SQLModel):
 class ClassPublic(ClassBase):
     """Model to respond public data."""
     id: int
-
-
-class ClassMe(ClassBase):
-    """Fields to show class data by themselves."""
-    notes: str
-    inventory: str
-    campaign_id: int
