@@ -19,6 +19,32 @@ class SqlAlchemyUserRepository(UserRepository):
         self.session = session
 
 
+    def get_by_email(self, email: str) -> Optional[UserPublic]:
+        """Get a user by email address."""
+        db_user = self.session.exec(
+            select(User)
+            .where(User.email == email)
+        ).first()
+        if db_user:
+            return UserPublic.model_validate(db_user)
+        return None
+
+
+    def add_user_secure(
+            self,
+            email: str,
+            hashed_pw: str) -> UserPublic:
+        """Add a user with secure data."""
+        db_user = User(
+            email=email,
+            hashed_password=hashed_pw,
+            user_name=email.split("@")[0])
+        self.session.add(db_user)
+        self.session.commit()
+        self.session.refresh(db_user)
+        return UserPublic.model_validate(db_user)
+
+
     def get_by_id(self, user_id: int) \
             -> Optional[UserPublic]:
         """Method to get a user by ID."""
