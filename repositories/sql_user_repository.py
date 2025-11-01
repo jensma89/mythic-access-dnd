@@ -8,7 +8,6 @@ from sqlmodel import Session, select
 from models.db_models.table_models import User
 from models.schemas.user_schema import *
 from repositories.user_repository import UserRepository
-from auth.utils import hash_password
 
 
 
@@ -28,21 +27,6 @@ class SqlAlchemyUserRepository(UserRepository):
         if db_user:
             return UserPublic.model_validate(db_user)
         return None
-
-
-    def add_user_secure(
-            self,
-            user: UserCreate) -> UserPublic:
-        """Add a user with secure data."""
-        db_user = User(
-            user_name=user.user_name,
-            email=user.email,
-            hashed_password=hash_password(user.password)
-        )
-        self.session.add(db_user)
-        self.session.commit()
-        self.session.refresh(db_user)
-        return UserPublic.model_validate(db_user)
 
 
     def get_by_id(self, user_id: int) \

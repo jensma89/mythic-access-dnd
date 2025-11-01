@@ -84,7 +84,6 @@ async def get_current_user(
         email: str | None = payload.get("sub")
         if email is None:
             raise credentials_exception
-        token_data= TokenData(username=email)
     except InvalidTokenError:
         raise credentials_exception
 
