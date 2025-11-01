@@ -17,7 +17,7 @@ from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
 router = APIRouter(tags=["campaigns"])
 
 
-async def get_campaign_service(session: SessionDep) \
+def get_campaign_service(session: SessionDep) \
         -> CampaignService:
     """Factory to get the campaign, class,
     dice set and dice log service."""
@@ -35,7 +35,7 @@ async def get_campaign_service(session: SessionDep) \
 
 @router.get("/campaigns/{campaign_id}",
             response_model=CampaignPublic)
-async def read_campaign(
+def read_campaign(
         campaign_id: int,
         service: CampaignService = Depends(get_campaign_service)):
     """Endpoint to get a single campaign."""
@@ -49,7 +49,7 @@ async def read_campaign(
 
 @router.get("/campaigns/",
             response_model=List[CampaignPublic])
-async def read_campaigns(
+def read_campaigns(
         pagination: Pagination = Depends(),
         filters: CampaignQueryParams = Depends(),
         service: CampaignService = Depends(get_campaign_service)):
@@ -63,7 +63,7 @@ async def read_campaigns(
 
 @router.post("/campaigns/",
              response_model=CampaignPublic)
-async def create_campaign(
+def create_campaign(
         campaign: CampaignCreate,
         service: CampaignService = Depends(get_campaign_service)):
     """Endpoint to create a new campaign."""
@@ -72,7 +72,7 @@ async def create_campaign(
 
 @router.patch("/campaigns/{campaign_id}",
             response_model=CampaignPublic)
-async def update_campaign(
+def update_campaign(
         campaign_id: int,
         campaign: CampaignUpdate,
         service: CampaignService = Depends(get_campaign_service)):
@@ -87,7 +87,7 @@ async def update_campaign(
 
 @router.delete("/campaigns/{campaign_id}",
                response_model=CampaignPublic)
-async def delete_campaign(
+def delete_campaign(
         campaign_id: int,
         service: CampaignService = Depends(get_campaign_service)):
     """Endpoint to remove a campaign."""

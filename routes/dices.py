@@ -16,7 +16,7 @@ router = APIRouter(tags=["dices"])
 
 
 
-async def get_dice_service(session: SessionDep) \
+def get_dice_service(session: SessionDep) \
         -> DiceService:
     """Factory to get the dice and dice log service."""
     dice_repo = SqlAlchemyDiceRepository(session)
@@ -26,7 +26,7 @@ async def get_dice_service(session: SessionDep) \
 
 @router.get("/dices/{dice_id}",
             response_model=DicePublic)
-async def read_dice(
+def read_dice(
         dice_id: int,
         service: DiceService = Depends(get_dice_service)):
     """Endpoint to get a single dice."""
@@ -40,7 +40,7 @@ async def read_dice(
 
 @router.get("/dices/",
             response_model=List[DicePublic])
-async def read_dices(
+def read_dices(
         pagination: Pagination = Depends(),
         service: DiceService = Depends(get_dice_service)):
     """Endpoint to list all dices."""
@@ -51,7 +51,7 @@ async def read_dices(
 
 #@router.post("/dices/",
 #             response_model=DicePublic)
-#async def create_dice(
+#def create_dice(
 #        dice: DiceCreate,
 #        service: DiceService = Depends(get_dice_service)):
 #    """Endpoint to create a new dice."""
@@ -60,7 +60,7 @@ async def read_dices(
 
 #@router.patch("/dices/{dice_id}",
 #              response_model=DicePublic)
-#async def update_dice(
+#def update_dice(
 #        dice_id: int,
 #        dice: DiceUpdate,
 #        service: DiceService = Depends(get_dice_service)):
@@ -75,7 +75,7 @@ async def read_dices(
 
 #@router.delete("/dices/{dice_id}",
 #               response_model=DicePublic)
-#async def delete_dice(
+#def delete_dice(
 #        dice_id: int,
 #        service: DiceService = Depends(get_dice_service)):
 #    """Endpoint to delete a dice."""
@@ -89,7 +89,7 @@ async def read_dices(
 
 @router.post("/dices/{dice_id}/roll",
              response_model=DiceRollResult)
-async def roll_dice(
+def roll_dice(
         dice_id: int,
         service: DiceService = Depends(get_dice_service)):
     """Endpoint to roll a specific dice

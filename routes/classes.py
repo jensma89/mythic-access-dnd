@@ -20,7 +20,7 @@ router = APIRouter(tags=["classes"])
 
 
 
-async def get_class_service(session: SessionDep) \
+def get_class_service(session: SessionDep) \
         -> ClassService:
     """Factory to get the class, dice set and dice log service."""
     class_repo = SqlAlchemyClassRepository(session)
@@ -35,7 +35,7 @@ async def get_class_service(session: SessionDep) \
 
 @router.get("/classes/{class_id}",
             response_model=ClassPublic)
-async def read_class(
+def read_class(
         class_id: int,
         service: ClassService = Depends(get_class_service)):
     """Endpoint to get a single dnd class."""
@@ -49,7 +49,7 @@ async def read_class(
 
 @router.get("/classes/",
             response_model=List[ClassPublic])
-async def read_classes(
+def read_classes(
         pagination: Pagination = Depends(),
         filters: ClassQueryParams = Depends(),
         service: ClassService = Depends(get_class_service)):
@@ -62,7 +62,7 @@ async def read_classes(
 
 @router.post("/classes/",
              response_model=ClassPublic)
-async def create_class(
+def create_class(
         dnd_class: ClassCreate,
         service: ClassService = Depends(get_class_service)):
     """Endpoint to create a new class."""
@@ -71,7 +71,7 @@ async def create_class(
 
 @router.patch("/classes/{class_id}",
             response_model=ClassPublic)
-async def update_class(
+def update_class(
         class_id: int,
         dnd_class: ClassUpdate,
         service: ClassService = Depends(get_class_service)):
@@ -86,7 +86,7 @@ async def update_class(
 
 @router.delete("/classes/{class_id}",
                response_model=ClassPublic)
-async def delete_class(
+def delete_class(
         class_id: int,
         service: ClassService = Depends(get_class_service)):
     """Endpoint to delete a class by ID."""

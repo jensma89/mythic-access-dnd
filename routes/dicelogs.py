@@ -14,7 +14,7 @@ from repositories.sql_dicelog_repository import *
 router = APIRouter(tags=["dicelogs"])
 
 
-async def get_dicelog_repo(session: SessionDep):
+def get_dicelog_repo(session: SessionDep):
     """Factory to get the dice log repo."""
     return SqlAlchemyDiceLogRepository(session)
 
@@ -22,7 +22,7 @@ async def get_dicelog_repo(session: SessionDep):
 
 @router.get("/dicelogs/",
             response_model=List[DiceLogPublic])
-async def list_logs(
+def list_logs(
         user_id: int,
         pagination: Pagination = Depends(),
         dicelog_repo: SqlAlchemyDiceLogRepository = Depends(get_dicelog_repo)):
@@ -36,7 +36,7 @@ async def list_logs(
 
 @router.get("/dicelogs/{dicelog_id}",
             response_model=DiceLogPublic)
-async def get_log(
+def get_log(
         dicelog_id: int,
         repo: SqlAlchemyDiceLogRepository = Depends(get_dicelog_repo)):
     """Endpoint to get a single dice log by ID."""

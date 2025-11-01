@@ -20,7 +20,7 @@ from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
 router = APIRouter(tags=["users"])
 
 
-async def get_user_service(session: SessionDep) \
+def get_user_service(session: SessionDep) \
         -> UserService:
     """Factory to get the user, campaign,
     class, dice set and dice log service."""
@@ -38,7 +38,7 @@ async def get_user_service(session: SessionDep) \
 
 @router.get("/users/{user_id}",
             response_model=UserPublic)
-async def read_user(
+def read_user(
         user_id: int,
         service: UserService = Depends(get_user_service)):
     """Endpoint to get a single user."""
@@ -52,7 +52,7 @@ async def read_user(
 
 @router.get("/users/",
             response_model=List[UserPublic])
-async def read_users(
+def read_users(
         pagination: Pagination = Depends(),
         filters: UserQueryParams = Depends(),
         service: UserService = Depends(get_user_service)):
@@ -65,7 +65,7 @@ async def read_users(
 
 @router.post("/users/",
              response_model=UserPublic)
-async def create_user(
+def create_user(
         user: UserCreate,
         service: UserService = Depends(get_user_service)):
     """Endpoint to create a new user."""
@@ -74,7 +74,7 @@ async def create_user(
 
 @router.patch("/users/{user_id}",
             response_model=UserPublic)
-async def update_user(
+def update_user(
         user_id: int,
         user: UserUpdate,
         service: UserService = Depends(get_user_service)):
@@ -89,7 +89,7 @@ async def update_user(
 
 @router.delete("/users/{user_id}",
                response_model=UserPublic)
-async def delete_user(
+def delete_user(
         user_id: int,
         service: UserService = Depends(get_user_service)):
     """Endpoint to delete a user by id."""

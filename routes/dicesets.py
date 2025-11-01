@@ -18,7 +18,7 @@ from services.diceset_service import DiceSetService
 router = APIRouter(tags=["dicesets"])
 
 
-async def get_diceset_service(session: SessionDep) \
+def get_diceset_service(session: SessionDep) \
         -> DiceSetService:
     """Factory to get the dice, dice set and dice log service."""
     dice_repo = SqlAlchemyDiceRepository(session)
@@ -31,7 +31,7 @@ async def get_diceset_service(session: SessionDep) \
 
 @router.get("/dicesets/{diceset_id}",
             response_model=DiceSetPublic)
-async def read_diceset(
+def read_diceset(
         diceset_id: int,
         service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to get a single dice set."""
@@ -45,7 +45,7 @@ async def read_diceset(
 
 @router.get("/dicesets/",
             response_model=List[DiceSetPublic])
-async def read_dicesets(
+def read_dicesets(
         pagination: Pagination = Depends(),
         service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to list all dice sets."""
@@ -56,7 +56,7 @@ async def read_dicesets(
 
 @router.post("/dicesets/",
              response_model=DiceSetPublic)
-async def create_diceset(
+def create_diceset(
         diceset: DiceSetCreate,
         service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to create a new dice set."""
@@ -65,7 +65,7 @@ async def create_diceset(
 
 @router.patch("/dicesets/{diceset_id}",
               response_model=DiceSetPublic)
-async def update_diceset(
+def update_diceset(
         diceset_id: int,
         diceset: DiceSetUpdate,
         service: DiceSetService = Depends(get_diceset_service)):
@@ -80,7 +80,7 @@ async def update_diceset(
 
 @router.post("/dicesets/{diceset_id}/roll",
              response_model=DiceSetRollResult)
-async def roll_diceset(
+def roll_diceset(
         user_id: int,    # remove after auth implementation?
         campaign_id: int,
         class_id: int,
@@ -103,7 +103,7 @@ async def roll_diceset(
 
 @router.delete("/dicesets/{diceset_id}",
                response_model=DiceSetPublic)
-async def delete_diceset(
+def delete_diceset(
         diceset_id: int,
         service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to delete a dice set by ID."""
