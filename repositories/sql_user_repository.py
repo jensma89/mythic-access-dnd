@@ -18,17 +18,6 @@ class SqlAlchemyUserRepository(UserRepository):
         self.session = session
 
 
-    def get_by_email(self, email: str) -> Optional[UserPublic]:
-        """Get a user by email address."""
-        db_user = self.session.exec(
-            select(User)
-            .where(User.email == email)
-        ).first()
-        if db_user:
-            return UserPublic.model_validate(db_user)
-        return None
-
-
     def get_by_id(self, user_id: int) \
             -> Optional[UserPublic]:
         """Method to get a user by ID."""

@@ -71,7 +71,7 @@ async def authenticate_user(
 # Token validation
 
 async def get_current_user(
-        token: Annotated[str, Depends(oauth2_scheme)],
+        token: str = Depends(oauth2_scheme),
         session: Session = Depends(SessionDep)):
     """Validate JWT token and load the user from DB using email (sub)."""
     credentials_exception = HTTPException(
