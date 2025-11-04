@@ -49,6 +49,20 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
+def authenticate_user_by_email_password(
+        session: Session,
+        email: str,
+        password: str
+) -> User | None:
+    """Util function to authenticate without depends."""
+    stmt = select(User).where(User.email == email)
+    user = session.exec(stmt).first()
+    if not user or not verify_password(password, user.hashed_password):
+        return None
+    return user
+
+
+
 # Authentication
 
 async def authenticate_user(
