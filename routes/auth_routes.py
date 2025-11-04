@@ -2,14 +2,13 @@
 auth_routes.py
 
 """
-from argon2 import hash_password
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 from sqlmodel import Session, select
 from models.db_models.table_models import User
-from schemas.user_schema import UserCreate, UserMe, UserPublic
-from schemas.auth_schema import Token
+from models.schemas.user_schema import UserCreate, UserMe, UserPublic
+from models.schemas.auth_schema import Token
 from auth.auth import *
 from dependencies import SessionDep
 

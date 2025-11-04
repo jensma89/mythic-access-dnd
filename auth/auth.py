@@ -10,8 +10,8 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
 from dotenv import load_dotenv
-from schemas.auth_schema import Token, TokenData
-from schemas.user_schema import *
+from models.schemas.auth_schema import Token, TokenData
+from models.schemas.user_schema import *
 from dependencies import SessionDep
 from models.db_models.table_models import User
 from sqlmodel import select, Session

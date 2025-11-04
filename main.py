@@ -6,7 +6,7 @@ Webserver entry and links to routes.
 from fastapi import FastAPI
 from dependencies import create_db_and_tables
 from contextlib import asynccontextmanager
-from routes import campaigns, classes, dices, dicesets, dicelogs, users
+from routes import auth_routes, campaigns, classes, dices, dicesets, dicelogs, users
 
 
 
@@ -28,3 +28,4 @@ app.include_router(classes.router)
 app.include_router(dices.router)
 app.include_router(dicesets.router)
 app.include_router(dicelogs.router)
+app.include_router(auth_routes.router)
