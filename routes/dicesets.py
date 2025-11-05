@@ -4,7 +4,7 @@ dicesets.py
 API endpoints for handling dice sets.
 """
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Path
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from dependencies import Pagination, SessionDep
 from models.schemas.diceset_schema import *
 from repositories.sql_diceset_repository import SqlAlchemyDiceSetRepository
@@ -34,7 +34,8 @@ def get_diceset_service(session: SessionDep) \
 @router.get("/dicesets/{diceset_id}",
             response_model=DiceSetPublic)
 def read_diceset(
-        diceset_id: int,
+        diceset_id: int = Path(..., description="The ID of dice set to retrieve."),
+        current_user: User = Depends(get_current_user),
         service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to get a single dice set."""
     diceset = service.get_diceset(diceset_id)
@@ -48,6 +49,7 @@ def read_diceset(
 @router.get("/dicesets/",
             response_model=List[DiceSetPublic])
 def read_dicesets(
+        current_user: User = Depends(get_current_user),
         pagination: Pagination = Depends(),
         service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to list all dice sets."""
@@ -60,6 +62,7 @@ def read_dicesets(
              response_model=DiceSetPublic)
 def create_diceset(
         diceset: DiceSetCreate,
+        current_user: User = Depends(get_current_user),
         service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to create a new dice set."""
     return service.create_diceset(diceset)
@@ -68,8 +71,9 @@ def create_diceset(
 @router.patch("/dicesets/{diceset_id}",
               response_model=DiceSetPublic)
 def update_diceset(
-        diceset_id: int,
         diceset: DiceSetUpdate,
+        diceset_id: int = Path(..., description="The ID of dice set to update."),
+        current_user: User = Depends(get_current_user),
         service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to change data from a dice set."""
     updated = service.update_diceset(diceset_id, diceset)
@@ -80,13 +84,29 @@ def update_diceset(
     return updated
 
 
+@router.delete("/dicesets/{diceset_id}",
+               response_model=DiceSetPublic)
+def delete_diceset(
+        diceset_id: int = Path(..., description="The ID of dice set to delete."),
+        current_user: User = Depends(get_current_user),
+        service: DiceSetService = Depends(get_diceset_service)):
+    """Endpoint to delete a dice set by ID."""
+    deleted = service.delete_diceset(diceset_id)
+    if not deleted:
+        raise HTTPException(
+            status_code=404,
+            detail="Dice set not found.")
+    return deleted
+
+
 @router.post("/dicesets/{diceset_id}/roll",
              response_model=DiceSetRollResult)
 def roll_diceset(
-        user_id: int,    # remove after auth implementation?
-        campaign_id: int,
-        class_id: int,
-        diceset_id: int,
+        diceset_id: int = Path(..., description="The ID of the dice set to roll"),
+        user_id: int = Query(..., description="User ID"),
+        campaign_id: int = Query(..., description="Campaign ID"),
+        class_id: int = Query(..., description="Class ID"),
+        current_user: User = Depends(get_current_user),
         service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to roll a specific dice set
     and get the individual results and the total sum."""
@@ -101,17 +121,3 @@ def roll_diceset(
             status_code=404,
             detail="Dice set not found.")
     return result
-
-
-@router.delete("/dicesets/{diceset_id}",
-               response_model=DiceSetPublic)
-def delete_diceset(
-        diceset_id: int,
-        service: DiceSetService = Depends(get_diceset_service)):
-    """Endpoint to delete a dice set by ID."""
-    deleted = service.delete_diceset(diceset_id)
-    if not deleted:
-        raise HTTPException(
-            status_code=404,
-            detail="Dice set not found.")
-    return deleted
