@@ -4,7 +4,7 @@ dicesets.py
 API endpoints for handling dice sets.
 """
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Path
 from dependencies import Pagination, SessionDep
 from models.schemas.diceset_schema import *
 from repositories.sql_diceset_repository import SqlAlchemyDiceSetRepository
@@ -12,6 +12,8 @@ from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
 from repositories.sql_dice_repository import SqlAlchemyDiceRepository
 from repositories.sql_class_repository import SqlAlchemyClassRepository
 from services.diceset_service import DiceSetService
+from auth.auth import get_current_user
+from models.db_models.table_models import User
 
 
 

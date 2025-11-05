@@ -4,16 +4,15 @@ classes.py
 The API endpoints for classes.
 """
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Path
 from dependencies import ClassQueryParams, Pagination, SessionDep
 from models.schemas.class_schema import *
-from repositories.sql_class_repository import SqlAlchemyClassRepository
 from services.class_service import ClassService
-from services.campaign_service import CampaignService
 from repositories.sql_class_repository import SqlAlchemyClassRepository
 from repositories.sql_diceset_repository import SqlAlchemyDiceSetRepository
 from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
-
+from auth.auth import get_current_user
+from models.db_models.table_models import User
 
 
 router = APIRouter(tags=["classes"])
@@ -36,7 +35,8 @@ def get_class_service(session: SessionDep) \
 @router.get("/classes/{class_id}",
             response_model=ClassPublic)
 def read_class(
-        class_id: int,
+        class_id: int = Path(..., description="The ID of the class to retrieve."),
+        current_user: User = Depends(get_current_user),
         service: ClassService = Depends(get_class_service)):
     """Endpoint to get a single dnd class."""
     dnd_class = service.get_class(class_id)
@@ -50,6 +50,7 @@ def read_class(
 @router.get("/classes/",
             response_model=List[ClassPublic])
 def read_classes(
+        current_user: User = Depends(get_current_user),
         pagination: Pagination = Depends(),
         filters: ClassQueryParams = Depends(),
         service: ClassService = Depends(get_class_service)):
@@ -64,6 +65,7 @@ def read_classes(
              response_model=ClassPublic)
 def create_class(
         dnd_class: ClassCreate,
+        current_user: User = Depends(get_current_user),
         service: ClassService = Depends(get_class_service)):
     """Endpoint to create a new class."""
     return service.create_class(dnd_class)
@@ -72,8 +74,9 @@ def create_class(
 @router.patch("/classes/{class_id}",
             response_model=ClassPublic)
 def update_class(
-        class_id: int,
         dnd_class: ClassUpdate,
+        class_id: int = Path(..., description="The ID of the class to update."),
+        current_user: User = Depends(get_current_user),
         service: ClassService = Depends(get_class_service)):
     """Endpoint to make changes by a class."""
     updated = service.update_class(class_id, dnd_class)
@@ -87,7 +90,8 @@ def update_class(
 @router.delete("/classes/{class_id}",
                response_model=ClassPublic)
 def delete_class(
-        class_id: int,
+        class_id: int = Path(..., description="The ID of the class to delete."),
+        current_user: User = Depends(get_current_user),
         service: ClassService = Depends(get_class_service)):
     """Endpoint to delete a class by ID."""
     deleted = service.delete_class(class_id)
