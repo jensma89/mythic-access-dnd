@@ -9,8 +9,9 @@ from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
 from dotenv import load_dotenv
-from models.schemas.user_schema import *
-from dependencies import SessionDep
+from typing import Optional
+from models.schemas.user_schema import UserMe
+from dependencies import get_session
 from models.db_models.table_models import User
 from sqlmodel import select, Session
 
@@ -64,7 +65,7 @@ def authenticate_user_by_email_password(
 
 def get_current_user(
         token: str = Depends(oauth2_scheme),
-        session: Session = Depends(SessionDep))\
+        session: Session = Depends(get_session))\
         -> User:
     """Validate JWT token and load the user from DB using email (sub)."""
     credentials_exception = HTTPException(

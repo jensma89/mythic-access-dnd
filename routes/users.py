@@ -9,7 +9,6 @@ from dependencies import Pagination, SessionDep, UserQueryParams
 from models.schemas.user_schema import *
 from repositories.sql_user_repository import SqlAlchemyUserRepository
 from services.user_service import UserService
-from services.campaign_service import CampaignService
 from repositories.sql_campaign_repository import SqlAlchemyCampaignRepository
 from repositories.sql_class_repository import SqlAlchemyClassRepository
 from repositories.sql_diceset_repository import SqlAlchemyDiceSetRepository
@@ -61,15 +60,6 @@ def read_users(
         offset=pagination.offset,
         limit=pagination.limit,
         filters=filters)
-
-
-@router.post("/users/",
-             response_model=UserPublic)
-def create_user(
-        user: UserCreate,
-        service: UserService = Depends(get_user_service)):
-    """Endpoint to create a new user."""
-    return service.create_user(user)
 
 
 @router.patch("/users/{user_id}",

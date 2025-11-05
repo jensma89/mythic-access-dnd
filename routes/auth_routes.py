@@ -9,7 +9,13 @@ from sqlmodel import Session, select
 from models.db_models.table_models import User
 from models.schemas.user_schema import UserCreate, UserMe, UserPublic
 from models.schemas.auth_schema import Token
-from auth.auth import *
+from auth.auth import (
+    hash_password,
+    authenticate_user_by_email_password,
+    get_current_user,
+    create_access_token,
+    ACCESS_TOKEN_EXPIRE_MINUTES
+)
 from dependencies import SessionDep
 
 
