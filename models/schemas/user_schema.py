@@ -4,7 +4,7 @@ user_schema.py
 Request/response schema for users.
 """
 from sqlmodel import SQLModel
-from pydantic import EmailStr
+from pydantic import EmailStr, Field
 from datetime import datetime
 from typing import Optional
 
@@ -19,7 +19,7 @@ class UserCreate(SQLModel):
     """Model to create a user."""
     user_name: str
     email: EmailStr
-    password: str
+    password: str = Field(format="password", min_length=8)
 
 
 class UserUpdate(SQLModel):
