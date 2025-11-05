@@ -11,7 +11,7 @@ from models.schemas.user_schema import UserCreate, UserMe, UserPublic
 from models.schemas.auth_schema import Token
 from auth.auth import (
     hash_password,
-    authenticate_user_by_email_password,
+    authenticate_user,
     get_current_user,
     create_access_token,
     ACCESS_TOKEN_EXPIRE_MINUTES
@@ -58,9 +58,9 @@ def login_for_access_token(
         session: Session = Depends(get_session)
 ):
     """Login a user and issue a JWT access token."""
-    user = authenticate_user_by_email_password(
+    user = authenticate_user(
         session=session,
-        email=form_data.username,
+        login=form_data.username,
         password=form_data.password)
     if not user:
         raise HTTPException(
