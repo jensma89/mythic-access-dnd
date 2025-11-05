@@ -24,7 +24,8 @@ def get_dicelog_repo(session: SessionDep):
 @router.get("/dicelogs/",
             response_model=List[DiceLogPublic])
 def list_logs(
-        user_id: int,
+        user_id: int = Path(..., description="The user ID to retrieve dice logs."),
+        current_user: User = Depends(get_current_user),
         pagination: Pagination = Depends(),
         dicelog_repo: SqlAlchemyDiceLogRepository = Depends(get_dicelog_repo)):
     """Endpoint to list all dice logs
@@ -38,7 +39,8 @@ def list_logs(
 @router.get("/dicelogs/{dicelog_id}",
             response_model=DiceLogPublic)
 def get_log(
-        dicelog_id: int,
+        dicelog_id: int = Path(..., description="The log ID to retrieve."),
+        current_user: User = Depends(get_current_user),
         repo: SqlAlchemyDiceLogRepository = Depends(get_dicelog_repo)):
     """Endpoint to get a single dice log by ID."""
     dicelog = repo.get_by_id(dicelog_id)
