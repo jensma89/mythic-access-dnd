@@ -63,6 +63,19 @@ def authenticate_user_by_email_password(
     return user
 
 
+def authenticate_user(
+        session: Session,
+        login: str,
+        password: str
+) -> User | None:
+    """Authenticate user by email or username."""
+    stmt = select(User).where((User.email == login) | (User.user_name == login))
+    user = session.exec(stmt).first()
+    if not user or not verify_password(password, user.hashed_password):
+        return None
+    return user
+
+
 # Dependencies
 
 def get_current_user(
