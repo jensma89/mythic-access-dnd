@@ -62,31 +62,12 @@ def authenticate_user_by_email_password(
     return user
 
 
-
-# Authentication
-
-async def authenticate_user(
-        session: Session = Depends(SessionDep),
-        email: str | None = None,
-        password: str | None = None):
-    """Check username + password in database."""
-    if email is None or password is None:
-        return None
-    stmt = (select(User)
-            .where(User.email == email))
-    user = session.exec(stmt).first()
-    if not user:
-        return None
-    if not verify_password(password, user.hashed_password):
-        return None
-    return user
-
-
-# Token validation
+# Dependency function for fastapi
 
 async def get_current_user(
         token: str = Depends(oauth2_scheme),
-        session: Session = Depends(SessionDep)):
+        session: Session = Depends(SessionDep))\
+        -> User:
     """Validate JWT token and load the user from DB using email (sub)."""
     credentials_exception = HTTPException(
         status_code=401,
@@ -110,8 +91,8 @@ async def get_current_user(
 
 
 async def get_current_active_user(
-        current_user: Annotated[User, Depends(get_current_user)]
-):
+        current_user: User = Depends(get_current_user)
+) -> UserMe:
     """Optional: map DB user to public 'me' schema
     and check active state if you have it."""
     if getattr(current_user, "disabled", False):
@@ -120,4 +101,3 @@ async def get_current_active_user(
             detail="Inactive user."
         )
     return UserMe.model_validate(current_user)
-
