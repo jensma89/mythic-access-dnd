@@ -28,25 +28,27 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 # Password functions
 
-def hash_password(password: str):
+def hash_password(password: str) -> str:
     """Hash a plain password."""
     return password_hash.hash(password)
 
 
-def verify_password(plain_password: str, hashed_password: str):
+def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a plain with hashed password."""
     return password_hash.verify(plain_password, hashed_password)
 
 
 # Token functions
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     """Create a access token with expiration time."""
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=15))
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
+
+# Auth helpers
 
 def authenticate_user_by_email_password(
         session: Session,
@@ -61,7 +63,7 @@ def authenticate_user_by_email_password(
     return user
 
 
-# Dependency function for fastapi
+# Dependencies
 
 def get_current_user(
         token: str = Depends(oauth2_scheme),
@@ -76,7 +78,7 @@ def get_current_user(
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str | None = payload.get("sub")
-        if email is None:
+        if not email:
             raise credentials_exception
     except InvalidTokenError:
         raise credentials_exception
@@ -84,7 +86,7 @@ def get_current_user(
     stmt = (select(User)
             .where(User.email == email))
     user = session.exec(stmt).first()
-    if user is None:
+    if not user:
         raise credentials_exception
     return user
 

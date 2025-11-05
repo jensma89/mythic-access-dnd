@@ -2,7 +2,7 @@
 auth_routes.py
 
 """
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 from sqlmodel import Session, select
@@ -16,7 +16,7 @@ from auth.auth import (
     create_access_token,
     ACCESS_TOKEN_EXPIRE_MINUTES
 )
-from dependencies import SessionDep
+from dependencies import get_session
 
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -25,7 +25,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 @router.post("/register", response_model=UserPublic)
 def register_user(
         user_data: UserCreate,
-        session: Session = Depends(SessionDep)):
+        session: Session = Depends(get_session)):
     """Register a new user.
     Check for duplicate email or username.
     Hashes password."""
@@ -55,7 +55,7 @@ def register_user(
 @router.post("/token", response_model=Token)
 def login_for_access_token(
         form_data: OAuth2PasswordRequestForm = Depends(),
-        session: Session = Depends(SessionDep)
+        session: Session = Depends(get_session)
 ):
     """Login a user and issue a JWT access token."""
     user = authenticate_user_by_email_password(
