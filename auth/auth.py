@@ -2,15 +2,13 @@
 auth.py
 """
 from datetime import datetime, timedelta, timezone
-from typing import Annotated, Optional
 import os
 import jwt
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
 from dotenv import load_dotenv
-from models.schemas.auth_schema import Token, TokenData
 from models.schemas.user_schema import *
 from dependencies import SessionDep
 from models.db_models.table_models import User
@@ -64,7 +62,7 @@ def authenticate_user_by_email_password(
 
 # Dependency function for fastapi
 
-async def get_current_user(
+def get_current_user(
         token: str = Depends(oauth2_scheme),
         session: Session = Depends(SessionDep))\
         -> User:
@@ -90,7 +88,7 @@ async def get_current_user(
     return user
 
 
-async def get_current_active_user(
+def get_current_active_user(
         current_user: User = Depends(get_current_user)
 ) -> UserMe:
     """Optional: map DB user to public 'me' schema

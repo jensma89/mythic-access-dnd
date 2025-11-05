@@ -27,7 +27,7 @@ def register_user(
     existing = session.exec(
         select(User)
         .where((User.email == user_data.email)
-               | User.user_name == user_data.user_name)
+               | (User.user_name == user_data.user_name))
     ).first()
     if existing:
         raise HTTPException(
@@ -47,13 +47,13 @@ def register_user(
 
 
 @router.post("/token", response_model=Token)
-async def login_for_access_token(
+def login_for_access_token(
         form_data: OAuth2PasswordRequestForm = Depends(),
         session: Session = Depends(SessionDep)
 ):
     """Login a user and issue a JWT access token."""
-    user = await authenticate_user(
-        session,
+    user = authenticate_user_by_email_password(
+        session=session,
         email=form_data.username,
         password=form_data.password)
     if not user:
@@ -72,7 +72,7 @@ async def login_for_access_token(
 
 
 @router.get("/me", response_model=UserMe)
-async def get_my_profile(
+def get_my_profile(
         current_user: User = Depends(get_current_user)):
     """Returns the authenticated users info."""
     return UserMe.model_validate(current_user)
