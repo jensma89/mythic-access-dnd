@@ -8,6 +8,7 @@ from sqlmodel import Session, select
 from models.db_models.table_models import User
 from models.schemas.user_schema import *
 from repositories.user_repository import UserRepository
+from auth.auth import hash_password
 
 
 
@@ -68,8 +69,15 @@ class SqlAlchemyUserRepository(UserRepository):
         db_user = self.session.get(User, user_id)
         if not db_user:
             return None
-        for key, value in user.model_dump(
-                exclude_unset=True).items():
+
+        update_data = user.model_dump(exclude_unset=True)
+
+        # If password changed -> hash the password
+        if "password" in update_data:
+            db_user.hashed_password = hash_password(update_data["password"])
+            del update_data["password"]
+
+        for key, value in update_data.items():
             setattr(db_user, key, value)
         self.session.add(db_user)
         self.session.commit()

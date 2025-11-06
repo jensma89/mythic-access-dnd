@@ -42,3 +42,5 @@ class ClassUpdate(SQLModel):
 class ClassPublic(ClassBase):
     """Model to respond public data."""
     id: int
+    notes: Optional[str] = None
+    inventory: Optional[str] = None

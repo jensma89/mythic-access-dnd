@@ -19,19 +19,27 @@ class UserCreate(SQLModel):
     """Model to create a user."""
     user_name: str
     email: EmailStr
-    password: str = Field(format="password", min_length=8)
+    password: str = Field(
+        format="password",
+        min_length=8,
+    )
 
 
 class UserUpdate(SQLModel):
     """Fields (optional) to update a user."""
     user_name: Optional[str] = None
     email: Optional[EmailStr]  = None
-    hashed_password: Optional[str] = None
+    password: Optional[str] = Field(
+        default=None,
+        min_length=8,
+        format="password"
+    )
 
 
-class UserPublic(UserBase):
+class UserPublic(SQLModel):
     """Model to respond public data."""
     id: int
+    user_name: str
     created_at: datetime
 
     class Config:

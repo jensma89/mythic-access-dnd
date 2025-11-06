@@ -3,7 +3,7 @@ dicelogs.py
 
 API endpoints for dice log management.
 """
-from fastapi import APIRouter, Depends, HTTPException, Path
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from dependencies import Pagination, SessionDep
 from models.schemas.dicelog_schema import *
 from repositories.sql_dicelog_repository import *
@@ -24,7 +24,7 @@ def get_dicelog_repo(session: SessionDep):
 @router.get("/dicelogs/",
             response_model=List[DiceLogPublic])
 def list_logs(
-        user_id: int = Path(..., description="The user ID to retrieve dice logs."),
+        user_id: int = Query(..., description="The user ID to retrieve dice logs."),
         current_user: User = Depends(get_current_user),
         pagination: Pagination = Depends(),
         dicelog_repo: SqlAlchemyDiceLogRepository = Depends(get_dicelog_repo)):

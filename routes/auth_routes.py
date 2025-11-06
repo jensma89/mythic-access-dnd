@@ -49,7 +49,11 @@ def register_user(
     session.add(db_user)
     session.commit()
     session.refresh(db_user)
-    return UserPublic.model_validate(db_user)
+    return UserPublic(
+        id=db_user.id,
+        user_name=db_user.user_name,
+        created_at=db_user.created_at
+    )
 
 
 @router.post("/token", response_model=Token)
