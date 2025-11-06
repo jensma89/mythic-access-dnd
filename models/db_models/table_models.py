@@ -130,7 +130,7 @@ class DiceLog(SQLModel, table=True):
         nullable=False)
     user_id: int = Field(foreign_key="user.id", nullable=False)
     campaign_id: int = Field(foreign_key="campaign.id", nullable=False)
-    diceset_id: int = Field(foreign_key="diceset.id", nullable=False)
+    diceset_id: int | None = Field(foreign_key="diceset.id", nullable=True)
     class_id: int = Field(foreign_key="class.id", nullable=False)
     roll: str = Field(nullable=False)
     result: int = Field(nullable=False)

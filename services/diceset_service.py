@@ -215,7 +215,7 @@ class DiceSetService:
                 result=total,
                 timestamp=datetime.now(timezone.utc)
             )
-            self.dicelog_repo.add(log_entry)
+            self.dicelog_repo.log_roll(log_entry)
         except SQLAlchemyError:
             raise HTTPException(
                 status_code=500,

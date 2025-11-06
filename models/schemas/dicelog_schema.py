@@ -15,7 +15,7 @@ class DiceLogBase(SQLModel):
     user_id: int
     campaign_id: int
     class_id: int
-    diceset_id: int
+    diceset_id: int | None = None
     roll: str
     result: int
 

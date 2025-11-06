@@ -158,6 +158,8 @@ class DiceService:
             self,
             user_id: int,
             campaign_id: int,
+            class_id: int,
+            diceset_id: int | None,
             name: str,
             result: int):
         """Log the dice data after a roll."""
@@ -167,11 +169,13 @@ class DiceService:
             log_entry = DiceLogCreate(
                 user_id=user_id,
                 campaign_id=campaign_id,
+                class_id=class_id,
+                diceset_id=diceset_id,
                 roll=name,
                 result=result,
                 timestamp=datetime.now(timezone.utc)
             )
-            self.log_repo.add(log_entry)
+            self.log_repo.log_roll(log_entry)
         except SQLAlchemyError:
             raise HTTPException(
                 status_code=500,
@@ -190,8 +194,10 @@ class DiceService:
     def roll_dice(
             self,
             dice_id: int,
-            user_id: int | None = None,
-            campaign_id: int | None = None):
+            user_id: int,
+            campaign_id: int,
+            class_id: int,
+    ):
         """Roll a dice (e.g. d6 -> random 1-6)
         and optionally log the result."""
         db_dice = self.repo.get_by_id(dice_id)
@@ -203,12 +209,16 @@ class DiceService:
             )
         result = randint(1, db_dice.sides)
 
-        if user_id and campaign_id:
+        if (user_id is not None
+                and campaign_id is not None
+                and class_id is not None):
             self._log_roll(
-                user_id,
-                campaign_id,
-                db_dice.name,
-                result
+                user_id=user_id,
+                campaign_id=campaign_id,
+                class_id=class_id,
+                diceset_id=None,
+                name=db_dice.name,
+                result=result
             )
 
         return DiceRollResult(

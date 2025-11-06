@@ -71,3 +71,7 @@ class DiceLogRepository(ABC):
             -> List[DiceLogPublic]:
         """List all dice logs belonging to a specific dice set."""
         pass
+
+    @abstractmethod
+    def log_roll(self, log: DiceLogCreate) -> DiceLogPublic:
+        pass

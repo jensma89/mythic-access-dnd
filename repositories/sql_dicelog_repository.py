@@ -122,3 +122,8 @@ class SqlAlchemyDiceLogRepository(DiceLogRepository):
         ).all()
         return [DiceLogPublic.model_validate(d)
                 for d in dicelogs]
+
+
+    def log_roll(self, log: DiceLogCreate) -> DiceLogPublic:
+        """Method for services to store dice rolls."""
+        return self.add(log)

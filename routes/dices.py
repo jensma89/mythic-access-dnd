@@ -4,7 +4,7 @@ dices.py
 API endpoints for dices.
 """
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Path
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from dependencies import Pagination, SessionDep
 from models.schemas.dice_schema import *
 from repositories.sql_dice_repository import SqlAlchemyDiceRepository
@@ -98,9 +98,12 @@ def read_dices(
              response_model=DiceRollResult)
 def roll_dice(
         dice_id: int = Path(..., description="The ID of the dice to roll."),
+        user_id: int | None = Query(None, description="User ID."),
+        campaign_id: int | None = Query(None, description="Campaign ID."),
+        class_id: int | None = Query(None, description="Class ID."),
         current_user: User = Depends(get_current_user),
         service: DiceService = Depends(get_dice_service)):
     """Endpoint to roll a specific dice
     and get the result (random)."""
-    roll = service.roll_dice(dice_id)
+    roll = service.roll_dice(dice_id, user_id, campaign_id, class_id)
     return roll
