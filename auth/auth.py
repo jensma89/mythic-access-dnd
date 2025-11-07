@@ -14,9 +14,12 @@ from models.schemas.user_schema import UserMe
 from dependencies import get_session
 from models.db_models.table_models import User
 from sqlmodel import select, Session
+import logging
 
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 ALGORITHM = os.getenv("JWT_ALGORITHM")
@@ -72,7 +75,9 @@ def authenticate_user(
     stmt = select(User).where((User.email == login) | (User.user_name == login))
     user = session.exec(stmt).first()
     if not user or not verify_password(password, user.hashed_password):
+        logger.warning(f"Failed login attempt for {login}.")
         return None
+    logger.info(f"User {login} authenticated successfully.")
     return user
 
 

@@ -8,7 +8,11 @@ from sqlmodel import Session, select
 from models.db_models.table_models import Campaign
 from models.schemas.campaign_schema import *
 from repositories.campaign_repository import CampaignRepository
+import logging
 
+
+
+logger = logging.getLogger(__name__)
 
 
 class SqlAlchemyCampaignRepository(CampaignRepository):
@@ -16,6 +20,7 @@ class SqlAlchemyCampaignRepository(CampaignRepository):
     the campaign handling methods with sqlalchemy."""
     def __init__(self, session: Session):
         self.session = session
+        logger.debug("SqlAlchemyCampaignRepository initialized")
 
 
     def list_by_user(self, user_id: int) \
@@ -25,6 +30,7 @@ class SqlAlchemyCampaignRepository(CampaignRepository):
             select(Campaign)
             .where(Campaign.created_by == user_id)
         ).all()
+        logger.debug(f"Retrieved {len(campaigns)} campaigns for user {user_id}")
         return [CampaignPublic.model_validate(c)
                 for c in campaigns]
 
@@ -36,6 +42,7 @@ class SqlAlchemyCampaignRepository(CampaignRepository):
             select(Campaign)
             .where(Campaign.id == campaign_id)
         ).all()
+        logger.debug(f"Retrieved {len(campaign)} campaigns for campaign_id {campaign_id}")
         return [CampaignPublic.model_validate(c)
                 for c in campaign]
 
@@ -45,7 +52,9 @@ class SqlAlchemyCampaignRepository(CampaignRepository):
         """Method to get campaign by ID."""
         db_campaign = self.session.get(Campaign, campaign_id)
         if db_campaign:
+            logger.debug(f"Campaign found: {campaign_id} - {db_campaign.title}")
             return CampaignPublic.model_validate(db_campaign)
+        logger.warning(f"Campaign not found: {campaign_id}")
         return None
 
 
@@ -71,6 +80,7 @@ class SqlAlchemyCampaignRepository(CampaignRepository):
         campaigns = self.session.exec(
             query.offset(offset)
             .limit(limit)).all()
+        logger.debug(f"Listed {len(campaigns)} campaigns with filters name={name}, user_id={user_id}")
         return [CampaignPublic.model_validate(c)
                 for c in campaigns]
 
@@ -82,6 +92,7 @@ class SqlAlchemyCampaignRepository(CampaignRepository):
         self.session.add(db_campaign)
         self.session.commit()
         self.session.refresh(db_campaign)
+        logger.info(f"Campaign added: {db_campaign.id} - {db_campaign.title}")
         return CampaignPublic.model_validate(db_campaign)
 
 
@@ -92,6 +103,7 @@ class SqlAlchemyCampaignRepository(CampaignRepository):
         """Method to change the data of campaign."""
         db_campaign = self.session.get(Campaign, campaign_id)
         if not db_campaign:
+            logger.warning(f"Attempted to update non existing campaign: {campaign_id}")
             return None
         for key, value in campaign.model_dump(
                 exclude_unset=True).items():
@@ -99,6 +111,7 @@ class SqlAlchemyCampaignRepository(CampaignRepository):
         self.session.add(db_campaign)
         self.session.commit()
         self.session.refresh(db_campaign)
+        logger.info(f"Updated campaign: {campaign_id} - {db_campaign.title}")
         return CampaignPublic.model_validate(db_campaign)
 
 
@@ -107,7 +120,9 @@ class SqlAlchemyCampaignRepository(CampaignRepository):
         """Method to remove a campaign."""
         db_campaign = self.session.get(Campaign, campaign_id)
         if not db_campaign:
+            logger.warning(f"Attempted to delete non-existing campaign {campaign_id}")
             return None
         self.session.delete(db_campaign)
         self.session.commit()
+        logger.info(f"Deleted campaign: {campaign_id} - {db_campaign.title}")
         return CampaignPublic.model_validate(db_campaign)

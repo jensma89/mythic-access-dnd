@@ -8,6 +8,10 @@ from sqlmodel import Session, select, delete
 from models.db_models.table_models import Dice, DiceSet, DiceSetDice
 from models.schemas.diceset_schema import *
 from repositories.diceset_repository import DiceSetRepository
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class SqlAlchemyDiceSetRepository(DiceSetRepository):
@@ -15,6 +19,7 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
 
     def __init__(self, session: Session):
         self.session = session
+        logger.debug("SqlAlchemyDiceSetRepository initialized")
 
 
     def list_by_user(self, user_id: int) \
@@ -24,6 +29,7 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
             select(DiceSet)
             .where(DiceSet.user_id == user_id)
         ).all()
+        logger.debug(f"Retrieved {len(dicesets)} DiceSets for user {user_id}")
         return [DiceSetPublic.model_validate(d)
                 for d in dicesets]
 
@@ -35,6 +41,7 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
             select(DiceSet)
             .where(DiceSet.campaign_id == campaign_id)
         ).all()
+        logger.debug(f"Retrieved {len(dicesets)} DiceSets for campaign {campaign_id}")
         return [DiceSetPublic.model_validate(d)
                 for d in dicesets]
 
@@ -46,6 +53,7 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
             select(DiceSet)
             .where(DiceSet.class_id == class_id)
         ).all()
+        logger.debug(f"Retrieved {len(dicesets)} DiceSets for class {class_id}")
         return [DiceSetPublic.model_validate(d)
                 for d in dicesets]
 
@@ -61,7 +69,9 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
         """Method to get a dice set by ID."""
         db_diceset = self.session.get(DiceSet, diceset_id)
         if db_diceset:
+            logger.debug(f"Retrieved {db_diceset} for dice set {diceset_id}")
             return DiceSetPublic.model_validate(db_diceset)
+        logger.warning(f"Attempted to fetch non-existing DiceSet {diceset_id}")
         return None
 
 
@@ -75,6 +85,7 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
             .offset(offset)
             .limit(limit)
         ).all()
+        logger.debug(f"Retrieved {len(dicesets)} DiceSets.")
         return [DiceSetPublic.model_validate(d)
                 for d in dicesets]
 
@@ -96,7 +107,7 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
                                        dice_id=dice.id)
                     self.session.add(link)
             self.session.commit()
-
+        logger.info(f"DiceSet added: {db_diceset.id} for user {db_diceset.user_id}")
         return DiceSetPublic.model_validate(db_diceset)
 
 
@@ -107,6 +118,7 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
         """Update a dice set."""
         db_diceset = self.session.get(DiceSet, diceset_id)
         if not db_diceset:
+            logger.warning(f"Attempted to update non-existing DiceSet {diceset_id}")
             return None
 
         update_data = diceset.model_dump(
@@ -137,6 +149,7 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
             self.session.commit()
 
         self.session.refresh(db_diceset)
+        logger.info(f"Updated DiceSet {diceset_id} for user {db_diceset.user_id}")
         return DiceSetPublic.model_validate(db_diceset)
 
 
@@ -145,6 +158,7 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
         """Remove a dice set."""
         db_diceset = self.session.get(DiceSet, diceset_id)
         if not db_diceset:
+            logger.warning(f"Attempted to delete non-existing DiceSet {diceset_id}")
             return None
 
         # Delete all links first
@@ -156,4 +170,5 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
         # Delete the diceset
         self.session.delete(db_diceset)
         self.session.commit()
+        logger.info(f"Deleted DiceSet {diceset_id} for user {db_diceset.user_id}")
         return DiceSetPublic.model_validate(db_diceset)

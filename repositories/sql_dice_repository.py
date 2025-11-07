@@ -8,6 +8,11 @@ from sqlmodel import Session, select
 from models.db_models.table_models import Dice
 from models.schemas.dice_schema import *
 from repositories.dice_repository import DiceRepository
+import logging
+
+
+
+logger = logging.getLogger(__name__)
 
 
 class SqlAlchemyDiceRepository(DiceRepository):
@@ -16,6 +21,7 @@ class SqlAlchemyDiceRepository(DiceRepository):
 
     def __init__(self, session: Session):
         self.session = session
+        logger.debug("SqlAlchemyDiceRepository initialized")
 
 
     def get_by_id(self, dice_id: int) \
@@ -23,7 +29,9 @@ class SqlAlchemyDiceRepository(DiceRepository):
         """Method to get dice by ID."""
         db_dice = self.session.get(Dice, dice_id)
         if db_dice:
+            logger.debug(f"Dice found: {dice_id} - {db_dice.name}")
             return DicePublic.model_validate(db_dice)
+        logger.warning(f"Dice not found: {dice_id}")
         return None
 
 
@@ -36,6 +44,7 @@ class SqlAlchemyDiceRepository(DiceRepository):
             select(Dice)
             .offset(offset)
             .limit(limit)).all()
+        logger.debug(f"Listed {len(dices)} dices (offset={offset}, limit={limit})")
         return [DicePublic.model_validate(d)
                 for d in dices]
 
@@ -47,6 +56,7 @@ class SqlAlchemyDiceRepository(DiceRepository):
         self.session.add(db_dice)
         self.session.commit()
         self.session.refresh(db_dice)
+        logger.info(f"Dice added: {db_dice.id} - {db_dice.name}")
         return DicePublic.model_validate(db_dice)
 
 
@@ -57,6 +67,7 @@ class SqlAlchemyDiceRepository(DiceRepository):
         """Method to change data from a dice."""
         db_dice = self.session.get(Dice, dice_id)
         if not db_dice:
+            logger.warning(f"Attempted to update non-existing dice {dice_id}")
             return None
 
         for key, value in dice.model_dump(
@@ -65,6 +76,7 @@ class SqlAlchemyDiceRepository(DiceRepository):
         self.session.add(db_dice)
         self.session.commit()
         self.session.refresh(db_dice)
+        logger.info(f"Updated dice: {dice_id} - {db_dice.name}")
         return DicePublic.model_validate(db_dice)
 
 
@@ -73,9 +85,11 @@ class SqlAlchemyDiceRepository(DiceRepository):
         """Method to remove a dice."""
         db_dice = self.session.get(Dice, dice_id)
         if not db_dice:
+            logger.warning(f"Attempted to delete non-existing dice {dice_id}")
             return None
         self.session.delete(db_dice)
         self.session.commit()
+        logger.info(f"Deleted dice: {dice_id} - {db_dice.name}")
         return DicePublic.model_validate(db_dice)
 
 
@@ -86,5 +100,6 @@ class SqlAlchemyDiceRepository(DiceRepository):
             select(Dice)
             .where(Dice.class_id == class_id)
         ).all()
+        logger.debug(f"Retrieved {len(dices)} dices for class {class_id}")
         return [DicePublic.model_validate(d)
                 for d in dices]
