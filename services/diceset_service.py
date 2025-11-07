@@ -13,7 +13,11 @@ from repositories.diceset_repository import *
 from repositories.dice_repository import *
 from repositories.dicelog_repository import *
 from models.schemas.dicelog_schema import *
+import logging
 
+
+
+logger = logging.getLogger(__name__)
 
 
 class DiceSetService:
@@ -27,6 +31,7 @@ class DiceSetService:
         self.dice_repo = dice_repo
         self.diceset_repo = diceset_repo
         self.dicelog_repo = dicelog_repo
+        logger.debug("DiceSetService initialized")
 
 
     def create_diceset(
@@ -40,7 +45,10 @@ class DiceSetService:
             existing_sets = (
                 self.diceset_repo
                 .get_by_class_id(diceset.class_id))
+            logger.info(f"Creating DiceSet for Class {diceset.class_id}. "
+                        f"Existing sets: {len(existing_sets)}")
             if len(existing_sets) >= 5:
+                logger.warning(f"Cannot create DiceSet for Class {diceset.class_id}: max 5 sets reached")
                 raise HTTPException(
                     status_code=400,
                     detail="Maximum of 5 dice sets "
@@ -50,19 +58,23 @@ class DiceSetService:
             if self.dice_repo and diceset.dice_ids:
                 for dice_id in diceset.dice_ids:
                     if not self.dice_repo.get_by_id(dice_id):
+                        logger.warning(f"Dice ID {dice_id} not found for new DiceSet")
                         raise HTTPException(
                             status_code=404,
                             detail=f"Dice {dice_id} "
                                    f"not found.")
+            logger.info(f"Created DiceSet {diceset.id} - {diceset.name} for Class {diceset.class_id}")
             return self.diceset_repo.add(diceset)
 
         except SQLAlchemyError:
+            logger.exception("Database error while creating DiceSet", exc_info=True)
             raise HTTPException(
                 status_code=500,
                 detail="Database error "
                        "while creating dice set."
             )
         except Exception:
+            logger.exception("Unexpected error while creating DiceSet", exc_info=True)
             raise HTTPException(
                 status_code=500,
                 detail="Unexpected error "
@@ -79,20 +91,24 @@ class DiceSetService:
             db_diceset = (self.diceset_repo
                           .get_by_id(diceset_id))
             if not db_diceset:
+                logger.warning(f"DiceSet {diceset_id} not found")
                 raise HTTPException(
                     status_code=404,
                     detail=f"Dice set with ID {diceset_id} "
                            f"not found."
                 )
+            logger.info(f"Retrieved DiceSet {diceset_id} - {db_diceset.name}")
             return db_diceset
 
         except SQLAlchemyError:
+            logger.exception(f"Database error while fetching DiceSet {diceset_id}", exc_info=True)
             raise HTTPException(
                 status_code=500,
                 detail="Database error "
                        "while fetching dice set."
             )
         except Exception:
+            logger.exception(f"Unexpected error while fetching DiceSet {diceset_id}", exc_info=True)
             raise HTTPException(
                 status_code=500,
                 detail="Unexpected error "
@@ -111,12 +127,14 @@ class DiceSetService:
                 offset=offset,
                 limit=limit)
         except SQLAlchemyError:
+            logger.exception("Database error while listing DiceSets", exc_info=True)
             raise HTTPException(
                 status_code=500,
                 detail="Database error "
                        "while listing dice sets."
             )
         except Exception:
+            logger.exception("Unexpected error while listing DiceSets", exc_info=True)
             raise HTTPException(
                 status_code=500,
                 detail="Unexpected error "
@@ -135,20 +153,24 @@ class DiceSetService:
                 diceset_id,
                 diceset)
             if not updated:
+                logger.warning(f"DiceSet {diceset_id} not found for update")
                 raise HTTPException(
                     status_code=404,
                     detail=f"Dice set with ID {diceset_id} "
                            f"not found."
                 )
+            logger.info(f"Updated DiceSet {diceset_id} - {updated.name}")
             return updated
 
         except SQLAlchemyError:
+            logger.exception(f"Database error while updating DiceSet {diceset_id}", exc_info=True)
             raise HTTPException(
                 status_code=500,
                 detail="Database error "
                        "while updating dice set."
             )
         except Exception:
+            logger.exception(f"Unexpected error while updating DiceSet {diceset_id}", exc_info=True)
             raise HTTPException(
                 status_code=500,
                 detail="Unexpected error "
@@ -168,24 +190,29 @@ class DiceSetService:
                     .list_by_diceset(diceset_id))
             for log in logs:
                 self.dicelog_repo.delete(log.id)
+                logger.info(f"Deleted DiceLog {log.id} from DiceSet {diceset_id}")
 
             # Finally delete diceset
             deleted = self.diceset_repo.delete(diceset_id)
             if not deleted:
+                logger.warning(f"DiceSet {diceset_id} not found for deletion")
                 raise HTTPException(
                     status_code=404,
                     detail=f"Dice set with ID {diceset_id} "
                            f"not found."
                 )
+            logger.info(f"Deleted DiceSet {diceset_id} - {deleted.name}")
             return deleted
 
         except SQLAlchemyError:
+            logger.exception(f"Database error while deleting DiceSet {diceset_id}", exc_info=True)
             raise HTTPException(
                 status_code=500,
                 detail="Database error "
                        "while deleting dice set."
             )
         except Exception:
+            logger.exception(f"Unexpected error while deleting DiceSet {diceset_id}", exc_info=True)
             raise HTTPException(
                 status_code=500,
                 detail="Unexpected error "
@@ -204,6 +231,7 @@ class DiceSetService:
             total: int):
         """Function for dice set log entrys."""
         if not self.dicelog_repo:
+            logger.warning("DiceLogRepository not provided, skipping roll log")
             return
         try:
             log_entry = DiceLogCreate(
@@ -216,13 +244,16 @@ class DiceSetService:
                 timestamp=datetime.now(timezone.utc)
             )
             self.dicelog_repo.log_roll(log_entry)
+            logger.info(f"Logged DiceSet roll for DiceSet {diceset_id} by User {user_id}")
         except SQLAlchemyError:
+            logger.exception(f"Database error while logging roll for DiceSet {diceset_id}", exc_info=True)
             raise HTTPException(
                 status_code=500,
                 detail="Database error "
                        "while logging dice set roll."
             )
         except Exception:
+            logger.exception(f"Unexpected error while logging roll for DiceSet {diceset_id}", exc_info=True)
             raise HTTPException(
                 status_code=500,
                 detail="Unexpected error "
@@ -242,6 +273,7 @@ class DiceSetService:
             diceset = (self.diceset_repo
                        .get_by_id(diceset_id))
             if not diceset or not diceset.dices:
+                logger.warning(f"DiceSet {diceset_id} not found or has no dices")
                 raise HTTPException(
                     status_code=404,
                     detail="Dice set not found "
@@ -258,6 +290,9 @@ class DiceSetService:
                     result=roll_value
                 ))
                 total_sum += roll_value
+
+            logger.info(f"Rolled DiceSet {diceset_id} by User {user_id}: "
+                        f"Results {[r.result for r in results]}, Total: {total_sum}")
 
             self._log_roll(
                 user_id,
@@ -276,12 +311,14 @@ class DiceSetService:
                 total=total_sum
             )
         except SQLAlchemyError:
+            logger.exception(f"Database error while rolling DiceSet {diceset_id}", exc_info=True)
             raise HTTPException(
                 status_code=500,
                 detail="Database error "
                        "while rolling dice set."
             )
         except Exception:
+            logger.exception(f"Unexpected error while rolling DiceSet {diceset_id}", exc_info=True)
             raise HTTPException(
                 status_code=500,
                 detail="Unexpected error "

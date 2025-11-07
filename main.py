@@ -11,17 +11,19 @@ from slowapi.middleware import SlowAPIMiddleware
 from slowapi.errors import RateLimitExceeded
 from rate_limit import limiter
 from routes import auth_routes, campaigns, classes, dices, dicesets, dicelogs, users
+import logging
 
 
+
+logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Create the tables and start and stop the DB session"""
     create_db_and_tables() # Create the tables
-    print("Server started!")
+    logger.info("Server started and DB tables ensured")
     yield
-    print("Server stopped!")
-
+    logger.info("Server stopped!")
 
 app = FastAPI(lifespan=lifespan)
 

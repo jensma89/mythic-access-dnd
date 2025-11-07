@@ -12,7 +12,11 @@ from models.schemas.dice_schema import *
 from models.schemas.dicelog_schema import *
 from repositories.dice_repository import DiceRepository
 from repositories.dicelog_repository import DiceLogRepository
+import logging
 
+
+
+logger = logging.getLogger(__name__) # hier weitermachen
 
 
 class DiceService:
