@@ -4,7 +4,7 @@ campaigns.py
 The API routes for campaigns.
 """
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Path
+from fastapi import APIRouter, Depends, HTTPException, Path, Request
 from dependencies import CampaignQueryParams, Pagination, SessionDep
 from models.schemas.campaign_schema import *
 from services.campaign_service import CampaignService
@@ -14,6 +14,7 @@ from repositories.sql_diceset_repository import SqlAlchemyDiceSetRepository
 from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
 from auth.auth import get_current_user
 from models.db_models.table_models import User
+from rate_limit import limiter
 
 router = APIRouter(tags=["campaigns"])
 
@@ -36,7 +37,9 @@ def get_campaign_service(session: SessionDep) \
 
 @router.get("/campaigns/{campaign_id}",
             response_model=CampaignPublic)
+@limiter.limit("10/minute")
 def read_campaign(
+        request: Request,
         campaign_id: int = Path(..., description="The ID of the campaign to retrieve"),
         current_user: User = Depends(get_current_user),
         service: CampaignService = Depends(get_campaign_service)):
@@ -51,7 +54,9 @@ def read_campaign(
 
 @router.get("/campaigns/",
             response_model=List[CampaignPublic])
+@limiter.limit("10/minute")
 def read_campaigns(
+        request: Request,
         current_user: User = Depends(get_current_user),
         pagination: Pagination = Depends(),
         filters: CampaignQueryParams = Depends(),
@@ -66,7 +71,9 @@ def read_campaigns(
 
 @router.post("/campaigns/",
              response_model=CampaignPublic)
+@limiter.limit("3/minute")
 def create_campaign(
+        request: Request,
         campaign: CampaignCreate,
         current_user: User = Depends(get_current_user),
         service: CampaignService = Depends(get_campaign_service)):
@@ -76,7 +83,9 @@ def create_campaign(
 
 @router.patch("/campaigns/{campaign_id}",
             response_model=CampaignPublic)
+@limiter.limit("5/minute")
 def update_campaign(
+        request: Request,
         campaign: CampaignUpdate,
         campaign_id: int = Path(..., description="The ID of the campaign to update."),
         current_user: User = Depends(get_current_user),
@@ -92,7 +101,9 @@ def update_campaign(
 
 @router.delete("/campaigns/{campaign_id}",
                response_model=CampaignPublic)
+@limiter.limit("5/minute")
 def delete_campaign(
+        request: Request,
         campaign_id: int = Path(..., description="The ID of the campaign to delete."),
         current_user: User = Depends(get_current_user),
         service: CampaignService = Depends(get_campaign_service)):

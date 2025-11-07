@@ -4,7 +4,7 @@ users.py
 The API endpoints for users.
 """
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException,Path ,Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Request
 from dependencies import Pagination, SessionDep, UserQueryParams
 from models.db_models.table_models import User
 from models.schemas.user_schema import (UserCreate,
@@ -17,6 +17,7 @@ from repositories.sql_class_repository import SqlAlchemyClassRepository
 from repositories.sql_diceset_repository import SqlAlchemyDiceSetRepository
 from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
 from auth.auth import get_current_user
+from rate_limit import limiter
 
 
 
@@ -41,7 +42,9 @@ def get_user_service(session: SessionDep) \
 
 @router.get("/users/{user_id}",
             response_model=UserPublic)
+@limiter.limit("10/minute")
 def read_user(
+        request: Request,
         user_id: int = Path(..., description="The ID of the user to retrieve"),
         current_user: User = Depends(get_current_user),
         service: UserService = Depends(get_user_service)):
@@ -56,7 +59,9 @@ def read_user(
 
 @router.get("/users/",
             response_model=List[UserPublic])
+@limiter.limit("10/minute")
 def read_users(
+        request: Request,
         current_user: User = Depends(get_current_user),
         pagination: Pagination = Depends(),
         filters: UserQueryParams = Depends(),
@@ -70,7 +75,9 @@ def read_users(
 
 @router.patch("/users/{user_id}",
             response_model=UserPublic)
+@limiter.limit("3/minute")
 def update_user(
+        request: Request,
         user: UserUpdate,
         user_id: int = Path(..., description="The ID of the user to update."),
         current_user: User = Depends(get_current_user),
@@ -86,7 +93,9 @@ def update_user(
 
 @router.delete("/users/{user_id}",
                response_model=UserPublic)
+@limiter.limit("3/minute")
 def delete_user(
+        request: Request,
         user_id: int = Path(..., description="The ID of the user to delete."),
         current_user: User = Depends(get_current_user),
         service: UserService = Depends(get_user_service)):

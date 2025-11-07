@@ -4,7 +4,7 @@ dicesets.py
 API endpoints for handling dice sets.
 """
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Path, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from dependencies import Pagination, SessionDep
 from models.schemas.diceset_schema import *
 from repositories.sql_diceset_repository import SqlAlchemyDiceSetRepository
@@ -14,6 +14,7 @@ from repositories.sql_class_repository import SqlAlchemyClassRepository
 from services.diceset_service import DiceSetService
 from auth.auth import get_current_user
 from models.db_models.table_models import User
+from rate_limit import limiter
 
 
 
@@ -33,7 +34,9 @@ def get_diceset_service(session: SessionDep) \
 
 @router.get("/dicesets/{diceset_id}",
             response_model=DiceSetPublic)
+@limiter.limit("10/minute")
 def read_diceset(
+        request: Request,
         diceset_id: int = Path(..., description="The ID of dice set to retrieve."),
         current_user: User = Depends(get_current_user),
         service: DiceSetService = Depends(get_diceset_service)):
@@ -48,7 +51,9 @@ def read_diceset(
 
 @router.get("/dicesets/",
             response_model=List[DiceSetPublic])
+@limiter.limit("10/minute")
 def read_dicesets(
+        request: Request,
         current_user: User = Depends(get_current_user),
         pagination: Pagination = Depends(),
         service: DiceSetService = Depends(get_diceset_service)):
@@ -60,7 +65,9 @@ def read_dicesets(
 
 @router.post("/dicesets/",
              response_model=DiceSetPublic)
+@limiter.limit("5/minute")
 def create_diceset(
+        request: Request,
         diceset: DiceSetCreate,
         current_user: User = Depends(get_current_user),
         service: DiceSetService = Depends(get_diceset_service)):
@@ -70,7 +77,9 @@ def create_diceset(
 
 @router.patch("/dicesets/{diceset_id}",
               response_model=DiceSetPublic)
+@limiter.limit("5/minute")
 def update_diceset(
+        request: Request,
         diceset: DiceSetUpdate,
         diceset_id: int = Path(..., description="The ID of dice set to update."),
         current_user: User = Depends(get_current_user),
@@ -86,7 +95,9 @@ def update_diceset(
 
 @router.delete("/dicesets/{diceset_id}",
                response_model=DiceSetPublic)
+@limiter.limit("5/minute")
 def delete_diceset(
+        request: Request,
         diceset_id: int = Path(..., description="The ID of dice set to delete."),
         current_user: User = Depends(get_current_user),
         service: DiceSetService = Depends(get_diceset_service)):
@@ -101,7 +112,9 @@ def delete_diceset(
 
 @router.post("/dicesets/{diceset_id}/roll",
              response_model=DiceSetRollResult)
+@limiter.limit("30/minute")
 def roll_diceset(
+        request: Request,
         diceset_id: int = Path(..., description="The ID of the dice set to roll"),
         user_id: int = Query(..., description="User ID"),
         campaign_id: int = Query(..., description="Campaign ID"),

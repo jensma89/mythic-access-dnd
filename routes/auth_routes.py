@@ -2,8 +2,9 @@
 auth_routes.py
 
 """
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordRequestForm
+from rate_limit import limiter
 from datetime import timedelta
 from sqlmodel import Session, select
 from models.db_models.table_models import User
@@ -23,7 +24,9 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 @router.post("/register", response_model=UserPublic)
+@limiter.limit("3/minute")
 def register_user(
+        request: Request,
         user_data: UserCreate,
         session: Session = Depends(get_session)):
     """Register a new user.
@@ -57,7 +60,9 @@ def register_user(
 
 
 @router.post("/token", response_model=Token)
+@limiter.limit("5/minute")
 def login_for_access_token(
+        request: Request,
         form_data: OAuth2PasswordRequestForm = Depends(),
         session: Session = Depends(get_session)
 ):
@@ -82,7 +87,9 @@ def login_for_access_token(
 
 
 @router.get("/me", response_model=UserMe)
+@limiter.limit("30/minute")
 def get_my_profile(
+        request: Request,
         current_user: User = Depends(get_current_user)):
     """Returns the authenticated users info."""
     return UserMe.model_validate(current_user)

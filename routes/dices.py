@@ -4,7 +4,7 @@ dices.py
 API endpoints for dices.
 """
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Path, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from dependencies import Pagination, SessionDep
 from models.schemas.dice_schema import *
 from repositories.sql_dice_repository import SqlAlchemyDiceRepository
@@ -12,6 +12,7 @@ from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
 from services.dice_service import DiceService
 from auth.auth import get_current_user
 from models.db_models.table_models import User
+from rate_limit import limiter
 
 
 router = APIRouter(tags=["dices"])
@@ -28,7 +29,9 @@ def get_dice_service(session: SessionDep) \
 
 @router.get("/dices/{dice_id}",
             response_model=DicePublic)
+@limiter.limit("10/minute")
 def read_dice(
+        request: Request,
         dice_id: int = Path(..., description="The dice ID to retrieve."),
         current_user: User = Depends(get_current_user),
         service: DiceService = Depends(get_dice_service)):
@@ -43,7 +46,9 @@ def read_dice(
 
 @router.get("/dices/",
             response_model=List[DicePublic])
+@limiter.limit("10/minute")
 def read_dices(
+        request: Request,
         current_user: User = Depends(get_current_user),
         pagination: Pagination = Depends(),
         service: DiceService = Depends(get_dice_service)):
@@ -96,7 +101,9 @@ def read_dices(
 
 @router.post("/dices/{dice_id}/roll",
              response_model=DiceRollResult)
+@limiter.limit("30/minute")
 def roll_dice(
+        request: Request,
         dice_id: int = Path(..., description="The ID of the dice to roll."),
         user_id: int | None = Query(None, description="User ID."),
         campaign_id: int | None = Query(None, description="Campaign ID."),

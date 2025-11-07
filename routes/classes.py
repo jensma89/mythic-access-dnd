@@ -4,7 +4,7 @@ classes.py
 The API endpoints for classes.
 """
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Path
+from fastapi import APIRouter, Depends, HTTPException, Path, Request
 from dependencies import ClassQueryParams, Pagination, SessionDep
 from models.schemas.class_schema import *
 from services.class_service import ClassService
@@ -13,6 +13,7 @@ from repositories.sql_diceset_repository import SqlAlchemyDiceSetRepository
 from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
 from auth.auth import get_current_user
 from models.db_models.table_models import User
+from rate_limit import limiter
 
 
 router = APIRouter(tags=["classes"])
@@ -34,7 +35,9 @@ def get_class_service(session: SessionDep) \
 
 @router.get("/classes/{class_id}",
             response_model=ClassPublic)
+@limiter.limit("10/minute")
 def read_class(
+        request: Request,
         class_id: int = Path(..., description="The ID of the class to retrieve."),
         current_user: User = Depends(get_current_user),
         service: ClassService = Depends(get_class_service)):
@@ -49,7 +52,9 @@ def read_class(
 
 @router.get("/classes/",
             response_model=List[ClassPublic])
+@limiter.limit("10/minute")
 def read_classes(
+        request: Request,
         current_user: User = Depends(get_current_user),
         pagination: Pagination = Depends(),
         filters: ClassQueryParams = Depends(),
@@ -63,7 +68,9 @@ def read_classes(
 
 @router.post("/classes/",
              response_model=ClassPublic)
+@limiter.limit("3/minute")
 def create_class(
+        request: Request,
         dnd_class: ClassCreate,
         current_user: User = Depends(get_current_user),
         service: ClassService = Depends(get_class_service)):
@@ -73,7 +80,9 @@ def create_class(
 
 @router.patch("/classes/{class_id}",
             response_model=ClassPublic)
+@limiter.limit("3/minute")
 def update_class(
+        request: Request,
         dnd_class: ClassUpdate,
         class_id: int = Path(..., description="The ID of the class to update."),
         current_user: User = Depends(get_current_user),
@@ -89,7 +98,9 @@ def update_class(
 
 @router.delete("/classes/{class_id}",
                response_model=ClassPublic)
+@limiter.limit("5/minute")
 def delete_class(
+        request: Request,
         class_id: int = Path(..., description="The ID of the class to delete."),
         current_user: User = Depends(get_current_user),
         service: ClassService = Depends(get_class_service)):
