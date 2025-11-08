@@ -1,6 +1,7 @@
 """
 auth_routes.py
 
+API endpoints to handle authentication operations.
 """
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordRequestForm

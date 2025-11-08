@@ -14,9 +14,11 @@ from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
 from auth.auth import get_current_user
 from models.db_models.table_models import User
 from rate_limit import limiter
+import logging
 
 
 router = APIRouter(tags=["classes"])
+logger = logging.getLogger(__name__)
 
 
 
@@ -42,8 +44,10 @@ def read_class(
         current_user: User = Depends(get_current_user),
         service: ClassService = Depends(get_class_service)):
     """Endpoint to get a single dnd class."""
+    logger.info(f"GET class {class_id} by user {current_user.id}")
     dnd_class = service.get_class(class_id)
     if not dnd_class:
+        logger.warning(f"Class {class_id} not found")
         raise HTTPException(
             status_code=404,
             detail="Class not found.")
@@ -60,6 +64,7 @@ def read_classes(
         filters: ClassQueryParams = Depends(),
         service: ClassService = Depends(get_class_service)):
     """Endpoint to get a list of all classes."""
+    logger.info(f"GET classes list by user {current_user.id}")
     return service.list_classes(
         offset=pagination.offset,
         limit=pagination.limit,
@@ -75,6 +80,7 @@ def create_class(
         current_user: User = Depends(get_current_user),
         service: ClassService = Depends(get_class_service)):
     """Endpoint to create a new class."""
+    logger.info(f"POST create class by user {current_user.id}")
     return service.create_class(dnd_class)
 
 
@@ -88,8 +94,10 @@ def update_class(
         current_user: User = Depends(get_current_user),
         service: ClassService = Depends(get_class_service)):
     """Endpoint to make changes by a class."""
+    logger.info(f"PATCH update class {class_id} by user {current_user.id}")
     updated = service.update_class(class_id, dnd_class)
     if not updated:
+        logger.warning(f"Class {class_id} not found")
         raise HTTPException(
             status_code=404,
             detail="Class not found.")
@@ -105,8 +113,10 @@ def delete_class(
         current_user: User = Depends(get_current_user),
         service: ClassService = Depends(get_class_service)):
     """Endpoint to delete a class by ID."""
+    logger.info(f"DELETE class {class_id} by user {current_user.id}")
     deleted = service.delete_class(class_id)
     if not deleted:
+        logger.warning(f"Class {class_id} not found")
         raise HTTPException(
             status_code=404,
             detail="Class not found.")

@@ -13,9 +13,11 @@ from services.dice_service import DiceService
 from auth.auth import get_current_user
 from models.db_models.table_models import User
 from rate_limit import limiter
+import logging
 
 
 router = APIRouter(tags=["dices"])
+logger = logging.getLogger(__name__)
 
 
 
@@ -36,8 +38,10 @@ def read_dice(
         current_user: User = Depends(get_current_user),
         service: DiceService = Depends(get_dice_service)):
     """Endpoint to get a single dice."""
+    logger.info(f"GET dice {dice_id} by user {current_user.id}")
     dice = service.get_dice(dice_id)
     if not dice:
+        logger.warning(f"Dice {dice_id} not found")
         raise HTTPException(
             status_code=404,
             detail="Dice not found.")
@@ -53,6 +57,7 @@ def read_dices(
         pagination: Pagination = Depends(),
         service: DiceService = Depends(get_dice_service)):
     """Endpoint to list all dices."""
+    logger.info(f"GET dice list by user {current_user.id}")
     return service.list_dices(
         offset=pagination.offset,
         limit=pagination.limit)
@@ -112,5 +117,11 @@ def roll_dice(
         service: DiceService = Depends(get_dice_service)):
     """Endpoint to roll a specific dice
     and get the result (random)."""
+    logger.info(f"ROLL dice {dice_id} by user {current_user.id}")
     roll = service.roll_dice(dice_id, user_id, campaign_id, class_id)
+    if not roll:
+        logger.warning(f"Dice {dice_id} not found for roll")
+        raise HTTPException(
+            status_code=404,
+            detail="Dice not found.")
     return roll

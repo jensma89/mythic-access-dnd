@@ -15,8 +15,11 @@ from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
 from auth.auth import get_current_user
 from models.db_models.table_models import User
 from rate_limit import limiter
+import logging
+
 
 router = APIRouter(tags=["campaigns"])
+logger = logging.getLogger(__name__)
 
 
 def get_campaign_service(session: SessionDep) \
@@ -44,8 +47,10 @@ def read_campaign(
         current_user: User = Depends(get_current_user),
         service: CampaignService = Depends(get_campaign_service)):
     """Endpoint to get a single campaign."""
+    logger.info(f"GET campaign {campaign_id} by user {current_user.id}")
     campaign = service.get_campaign(campaign_id)
     if not campaign:
+        logger.warning(f"Campaign {campaign_id} not found")
         raise HTTPException(
             status_code=404,
             detail="Campaign not found.")
@@ -62,6 +67,7 @@ def read_campaigns(
         filters: CampaignQueryParams = Depends(),
         service: CampaignService = Depends(get_campaign_service)):
     """Endpoint to get all campaigns."""
+    logger.info(f"GET campaigns list by user {current_user.id}")
     return service.list_campaigns(
         offset=pagination.offset,
         limit=pagination.limit,
@@ -78,6 +84,7 @@ def create_campaign(
         current_user: User = Depends(get_current_user),
         service: CampaignService = Depends(get_campaign_service)):
     """Endpoint to create a new campaign."""
+    logger.info(f"POST create campaign by user {current_user.id}")
     return service.create_campaign(campaign)
 
 
@@ -91,8 +98,10 @@ def update_campaign(
         current_user: User = Depends(get_current_user),
         service: CampaignService = Depends(get_campaign_service)):
     """Endpoint to change campaign data."""
+    logger.info(f"PATCH update campaign {campaign_id} by user {current_user.id}")
     updated = service.update_campaign(campaign_id, campaign)
     if not updated:
+        logger.warning(f"Campaign {campaign_id} not found")
         raise HTTPException(
             status_code=404,
             detail="Campaign not found")
@@ -108,8 +117,10 @@ def delete_campaign(
         current_user: User = Depends(get_current_user),
         service: CampaignService = Depends(get_campaign_service)):
     """Endpoint to remove a campaign."""
+    logger.info(f"DELETE campaign {campaign_id} by user {current_user.id}")
     deleted = service.delete_campaign(campaign_id)
     if not deleted:
+        logger.warning(f"Campaign {campaign_id} not found")
         raise HTTPException(
             status_code=404,
             detail="Campaign not found")

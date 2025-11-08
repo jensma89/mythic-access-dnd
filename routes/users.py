@@ -18,10 +18,12 @@ from repositories.sql_diceset_repository import SqlAlchemyDiceSetRepository
 from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
 from auth.auth import get_current_user
 from rate_limit import limiter
+import logging
 
 
 
 router = APIRouter(tags=["users"])
+logger = logging.getLogger(__name__)
 
 
 def get_user_service(session: SessionDep) \
@@ -49,8 +51,10 @@ def read_user(
         current_user: User = Depends(get_current_user),
         service: UserService = Depends(get_user_service)):
     """Endpoint to get a single user."""
+    logger.debug(f"GET /users/{user_id} requested")
     user = service.get_user(user_id)
     if not user:
+        logger.warning(f"User {user_id} not found")
         raise HTTPException(
             status_code=404,
             detail="User not found.")
@@ -67,6 +71,7 @@ def read_users(
         filters: UserQueryParams = Depends(),
         service: UserService = Depends(get_user_service)):
     """Endpoint to get all users."""
+    logger.debug("GET /users/ list requested")
     return service.list_users(
         offset=pagination.offset,
         limit=pagination.limit,
@@ -83,8 +88,10 @@ def update_user(
         current_user: User = Depends(get_current_user),
         service: UserService = Depends(get_user_service)):
     """Endpoint to change user data."""
+    logger.debug(f"PATCH /users/{user_id} update requested")
     updated = service.update_user(user_id, user)
     if not updated:
+        logger.warning(f"Update failed, User {user_id} not found")
         raise HTTPException(
             status_code=404,
             detail="User not found")
@@ -100,8 +107,10 @@ def delete_user(
         current_user: User = Depends(get_current_user),
         service: UserService = Depends(get_user_service)):
     """Endpoint to delete a user by id."""
+    logger.debug(f"DELETE /users/{user_id} requested")
     deleted = service.delete_user(user_id)
     if not deleted:
+        logger.warning(f"Delete failed, User {user_id} not found")
         raise HTTPException(
             status_code=404,
             detail="User not found")

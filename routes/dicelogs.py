@@ -10,10 +10,12 @@ from repositories.sql_dicelog_repository import *
 from auth.auth import get_current_user
 from models.db_models.table_models import User
 from rate_limit import limiter
+import logging
 
 
 
 router = APIRouter(tags=["dicelogs"])
+logger = logging.getLogger(__name__)
 
 
 def get_dicelog_repo(session: SessionDep):
@@ -33,6 +35,7 @@ def list_logs(
         dicelog_repo: SqlAlchemyDiceLogRepository = Depends(get_dicelog_repo)):
     """Endpoint to list all dice logs
     by a specific user."""
+    logger.info(f"GET logs for user {user_id} by requester {current_user.id}")
     return dicelog_repo.list_logs(
         user_id=user_id,
         offset=pagination.offset,
@@ -48,8 +51,10 @@ def get_log(
         current_user: User = Depends(get_current_user),
         repo: SqlAlchemyDiceLogRepository = Depends(get_dicelog_repo)):
     """Endpoint to get a single dice log by ID."""
+    logger.info(f"GET log {dicelog_id} by user {current_user.id}")
     dicelog = repo.get_by_id(dicelog_id)
     if not dicelog:
+        logger.warning(f"Dice log {dicelog_id} not found")
         raise HTTPException(
             status_code=404,
             detail="Dice log not found.")

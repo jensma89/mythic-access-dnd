@@ -15,10 +15,12 @@ from services.diceset_service import DiceSetService
 from auth.auth import get_current_user
 from models.db_models.table_models import User
 from rate_limit import limiter
+import logging
 
 
 
 router = APIRouter(tags=["dicesets"])
+logger = logging.getLogger(__name__)
 
 
 def get_diceset_service(session: SessionDep) \
@@ -41,8 +43,10 @@ def read_diceset(
         current_user: User = Depends(get_current_user),
         service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to get a single dice set."""
+    logger.info(f"GET dice set {diceset_id} by user {current_user.id}")
     diceset = service.get_diceset(diceset_id)
     if not diceset:
+        logger.warning(f"Dice set {diceset_id} not found")
         raise HTTPException(
             status_code=404,
             detail="Diceset not found.")
@@ -58,6 +62,7 @@ def read_dicesets(
         pagination: Pagination = Depends(),
         service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to list all dice sets."""
+    logger.info(f"GET dice sets list by user {current_user.id}")
     return service.list_dicesets(
         offset=pagination.offset,
         limit=pagination.limit)
@@ -72,6 +77,7 @@ def create_diceset(
         current_user: User = Depends(get_current_user),
         service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to create a new dice set."""
+    logger.info(f"CREATE dice set by user {current_user.id}")
     return service.create_diceset(diceset)
 
 
@@ -85,8 +91,10 @@ def update_diceset(
         current_user: User = Depends(get_current_user),
         service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to change data from a dice set."""
+    logger.info(f"UPDATE dice set {diceset_id} by user {current_user.id}")
     updated = service.update_diceset(diceset_id, diceset)
     if not updated:
+        logger.warning(f"Dice set {diceset_id} not found for update")
         raise HTTPException(
             status_code=404,
             detail="Dice set not found.")
@@ -102,8 +110,10 @@ def delete_diceset(
         current_user: User = Depends(get_current_user),
         service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to delete a dice set by ID."""
+    logger.info(f"DELETE dice set {diceset_id} by user {current_user.id}")
     deleted = service.delete_diceset(diceset_id)
     if not deleted:
+        logger.warning(f"Dice set {diceset_id} not found for deletion")
         raise HTTPException(
             status_code=404,
             detail="Dice set not found.")
@@ -123,6 +133,7 @@ def roll_diceset(
         service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to roll a specific dice set
     and get the individual results and the total sum."""
+    logger.info(f"ROLL dice set {diceset_id} by user {current_user.id}")
     result = service.roll_diceset(
         user_id,
         campaign_id,
@@ -130,6 +141,7 @@ def roll_diceset(
         diceset_id
     )
     if not result:
+        logger.warning(f"Dice set {diceset_id} not found for roll")
         raise HTTPException(
             status_code=404,
             detail="Dice set not found.")
