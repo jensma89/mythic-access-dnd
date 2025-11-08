@@ -12,7 +12,11 @@ from repositories.campaign_repository import CampaignRepository
 from repositories.class_repository import ClassRepository
 from repositories.diceset_repository import DiceSetRepository
 from repositories.dicelog_repository import DiceLogRepository
+import logging
 
+
+
+logger = logging.getLogger(__name__)
 
 
 class CampaignService:
@@ -27,6 +31,7 @@ class CampaignService:
         self.class_repo = class_repo
         self.diceset_repo = diceset_repo
         self.dicelog_repo = dicelog_repo
+        logger.debug("CampaignService initialized")
 
 
     def create_campaign(
@@ -35,8 +40,17 @@ class CampaignService:
             -> CampaignPublic:
         """Create a new campaign."""
         try:
-            return self.campaign_repo.add(campaign)
+            created = self.campaign_repo.add(campaign)
+            if not created:
+                logger.warning("Campaign creation failed in repository")
+                raise HTTPException(
+                    status_code=400,
+                    detail="Failed to create campaign."
+                )
+            logger.info(f"Created Campaign {created.id} - {created.name}")
+            return created
         except SQLAlchemyError:
+            logger.exception("Database error while creating Campaign", exc_info=True)
             raise HTTPException(
                 status_code=500,
                 detail=f"Database error "
@@ -49,14 +63,21 @@ class CampaignService:
             campaign_id: int) \
             -> Optional[CampaignPublic]:
         """Get a campaign by ID."""
-        campaign = self.campaign_repo.get_by_id(campaign_id)
-        if not campaign:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Campaign with ID {campaign_id} "
-                       f"not found."
-            )
-        return campaign
+        try:
+            campaign = self.campaign_repo.get_by_id(campaign_id)
+            if not campaign:
+                logger.warning(f"Campaign {campaign_id} not found")
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Campaign with ID {campaign_id} not found."
+                )
+
+            logger.info(f"Retrieved Campaign {campaign_id} - {campaign.name}")
+            return campaign
+
+        except SQLAlchemyError:
+            logger.exception(f"Database error while retrieving Campaign {campaign_id}", exc_info=True)
+            raise HTTPException(status_code=500, detail="Database error while retrieving campaign.")
 
 
     def list_campaigns(
@@ -67,13 +88,17 @@ class CampaignService:
             -> List[CampaignPublic]:
         """Get a list of all campaigns."""
         try:
-            return self.campaign_repo.list_all(
+            campaigns = self.campaign_repo.list_all(
                 user_id=filters.user_id,
                 name=filters.name,
                 offset=offset,
                 limit=limit
             )
+            logger.info(f"Listed {len(campaigns)} Campaigns (offset={offset}, limit={limit})")
+            return campaigns
+
         except SQLAlchemyError:
+            logger.exception("Database error while listing Campaigns", exc_info=True)
             raise HTTPException(
                 status_code=500,
                 detail=f"Database error "
@@ -92,13 +117,17 @@ class CampaignService:
                 campaign_id,
                 campaign)
             if not updated:
+                logger.warning(f"Campaign {campaign_id} not found for update")
                 raise HTTPException(
                     status_code=404,
                     detail=f"Campaign with ID {campaign_id} "
                            f"not found."
                 )
+            logger.info(f"Updated Campaign {campaign_id} - {updated.name}")
             return updated
+
         except SQLAlchemyError:
+            logger.exception(f"Database error while updating Campaign {campaign_id}", exc_info=True)
             raise HTTPException(
                 status_code=500,
                 detail=f"Database error "
@@ -108,13 +137,13 @@ class CampaignService:
 
     def delete_campaign(
             self,
-            campaign_id: int) \
-            -> Optional[CampaignPublic]:
+            campaign_id: int):
         """Remove a campaign and the belonging entries:
         classes, dice sets and dice logs."""
         try:
             campaign = self.campaign_repo.get_by_id(campaign_id)
             if not campaign:
+                logger.warning(f"Campaign {campaign_id} not found for deletion")
                 raise HTTPException(
                     status_code=404,
                     detail=f"Campaign with ID {campaign_id} "
@@ -140,19 +169,23 @@ class CampaignService:
             deleted_campaign = (self.campaign_repo
                               .delete(campaign_id))
             if not deleted_campaign:
+                logger.warning(f"Failed to delete Campaign {campaign_id}")
                 raise HTTPException(
                     status_code=400,
                     detail="Failed to delete campaign."
                 )
+            logger.info(f"Deleted Campaign {campaign_id} - {deleted_campaign}")
             return deleted_campaign
 
         except SQLAlchemyError:
+            logger.exception(f"Database error while deleting Campaign {campaign_id}", exc_info=True)
             raise HTTPException(
                 status_code=500,
                 detail=f"Database error "
                        f"while deleting campaign."
             )
         except Exception:
+            logger.exception(f"Unexpected error while deleting Campaign {campaign_id}", exc_info=True)
             raise HTTPException(
                 status_code=500,
                 detail=f"Unexpected error "
