@@ -16,7 +16,7 @@ import logging
 
 
 
-logger = logging.getLogger(__name__) # hier weitermachen
+logger = logging.getLogger(__name__)
 
 
 class DiceService:
