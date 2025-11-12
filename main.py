@@ -10,6 +10,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.errors import RateLimitExceeded
 from rate_limit import limiter
+from fastapi.middleware.cors import CORSMiddleware
 from routes import auth_routes, campaigns, classes, dices, dicesets, dicelogs, users
 import logging
 
@@ -35,6 +36,20 @@ app.add_middleware(SlowAPIMiddleware)
 
 # Register error handler (helper from slowapi)
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
+origins = [
+    "https://www.mythic-access-dnd.com",
+    "http://localhost:3000"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 
 # Link to routes
