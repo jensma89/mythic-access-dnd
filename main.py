@@ -38,6 +38,7 @@ app.add_middleware(SlowAPIMiddleware)
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
+# CORS middleware
 origins = [
     "https://www.mythic-access-dnd.com",
     "http://localhost:3000"
