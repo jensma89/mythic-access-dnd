@@ -3,6 +3,9 @@
 A FastAPI-based backend for managing users, campaigns, dnd classes, dice sets and dice rolls — designed for tabletop and D&D-style applications.  
 Built with PostgreSQL, JWT authentication, and rate limiting.
 
+
+**Live API:** [https://mythic-access-dnd.onrender.com/](https://mythic-access-dnd.onrender.com/)
+
 ---
 
 
@@ -46,14 +49,15 @@ On Render, set these under Environment → Environment Variables.
 
 ## API Endpoints
 
-- Authentication - 
+- Authentication
 
 POST - /auth/register - Register a new user
 
 POST - /auth/token - Authenticate and receive JWT token
 
+---
 
-- Users -
+- Users
 
 GET - /users/me - Get current user profile
 
@@ -61,8 +65,9 @@ PATCH - /users/me/update - Update current user profile
 
 DELETE - /users/me/delete - Delete current user account
 
+---
 
-- Campaigns -
+- Campaigns
 
 GET - /campaigns - List all campaigns
 
@@ -74,6 +79,7 @@ PATCH - /campaigns/{id} - Update campaign
 
 DELETE - /campaigns/{id} - Delete campaign
 
+---
 
 - DnD Classes/Characters -
 
@@ -87,6 +93,7 @@ PATCH - /classes/{id} - Update class
 
 DELETE - /classes/{id} - Delete class
 
+---
 
 - Dices -
 
@@ -96,6 +103,7 @@ GET - /dices/{id} - Get dice by ID
 
 POST - /dices/{id}/roll - Roll a dice 
 
+---
 
 - Dice Sets -
 
@@ -111,6 +119,7 @@ DELETE - /dicesets/{id} - Delete dice set
 
 POST - /dicesets/{id}/roll - Roll a dice set
 
+---
 
 - Dice Logs -
 
@@ -123,13 +132,13 @@ GET - /dicelogs/{id} - Get a specific dice log from user ID
 
 GET - /healthz - Basic health check endpoint for Render
 
-
+---
 
 ## Rate Limiting
 
 each endpoint is protected by rate limiting with slowapi → Each endpoint is protected by rate limiting via slowapi.
 
 
-
+---
 MIT License © 2025 Mythic Access DnD Project
 
