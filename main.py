@@ -61,3 +61,9 @@ app.include_router(dices.router)
 app.include_router(dicesets.router)
 app.include_router(dicelogs.router)
 app.include_router(auth_routes.router)
+
+
+@app.get("/healthz")
+def health_check():
+    """A health check for deploying (on commit)."""
+    return {"status": "ok"}
