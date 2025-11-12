@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI):
     yield
     logger.info("Server stopped!")
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, title="Mythic Access DnD")
 
 # Attach limiter to app state
 app.state.limiter = limiter
@@ -54,13 +54,13 @@ app.add_middleware(
 
 
 # Link to routes
-app.include_router(users.router)
-app.include_router(campaigns.router)
-app.include_router(classes.router)
-app.include_router(dices.router)
-app.include_router(dicesets.router)
-app.include_router(dicelogs.router)
-app.include_router(auth_routes.router)
+app.include_router(users.router, prefix="/api")
+app.include_router(campaigns.router, prefix="/api")
+app.include_router(classes.router, prefix="/api")
+app.include_router(dices.router, prefix="/api")
+app.include_router(dicesets.router, prefix="/api")
+app.include_router(dicelogs.router, prefix="/api")
+app.include_router(auth_routes.router, prefix="/api")
 
 
 @app.get("/healthz")
