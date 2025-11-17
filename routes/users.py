@@ -87,7 +87,7 @@ def update_user(
         user_id: int = Path(..., description="The ID of the user to update."),
         current_user: User = Depends(get_current_user),
         service: UserService = Depends(get_user_service)):
-    """Endpoint to change user data."""
+    """Endpoint to update current user data."""
     logger.debug(f"PATCH /users/{user_id} update requested")
     updated = service.update_user(user_id, user)
     if not updated:
