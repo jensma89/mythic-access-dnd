@@ -151,7 +151,6 @@ def delete_diceset(
 def roll_diceset(
         request: Request,
         diceset_id: int = Path(..., description="The ID of the dice set to roll"),
-        user_id: int = Query(..., description="User ID"),
         campaign_id: int = Query(..., description="Campaign ID"),
         class_id: int = Query(..., description="Class ID"),
         current_user: User = Depends(get_current_user),
@@ -176,7 +175,7 @@ def roll_diceset(
 
     logger.info(f"ROLL dice set {diceset_id} by user {current_user.id}")
     result = service.roll_diceset(
-        user_id,
+        current_user.id,
         campaign_id,
         class_id,
         diceset_id

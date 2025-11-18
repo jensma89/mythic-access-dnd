@@ -110,7 +110,6 @@ def read_dices(
 def roll_dice(
         request: Request,
         dice_id: int = Path(..., description="The ID of the dice to roll."),
-        user_id: int | None = Query(None, description="User ID."),
         campaign_id: int | None = Query(None, description="Campaign ID."),
         class_id: int | None = Query(None, description="Class ID."),
         current_user: User = Depends(get_current_user),
@@ -118,7 +117,29 @@ def roll_dice(
     """Endpoint to roll a specific dice
     and get the result (random)."""
     logger.info(f"ROLL dice {dice_id} by user {current_user.id}")
-    roll = service.roll_dice(dice_id, user_id, campaign_id, class_id)
+
+    # Check if the user is the owner
+    dice = service.get_dice(dice_id)
+    if not dice:
+        logger.warning(f"Dice {dice_id} not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Dice not found"
+        )
+
+    if dice.user_id != current_user.id:
+        logger.warning(f"User {current_user.id} tried to roll dice {dice_id} without ownership")
+        raise HTTPException(
+            status_code=403,
+            detail="Not allowed to roll this dice."
+        )
+
+    roll = service.roll_dice(
+        dice_id,
+        current_user.id,
+        campaign_id,
+        class_id
+    )
     if not roll:
         logger.warning(f"Dice {dice_id} not found for roll")
         raise HTTPException(
