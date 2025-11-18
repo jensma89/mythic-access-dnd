@@ -81,7 +81,12 @@ def create_class(
         service: ClassService = Depends(get_class_service)):
     """Endpoint to create a new class."""
     logger.info(f"POST create class by user {current_user.id}")
-    return service.create_class(dnd_class)
+
+    # Set current user as owner
+    dnd_class.user_id = current_user.id
+    created = service.create_class(dnd_class)
+    logger.info(f"Class {created.id} created by user {current_user.id}")
+    return created
 
 
 @router.patch("/classes/{class_id}",
@@ -93,7 +98,17 @@ def update_class(
         class_id: int = Path(..., description="The ID of the class to update."),
         current_user: User = Depends(get_current_user),
         service: ClassService = Depends(get_class_service)):
-    """Endpoint to make changes by a class."""
+    """Endpoint to change class data."""
+
+    # Check if the user is the owner
+    existing_class = service.get_class(class_id)
+    if existing_class.user_id != current_user.id:
+        logger.warning(f"User {current_user.id} tried to update class {class_id} not owned by them")
+        raise HTTPException(
+            status_code=403,
+            detail="Not allowed"
+        )
+
     logger.info(f"PATCH update class {class_id} by user {current_user.id}")
     updated = service.update_class(class_id, dnd_class)
     if not updated:
@@ -113,6 +128,16 @@ def delete_class(
         current_user: User = Depends(get_current_user),
         service: ClassService = Depends(get_class_service)):
     """Endpoint to delete a class by ID."""
+
+    # Check if the user is the owner
+    existing_class = service.get_class(class_id)
+    if existing_class.user_is != current_user.id:
+        logger.warning(f"User {current_user.id} tried to delete class {class_id} not owned by them")
+        raise HTTPException(
+            status_code=403,
+            detail="Not allowed"
+        )
+
     logger.info(f"DELETE class {class_id} by user {current_user.id}")
     deleted = service.delete_class(class_id)
     if not deleted:
