@@ -88,7 +88,7 @@ def read_campaigns(
 @limiter.limit("3/minute")
 def create_campaign(
         request: Request,
-        campaign: CampaignCreate,
+        campaign: CampaignCreateInput,
         current_user: User = Depends(get_current_user),
         service: CampaignService = Depends(get_campaign_service)):
     """Endpoint to create a new campaign."""
@@ -96,7 +96,8 @@ def create_campaign(
 
 
     # Set current user as owner
-    campaign.created_by = current_user.id
+    campaign = CampaignCreate(**campaign.model_dump())
+    campaign.set_user(current_user.id)
     created = service.create_campaign(campaign)
     logger.info(f"Campaign {created.id} created by user {current_user.id}")
     return created

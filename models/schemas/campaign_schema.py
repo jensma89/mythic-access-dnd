@@ -3,7 +3,8 @@ campaign_schema.py
 
 Request/response schemas for campaigns.
 """
-from sqlmodel import SQLModel
+from sqlalchemy.testing import exclude
+from sqlmodel import Field, SQLModel
 from datetime import datetime
 from typing import Optional
 
@@ -17,9 +18,19 @@ class CampaignBase(SQLModel):
     max_classes: int
 
 
+class CampaignCreateInput(SQLModel):
+    title: str
+    genre: str
+    description: str
+    max_classes: int
+
+
 class CampaignCreate(CampaignBase):
     """Fields to create a campaign."""
-    created_by: int | None
+    created_by: Optional[int] = None
+
+    def set_user(self, user_id: int):
+        self.created_by = user_id
 
 
 class CampaignUpdate(SQLModel):
