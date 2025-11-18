@@ -29,17 +29,19 @@ def get_dicelog_repo(session: SessionDep):
 @limiter.limit("10/minute")
 def list_logs(
         request: Request,
-        user_id: int = Query(..., description="The user ID to retrieve dice logs."),
         current_user: User = Depends(get_current_user),
         pagination: Pagination = Depends(),
         dicelog_repo: SqlAlchemyDiceLogRepository = Depends(get_dicelog_repo)):
     """Endpoint to list all dice logs
-    by a specific user."""
+    for the current user."""
     logger.info(f"GET logs for user {user_id} by requester {current_user.id}")
-    return dicelog_repo.list_logs(
-        user_id=user_id,
+    logs = dicelog_repo.list_logs(
+        user_id=current_user.id,
         offset=pagination.offset,
-        limit=pagination.limit)
+        limit=pagination.limit
+    )
+    logger.info(f"Returned {len(logs)} logs for user {current_user.id}")
+    return logs
 
 
 @router.get("/dicelogs/{dicelog_id}",
@@ -50,12 +52,21 @@ def get_log(
         dicelog_id: int = Path(..., description="The log ID to retrieve."),
         current_user: User = Depends(get_current_user),
         repo: SqlAlchemyDiceLogRepository = Depends(get_dicelog_repo)):
-    """Endpoint to get a single dice log by ID."""
+    """Endpoint to get a single dice log by ID
+    (only if owned by current user)."""
     logger.info(f"GET log {dicelog_id} by user {current_user.id}")
     dicelog = repo.get_by_id(dicelog_id)
     if not dicelog:
         logger.warning(f"Dice log {dicelog_id} not found")
         raise HTTPException(
             status_code=404,
-            detail="Dice log not found.")
+            detail="Dice log not found."
+        )
+
+    if dicelog.user_id != current_user.id:
+        logger.warning(f"User {current_user.id} tried to access log {dicelog_id} not owned by them")
+        raise HTTPException(
+            status_code=403,
+            detail="Not allowed."
+        )
     return dicelog
