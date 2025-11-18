@@ -19,7 +19,7 @@ class CampaignBase(SQLModel):
 
 class CampaignCreate(CampaignBase):
     """Fields to create a campaign."""
-    created_by: int
+    created_by: int | None
 
 
 class CampaignUpdate(SQLModel):

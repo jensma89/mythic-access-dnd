@@ -47,7 +47,7 @@ class CampaignService:
                     status_code=400,
                     detail="Failed to create campaign."
                 )
-            logger.info(f"Created Campaign {created.id} - {created.name}")
+            logger.info(f"Created Campaign {created.id} - {created.title}")
             return created
         except SQLAlchemyError:
             logger.exception("Database error while creating Campaign", exc_info=True)
