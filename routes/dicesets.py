@@ -78,7 +78,12 @@ def create_diceset(
         service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to create a new dice set."""
     logger.info(f"CREATE dice set by user {current_user.id}")
-    return service.create_diceset(diceset)
+
+    # Set current user as owner
+    diceset.user_id = current_user.id
+    created = service.create_diceset(diceset)
+    logger.info(f"Dice set {created.id} created by user {current_user.id}")
+    return created
 
 
 @router.patch("/dicesets/{diceset_id}",
@@ -91,7 +96,17 @@ def update_diceset(
         current_user: User = Depends(get_current_user),
         service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to change data from a dice set."""
-    logger.info(f"UPDATE dice set {diceset_id} by user {current_user.id}")
+
+    # Check if the user is the owner
+    existing_diceset = service.get_diceset(diceset_id)
+    if existing_diceset.user_id != current_user.id:
+        logger.warning(f"User {current_user.id} tried to update dice set {diceset_id} not owned by them")
+        raise HTTPException(
+            status_code=403,
+            detail="Not allowed"
+        )
+
+    logger.info(f"PATCH update dice set {diceset_id} by user {current_user.id}")
     updated = service.update_diceset(diceset_id, diceset)
     if not updated:
         logger.warning(f"Dice set {diceset_id} not found for update")
@@ -110,6 +125,16 @@ def delete_diceset(
         current_user: User = Depends(get_current_user),
         service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to delete a dice set by ID."""
+
+    # Check if the user is the owner
+    existing_diceset = service.get_diceset(diceset_id)
+    if existing_diceset.user_id != current_user.id:
+        logger.warning(f"User {current_user.id} tried to delete dice set {diceset_id} not owned by them")
+        raise HTTPException(
+            status_code=403,
+            detail="Not allowed"
+        )
+
     logger.info(f"DELETE dice set {diceset_id} by user {current_user.id}")
     deleted = service.delete_diceset(diceset_id)
     if not deleted:
@@ -131,8 +156,24 @@ def roll_diceset(
         class_id: int = Query(..., description="Class ID"),
         current_user: User = Depends(get_current_user),
         service: DiceSetService = Depends(get_diceset_service)):
-    """Endpoint to roll a specific dice set
-    and get the individual results and the total sum."""
+    """Endpoint to roll a dice set (only owner allowed)."""
+
+    # Check ownership first
+    diceset = service.get_diceset(diceset_id)
+    if not diceset:
+        logger.warning(f"Dice set {diceset_id} not found before roll attempt")
+        raise HTTPException(
+            status_code=404,
+            detail="Dice set not found."
+        )
+
+    if diceset.user_id != current_user.id:
+        logger.warning(f"User {current_user.id} tried to ROLL dice set {diceset_id} owned by {diceset.user_id}")
+        raise HTTPException(
+            status_code=403,
+            detail="Not allowed"
+        )
+
     logger.info(f"ROLL dice set {diceset_id} by user {current_user.id}")
     result = service.roll_diceset(
         user_id,
@@ -140,6 +181,7 @@ def roll_diceset(
         class_id,
         diceset_id
     )
+
     if not result:
         logger.warning(f"Dice set {diceset_id} not found for roll")
         raise HTTPException(
