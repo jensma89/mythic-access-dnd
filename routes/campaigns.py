@@ -75,11 +75,11 @@ def read_campaigns(
         service: CampaignService = Depends(get_campaign_service)):
     """Endpoint to get all campaigns owned by the current user."""
     logger.info(f"GET campaigns list by user {current_user.id}")
+    filters.user_id = current_user.id
     return service.list_campaigns(
         offset=pagination.offset,
         limit=pagination.limit,
-        filters=filters,
-        created_by=current_user.id
+        filters=filters
     )
 
 

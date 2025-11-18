@@ -90,7 +90,7 @@ class CampaignService:
         try:
             campaigns = self.campaign_repo.list_all(
                 user_id=filters.user_id,
-                name=filters.title,
+                name=filters.name,
                 offset=offset,
                 limit=limit
             )
