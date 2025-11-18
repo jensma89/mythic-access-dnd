@@ -85,7 +85,12 @@ def create_campaign(
         service: CampaignService = Depends(get_campaign_service)):
     """Endpoint to create a new campaign."""
     logger.info(f"POST create campaign by user {current_user.id}")
-    return service.create_campaign(campaign)
+
+    # Set current user as owner
+    campaign.user_id = current_user.id
+    created = service.create_campaign(campaign)
+    logger.info(f"Campaign {created.id} created by user {current_user.id}")
+    return created
 
 
 @router.patch("/campaigns/{campaign_id}",
@@ -98,6 +103,16 @@ def update_campaign(
         current_user: User = Depends(get_current_user),
         service: CampaignService = Depends(get_campaign_service)):
     """Endpoint to change campaign data."""
+
+    # Check if the user is the owner
+    existing_campaign = service.get_campaign(campaign_id)
+    if existing_campaign.user_id != current_user.id:
+        logger.warning(f"User {current_user.id} tried to update campaign {campaign_id} not owned by them")
+        raise HTTPException(
+            status_code=403,
+            detail="Not allowed"
+        )
+
     logger.info(f"PATCH update campaign {campaign_id} by user {current_user.id}")
     updated = service.update_campaign(campaign_id, campaign)
     if not updated:
@@ -117,6 +132,16 @@ def delete_campaign(
         current_user: User = Depends(get_current_user),
         service: CampaignService = Depends(get_campaign_service)):
     """Endpoint to remove a campaign."""
+
+    # Check if the user is the owner
+    existing_campaign = service.get_campaign(campaign_id)
+    if existing_campaign.user_id != current_user.id:
+        logger.warning(f"User {current_user.id} tried to delete campaign {campaign_id} not owned by them")
+        raise HTTPException(
+            status_code=403,
+            detail="Not allowed"
+        )
+
     logger.info(f"DELETE campaign {campaign_id} by user {current_user.id}")
     deleted = service.delete_campaign(campaign_id)
     if not deleted:
