@@ -78,18 +78,21 @@ def read_users(
         filters=filters)
 
 
-@router.patch("/users/{user_id}",
+@router.patch("/users/me/update",
             response_model=UserPublic)
 @limiter.limit("3/minute")
 def update_user(
         request: Request,
         user: UserUpdate,
-        user_id: int = Path(..., description="The ID of the user to update."),
         current_user: User = Depends(get_current_user),
         service: UserService = Depends(get_user_service)):
     """Endpoint to update current user data."""
-    logger.debug(f"PATCH /users/{user_id} update requested")
-    updated = service.update_user(user_id, user)
+    logger.debug(f"PATCH /users/me/update update requested by user {current_user.id}")
+
+    updated = service.update_user(current_user.id, user)
+
+    logger.info(f"User {current_user.id} updated successfully.")
+
     if not updated:
         logger.warning(f"Update failed, User {user_id} not found")
         raise HTTPException(
@@ -98,19 +101,22 @@ def update_user(
     return updated
 
 
-@router.delete("/users/{user_id}",
+@router.delete("/users/me/delete",
                response_model=UserPublic)
 @limiter.limit("3/minute")
 def delete_user(
         request: Request,
-        user_id: int = Path(..., description="The ID of the user to delete."),
         current_user: User = Depends(get_current_user),
         service: UserService = Depends(get_user_service)):
     """Endpoint to delete a user by id."""
-    logger.debug(f"DELETE /users/{user_id} requested")
-    deleted = service.delete_user(user_id)
+    logger.warning(f"DELETE /users/me/delete requested by user {current_user.id}")
+
+    deleted = service.delete_user(current_user.id)
+
+    logger.info(f"User {current_user.id} and all related data deleted.")
+
     if not deleted:
-        logger.warning(f"Delete failed, User {user_id} not found")
+        logger.warning(f"Delete failed, User {current_user.id} not found")
         raise HTTPException(
             status_code=404,
             detail="User not found")
