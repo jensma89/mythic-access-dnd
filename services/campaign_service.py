@@ -72,7 +72,7 @@ class CampaignService:
                     detail=f"Campaign with ID {campaign_id} not found."
                 )
 
-            logger.info(f"Retrieved Campaign {campaign_id} - {campaign.name}")
+            logger.info(f"Retrieved Campaign {campaign_id} - {campaign.title}")
             return campaign
 
         except SQLAlchemyError:
@@ -90,7 +90,7 @@ class CampaignService:
         try:
             campaigns = self.campaign_repo.list_all(
                 user_id=filters.user_id,
-                name=filters.name,
+                name=filters.title,
                 offset=offset,
                 limit=limit
             )
@@ -123,7 +123,7 @@ class CampaignService:
                     detail=f"Campaign with ID {campaign_id} "
                            f"not found."
                 )
-            logger.info(f"Updated Campaign {campaign_id} - {updated.name}")
+            logger.info(f"Updated Campaign {campaign_id} - {updated.title}")
             return updated
 
         except SQLAlchemyError:
