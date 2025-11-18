@@ -10,9 +10,11 @@ from typing import Optional
 
 class ClassSkills(SQLModel):
     """Skills model for attribute-based systems."""
+    Constitution: int = 0
     Strength: int = 0
     Stamina: int = 0
     Dexterity: int = 0
+    Wisdom: int = 0
     Intelligence: int = 0
     Charisma: int = 0
 
