@@ -51,6 +51,13 @@ def read_class(
         raise HTTPException(
             status_code=404,
             detail="Class not found.")
+
+    if dnd_class.user_id != current_user.id:
+        logger.warning(f"User {current_user.id} tried to access class {class_id} not owned by them")
+        raise HTTPException(
+            status_code=403,
+            detail="Not allowed"
+        )
     return dnd_class
 
 
@@ -65,6 +72,7 @@ def read_classes(
         service: ClassService = Depends(get_class_service)):
     """Endpoint to get a list of all classes."""
     logger.info(f"GET classes list by user {current_user.id}")
+    filters.user_id = current_user.id
     return service.list_classes(
         offset=pagination.offset,
         limit=pagination.limit,
