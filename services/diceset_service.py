@@ -63,8 +63,25 @@ class DiceSetService:
                             status_code=404,
                             detail=f"Dice {dice_id} "
                                    f"not found.")
-            logger.info(f"Created DiceSet {diceset.id} - {diceset.name} for Class {diceset.class_id}")
-            return self.diceset_repo.add(diceset)
+
+            # Create the dice set itself
+            created = self.diceset_repo.add(diceset)
+            logger.info(f"Created DiceSet {created.id} - {created.name} for Class {diceset.class_id}")
+
+            # Handle multiple dice (if same dice appear multiple times)
+            if diceset.dice_ids:
+                dice_count = {}
+                for dice_id in diceset.dice_ids:
+                    dice_count[dice_id] = dice_count.get(dice_id, 0) + 1
+
+                for dice_id, quantity, in dice_count.items():
+                    for _ in range (quantity):
+                        self.diceset_repo.add_dice_to_set(
+                            diceset_id=created.id,
+                            dice_id=dice_id
+                        )
+                        logger.debug(f"Added dice {dice_id} x1 to dice set {created.id}")
+
 
         except SQLAlchemyError:
             logger.exception("Database error while creating DiceSet", exc_info=True)

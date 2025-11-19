@@ -40,6 +40,7 @@ class DiceSetUpdate(SQLModel):
 class DiceSetPublic(DiceSetBase):
     """Model to respond public data."""
     id: int
+    user_id: int
     dices: List[DicePublic]
 
 

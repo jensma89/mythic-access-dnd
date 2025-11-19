@@ -76,15 +76,16 @@ def read_classes(
 @limiter.limit("3/minute")
 def create_class(
         request: Request,
-        dnd_class: ClassCreate,
+        dnd_class_input: ClassCreateInput,
         current_user: User = Depends(get_current_user),
         service: ClassService = Depends(get_class_service)):
     """Endpoint to create a new class."""
     logger.info(f"POST create class by user {current_user.id}")
 
     # Set current user as owner
-    dnd_class.user_id = current_user.id
-    created = service.create_class(dnd_class)
+    dnd_class_create = ClassCreate(**dnd_class_input.model_dump())
+    dnd_class_create.set_user(current_user.id)
+    created = service.create_class(dnd_class_create)
     logger.info(f"Class {created.id} created by user {current_user.id}")
     return created
 
@@ -131,7 +132,7 @@ def delete_class(
 
     # Check if the user is the owner
     existing_class = service.get_class(class_id)
-    if existing_class.user_is != current_user.id:
+    if existing_class.user_id != current_user.id:
         logger.warning(f"User {current_user.id} tried to delete class {class_id} not owned by them")
         raise HTTPException(
             status_code=403,

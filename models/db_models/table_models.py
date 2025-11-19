@@ -81,6 +81,7 @@ class Class(SQLModel, table=True):
     campaign_id: int = Field(foreign_key="campaign.id",
                              nullable=False,
                              index=True)
+    user_id: int = Field(foreign_key="user.id", nullable=False, index=True)
 
     # Link to Campaign
     campaign: "Campaign" = Relationship(back_populates="classes")
@@ -97,6 +98,7 @@ class DiceSetDice(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     dice_set_id: int = Field(foreign_key="diceset.id")
     dice_id: int = Field(foreign_key="dice.id")
+    quantity: int = Field(default=1)
 
 
 class DiceSet(SQLModel, table=True):
