@@ -14,13 +14,21 @@ class DiceSetBase(SQLModel):
     name: str
 
 
-class DiceSetCreate(SQLModel):
-    """Model to create a dice set."""
+class DiceSetCreateInput(SQLModel):
+    """Model to create a dice set (Request body input)."""
     name: str
-    user_id: int    # remove after auth implementation!
     class_id: int
     campaign_id: int
     dice_ids: Optional[List[int]] = None # IDs that contain in a dice set
+
+
+class DiceSetCreate(DiceSetCreateInput):
+    """Intern model to create a dice set."""
+    user_id: Optional[int] = None
+
+    def set_user(self, user_id: int, ):
+        """Set the ID from current user."""
+        self.user_id = user_id
 
 
 class DiceSetUpdate(SQLModel):
