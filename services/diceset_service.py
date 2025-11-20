@@ -7,11 +7,10 @@ from datetime import datetime, timezone
 from random import randint
 from fastapi import HTTPException
 from sqlalchemy.exc import SQLAlchemyError
-from typing import List, Optional
-from models.schemas.diceset_schema import *
 from repositories.diceset_repository import *
 from repositories.dice_repository import *
 from repositories.dicelog_repository import *
+from repositories.sql_diceset_repository import *
 from models.schemas.dicelog_schema import *
 import logging
 
@@ -33,70 +32,44 @@ class DiceSetService:
         self.dicelog_repo = dicelog_repo
         logger.debug("DiceSetService initialized")
 
-
-    def create_diceset(
-            self,
-            diceset: DiceSetCreate) \
-            -> DiceSetPublic:
-        """Create a new dice set
-        (optionally with existing dice)."""
+    def create_diceset(self, diceset: DiceSetCreate) -> DiceSetPublic:
         try:
             # Validation max 5 sets per dnd class
-            existing_sets = (
-                self.diceset_repo
-                .get_by_class_id(diceset.class_id))
-            logger.info(f"Creating DiceSet for Class {diceset.class_id}. "
-                        f"Existing sets: {len(existing_sets)}")
+            existing_sets = self.diceset_repo.get_by_class_id(diceset.class_id)
+            logger.info(f"Creating DiceSet for Class {diceset.class_id}. Existing sets: {len(existing_sets)}")
             if len(existing_sets) >= 5:
                 logger.warning(f"Cannot create DiceSet for Class {diceset.class_id}: max 5 sets reached")
-                raise HTTPException(
-                    status_code=400,
-                    detail="Maximum of 5 dice sets "
-                           "per class reached.")
+                raise HTTPException(status_code=400, detail="Maximum of 5 dice sets per class reached.")
 
-            # Check for existing dice IDs
+            # Check dice existence
             if self.dice_repo and diceset.dice_ids:
                 for dice_id in diceset.dice_ids:
                     if not self.dice_repo.get_by_id(dice_id):
                         logger.warning(f"Dice ID {dice_id} not found for new DiceSet")
-                        raise HTTPException(
-                            status_code=404,
-                            detail=f"Dice {dice_id} "
-                                   f"not found.")
+                        raise HTTPException(status_code=404, detail=f"Dice {dice_id} not found.")
 
-            # Create the dice set itself
+            # Create the dice set
             created = self.diceset_repo.add(diceset)
             logger.info(f"Created DiceSet {created.id} - {created.name} for Class {diceset.class_id}")
 
-            # Handle multiple dice (if same dice appear multiple times)
+            # Count duplicates and persist quantities
+            dice_count = {}
             if diceset.dice_ids:
-                dice_count = {}
-                for dice_id in diceset.dice_ids:
-                    dice_count[dice_id] = dice_count.get(dice_id, 0) + 1
+                for d in diceset.dice_ids:
+                    dice_count[d] = dice_count.get(d, 0) + 1
+            if dice_count:
+                self.diceset_repo.set_dice_quantities(created.id, dice_count)
+                logger.debug(f"Stored dice quantities for DiceSet {created.id}: {dice_count}")
 
-                for dice_id, quantity, in dice_count.items():
-                    for _ in range (quantity):
-                        self.diceset_repo.add_dice_to_set(
-                            diceset_id=created.id,
-                            dice_id=dice_id
-                        )
-                        logger.debug(f"Added dice {dice_id} x1 to dice set {created.id}")
-
+            # Return fresh expanded object
+            return self.diceset_repo.get_by_id(created.id)
 
         except SQLAlchemyError:
             logger.exception("Database error while creating DiceSet", exc_info=True)
-            raise HTTPException(
-                status_code=500,
-                detail="Database error "
-                       "while creating dice set."
-            )
+            raise HTTPException(status_code=500, detail="Database error while creating dice set.")
         except Exception:
             logger.exception("Unexpected error while creating DiceSet", exc_info=True)
-            raise HTTPException(
-                status_code=500,
-                detail="Unexpected error "
-                       "while creating dice set."
-            )
+            raise HTTPException(status_code=500, detail="Unexpected error while creating dice set.")
 
 
     def get_diceset(
@@ -288,8 +261,8 @@ class DiceSetService:
         and return each result + total sum."""
         try:
             diceset = (self.diceset_repo
-                       .get_by_id(diceset_id))
-            if not diceset or not diceset.dices:
+                       .get_orm_by_id(diceset_id))
+            if not diceset or not diceset.dice_entries:
                 logger.warning(f"DiceSet {diceset_id} not found or has no dices")
                 raise HTTPException(
                     status_code=404,
@@ -298,15 +271,19 @@ class DiceSetService:
             results = []
             total_sum = 0
 
-            for dice in diceset.dices:
-                roll_value = randint(1, dice.sides) # E.g. sides 6 or 12
-                results.append(DiceRollResult(
-                    id=dice.id,
-                    name=dice.name,
-                    sides=dice.sides,
-                    result=roll_value
-                ))
-                total_sum += roll_value
+            for dice_entry in diceset.dice_entries:
+                dice = dice_entry.dice
+                quantity = dice_entry.quantity
+
+                for _ in range(quantity):
+                    roll_value = randint(1, dice.sides)
+                    results.append(DiceRollResult(
+                        id=dice.id,
+                        name=dice.name,
+                        sides=dice.sides,
+                        result=roll_value
+                    ))
+                    total_sum += roll_value
 
             logger.info(f"Rolled DiceSet {diceset_id} by User {user_id}: "
                         f"Results {[r.result for r in results]}, Total: {total_sum}")
