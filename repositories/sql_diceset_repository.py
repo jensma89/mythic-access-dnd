@@ -155,13 +155,21 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
                 .where(DiceSetDice.dice_set_id == diceset_id))
             self.session.commit()
 
-            # Add new links
+            # Count duplicates
+            dice_count = {}
             for dice_id in update_data["dice_ids"]:
+                dice_count[dice_id] = dice_count.get(dice_id, 0) + 1
+
+            # Add new links with quantity
+            for dice_id, quantity in dice_count.items():
                 dice = self.session.get(Dice, dice_id)
                 if dice:
-                    link = DiceSetDice(dice_set_id=db_diceset.id,
-                                       dice_id=dice.id)
-                    self.session.add(link)
+                    entry = DiceSetDice(
+                        dice_set_id=db_diceset.id,
+                        dice_id=dice.id,
+                        quantity=quantity
+                    )
+                    self.session.add(entry)
             self.session.commit()
 
         self.session.refresh(db_diceset)
