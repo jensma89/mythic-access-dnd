@@ -119,30 +119,23 @@ def roll_dice(
     logger.info(f"ROLL dice {dice_id} by user {current_user.id}")
 
     # Check if the user is the owner
-    dice = service.get_dice(dice_id)
-    if not dice:
+    db_dice = service.repo.get_by_id(dice_id)
+    if not db_dice:
         logger.warning(f"Dice {dice_id} not found")
         raise HTTPException(
             status_code=404,
             detail="Dice not found"
         )
 
-    if dice.user_id != current_user.id:
-        logger.warning(f"User {current_user.id} tried to roll dice {dice_id} without ownership")
-        raise HTTPException(
-            status_code=403,
-            detail="Not allowed to roll this dice."
-        )
-
-    roll = service.roll_dice(
-        dice_id,
-        current_user.id,
-        campaign_id,
-        class_id
+    roll_result = service.roll_dice(
+        dice_id=dice_id,
+        user_id=current_user.id,
+        campaign_id=campaign_id,
+        class_id=class_id
     )
-    if not roll:
+    if not roll_result:
         logger.warning(f"Dice {dice_id} not found for roll")
         raise HTTPException(
             status_code=404,
             detail="Dice not found.")
-    return roll
+    return roll_result

@@ -94,7 +94,6 @@ def create_campaign(
     """Endpoint to create a new campaign."""
     logger.info(f"POST create campaign by user {current_user.id}")
 
-
     # Set current user as owner
     campaign = CampaignCreate(**campaign.model_dump())
     campaign.set_user(current_user.id)

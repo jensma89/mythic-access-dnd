@@ -57,7 +57,8 @@ def read_user(
         logger.warning(f"User {user_id} not found")
         raise HTTPException(
             status_code=404,
-            detail="User not found.")
+            detail="User not found."
+        )
     return user
 
 

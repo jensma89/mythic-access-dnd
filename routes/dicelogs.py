@@ -34,7 +34,7 @@ def list_logs(
         dicelog_repo: SqlAlchemyDiceLogRepository = Depends(get_dicelog_repo)):
     """Endpoint to list all dice logs
     for the current user."""
-    logger.info(f"GET logs for user {user_id} by requester {current_user.id}")
+    logger.info(f"GET logs for user {current_user.id}")
     logs = dicelog_repo.list_logs(
         user_id=current_user.id,
         offset=pagination.offset,

@@ -73,14 +73,15 @@ def read_dicesets(
 @limiter.limit("5/minute")
 def create_diceset(
         request: Request,
-        diceset: DiceSetCreate,
+        diceset_input: DiceSetCreateInput,
         current_user: User = Depends(get_current_user),
         service: DiceSetService = Depends(get_diceset_service)):
     """Endpoint to create a new dice set."""
     logger.info(f"CREATE dice set by user {current_user.id}")
 
     # Set current user as owner
-    diceset.user_id = current_user.id
+    diceset = DiceSetCreate(**diceset_input.model_dump())
+    diceset.set_user(current_user.id)
     created = service.create_diceset(diceset)
     logger.info(f"Dice set {created.id} created by user {current_user.id}")
     return created

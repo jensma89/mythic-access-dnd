@@ -26,12 +26,21 @@ class ClassBase(SQLModel):
     skills: ClassSkills
 
 
-class ClassCreate(SQLModel):
-    """Model to create a class."""
+class ClassCreateInput(SQLModel):
+    """Input model for request body."""
     name: str
     race: str
     campaign_id: int
     skills: Optional[ClassSkills] = Field(default_factory=ClassSkills)
+
+
+class ClassCreate(ClassCreateInput):
+    """Intern model to create a class."""
+    user_id: Optional[int] = None
+
+    def set_user(self, user_id: int):
+        """Set the current user ID."""
+        self.user_id = user_id
 
 
 class ClassUpdate(SQLModel):
@@ -44,5 +53,6 @@ class ClassUpdate(SQLModel):
 class ClassPublic(ClassBase):
     """Model to respond public data."""
     id: int
+    user_id: int
     notes: Optional[str] = None
     inventory: Optional[str] = None
