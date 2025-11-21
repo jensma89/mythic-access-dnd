@@ -1,5 +1,7 @@
 """
 auth.py
+
+Operations for authentication, password hashing, verify and register a user.
 """
 from datetime import datetime, timedelta, timezone
 import os
@@ -17,6 +19,7 @@ from sqlmodel import select, Session
 import logging
 
 
+
 load_dotenv()
 
 logger = logging.getLogger(__name__)
@@ -26,7 +29,7 @@ ALGORITHM = os.getenv("JWT_ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE", 60))
 
 password_hash = PasswordHash.recommended()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 # Password functions
