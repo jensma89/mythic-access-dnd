@@ -6,22 +6,16 @@ API endpoints to handle authentication operations.
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from rate_limit import limiter
-from datetime import timedelta
-from sqlmodel import Session, select
-from models.db_models.table_models import User
+from sqlmodel import Session
 from models.schemas.user_schema import UserCreate, UserMe, UserPublic
 from models.schemas.auth_schema import Token
-from auth.auth import (
-    hash_password,
-    authenticate_user,
-    get_current_user,
-    create_access_token,
-    ACCESS_TOKEN_EXPIRE_MINUTES
-)
+from auth.auth import get_current_user
 from dependencies import get_session
+from services.auth_service import AuthService
 
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+auth_service = AuthService()
 
 
 @router.post("/register", response_model=UserPublic)
@@ -30,29 +24,8 @@ def register_user(
         request: Request,
         user_data: UserCreate,
         session: Session = Depends(get_session)):
-    """Register a new user.
-    Check for duplicate email or username.
-    Hashes password."""
-    # Check for existing username or email
-    existing = session.exec(
-        select(User)
-        .where((User.email == user_data.email)
-               | (User.user_name == user_data.user_name))
-    ).first()
-    if existing:
-        raise HTTPException(
-            status_code=400,
-            detail="A user with that email or username already exists."
-        )
-
-    db_user = User(
-        user_name=user_data.user_name,
-        email=user_data.email,
-        hashed_password=hash_password(user_data.password)
-    )
-    session.add(db_user)
-    session.commit()
-    session.refresh(db_user)
+    """Endpoint to register a new user."""
+    db_user = auth_service.register_user(session, user_data)
     return UserPublic(
         id=db_user.id,
         user_name=db_user.user_name,
@@ -67,30 +40,19 @@ def login_for_access_token(
         form_data: OAuth2PasswordRequestForm = Depends(),
         session: Session = Depends(get_session)
 ):
-    """Login a user and issue a JWT access token."""
-    user = authenticate_user(
+    """Endpoint to authenticate a user via login."""
+    return auth_service.login(
         session=session,
         login=form_data.username,
-        password=form_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=401,
-            detail="Incorrect email or password.",
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.email},
-        expires_delta=access_token_expires
+        password=form_data.password
     )
-    return Token(access_token=access_token, token_type="bearer")
 
 
 @router.get("/me", response_model=UserMe)
 @limiter.limit("30/minute")
 def get_my_profile(
         request: Request,
-        current_user: User = Depends(get_current_user)):
+        current_user = Depends(get_current_user)
+):
     """Returns the authenticated users info."""
     return UserMe.model_validate(current_user)
