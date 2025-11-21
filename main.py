@@ -61,13 +61,13 @@ app.add_middleware(
 
 
 # Link to routes
+app.include_router(auth_routes.router)
 app.include_router(users.router)
 app.include_router(campaigns.router)
 app.include_router(classes.router)
 app.include_router(dices.router)
 app.include_router(dicesets.router)
 app.include_router(dicelogs.router)
-app.include_router(auth_routes.router)
 
 
 @app.get("/healthz")

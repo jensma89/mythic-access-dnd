@@ -3,7 +3,7 @@ auth_routes.py
 
 API endpoints to handle authentication operations.
 """
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from rate_limit import limiter
 from sqlmodel import Session
@@ -33,7 +33,7 @@ def register_user(
     )
 
 
-@router.post("/token", response_model=Token)
+@router.post("/login", response_model=Token)
 @limiter.limit("5/minute")
 def login_for_access_token(
         request: Request,
