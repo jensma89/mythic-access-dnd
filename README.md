@@ -53,7 +53,7 @@ On Render, set these under Environment → Environment Variables.
 
 POST - /auth/register - Register a new user
 
-POST - /auth/token - Authenticate and receive JWT token
+POST - /auth/login - Authenticate and receive JWT token
 
 ---
 
