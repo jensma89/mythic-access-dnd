@@ -4,13 +4,16 @@ user_repository.py
 Defined methods for user management.
 """
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List
+
 from models.schemas.user_schema import *
 
 
 
 class UserRepository(ABC):
-    """This class defines the management methods for users."""
+    """This class defines
+    the management methods for users."""
+
 
     @abstractmethod
     def get_by_id(self, user_id: int) \
@@ -20,11 +23,12 @@ class UserRepository(ABC):
 
 
     @abstractmethod
-    def list_all(self,
-                 offset: int = 0,
-                 limit: int = 100,
-                 name: Optional[str] = None
-                 ) -> List[UserPublic]:
+    def list_all(
+            self,
+            offset: int = 0,
+            limit: int = 100,
+            name: Optional[str] = None
+    ) -> List[UserPublic]:
         """Show all users method."""
         pass
 
@@ -37,9 +41,10 @@ class UserRepository(ABC):
 
 
     @abstractmethod
-    def update(self,
-               user_id: int,
-               user: UserUpdate) \
+    def update(
+            self,
+            user_id: int,
+            user: UserUpdate) \
             -> Optional[UserPublic]:
         """Change user data method."""
         pass

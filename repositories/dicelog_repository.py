@@ -4,7 +4,8 @@ dicelog_repository.py
 Defined methods for dice log management.
 """
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List
+
 from models.schemas.dicelog_schema import *
 
 
@@ -36,10 +37,11 @@ class DiceLogRepository(ABC):
 
 
     @abstractmethod
-    def list_logs(self,
-                  user_id: int,
-                  offset: int = 0,
-                  limit: int = 100) \
+    def list_logs(
+            self,
+            user_id: int,
+            offset: int = 0,
+            limit: int = 100) \
             -> List[DiceLogPublic]:
         """List all dice logs."""
         pass
@@ -48,30 +50,37 @@ class DiceLogRepository(ABC):
     @abstractmethod
     def list_by_user(self, user_id: int) \
             -> List[DiceLogPublic]:
-        """List all dice logs belonging to a specific user."""
+        """List all dice logs
+        belonging to a specific user."""
         pass
 
 
     @abstractmethod
     def list_by_campaign(self, campaign_id: int)\
             -> List[DiceLogPublic]:
-        """List all dice logs belonging to a specific campaign."""
+        """List all dice logs
+        belonging to a specific campaign."""
         pass
 
 
     @abstractmethod
     def list_by_class(self, class_id: int) \
             -> List[DiceLogPublic]:
-        """List all dice logs belonging to a specific class."""
+        """List all dice logs
+        belonging to a specific class."""
         pass
 
 
     @abstractmethod
     def list_by_diceset(self, diceset_id: int) \
             -> List[DiceLogPublic]:
-        """List all dice logs belonging to a specific dice set."""
+        """List all dice logs
+        belonging to a specific dice set."""
         pass
 
+
     @abstractmethod
-    def log_roll(self, log: DiceLogCreate) -> DiceLogPublic:
+    def log_roll(self, log: DiceLogCreate)\
+            -> DiceLogPublic:
+        """Method to log a dice roll."""
         pass

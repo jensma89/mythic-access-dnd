@@ -3,19 +3,20 @@ campaigns.py
 
 The API routes for campaigns.
 """
-from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Path, Request
-from dependencies import CampaignQueryParams, Pagination, SessionDep
+from typing import List
+import logging
+
+from rate_limit import limiter
+from auth.auth import get_current_user
 from models.schemas.campaign_schema import *
 from services.campaign_service import CampaignService
 from repositories.sql_campaign_repository import SqlAlchemyCampaignRepository
 from repositories.sql_class_repository import SqlAlchemyClassRepository
 from repositories.sql_diceset_repository import SqlAlchemyDiceSetRepository
 from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
-from auth.auth import get_current_user
 from models.db_models.table_models import User
-from rate_limit import limiter
-import logging
+from dependencies import CampaignQueryParams, Pagination, SessionDep
 
 
 router = APIRouter(tags=["campaigns"])
@@ -43,11 +44,18 @@ def get_campaign_service(session: SessionDep) \
 @limiter.limit("10/minute")
 def read_campaign(
         request: Request,
-        campaign_id: int = Path(..., description="The ID of the campaign to retrieve"),
+        campaign_id: int = Path(
+            ...,
+            description="The ID of the campaign to retrieve"
+        ),
         current_user: User = Depends(get_current_user),
-        service: CampaignService = Depends(get_campaign_service)):
+        service: CampaignService = Depends(get_campaign_service)
+):
     """Endpoint to get a single campaign (owner only)."""
-    logger.info(f"GET campaign {campaign_id} by user {current_user.id}")
+    logger.info(
+        f"GET campaign {campaign_id} "
+        f"by user {current_user.id}"
+    )
     campaign = service.get_campaign(campaign_id)
     if not campaign:
         logger.warning(f"Campaign {campaign_id} not found")
@@ -56,7 +64,11 @@ def read_campaign(
             detail="Campaign not found."
         )
     if campaign.created_by != current_user.id:
-        logger.warning(f"User {current_user.id} tried to access campaign {campaign_id} not owned by them")
+        logger.warning(
+            f"User {current_user.id} "
+            f"tried to access campaign {campaign_id} "
+            f"not owned by them"
+        )
         raise HTTPException(
             status_code=403,
             detail="Not allowed"
@@ -72,9 +84,14 @@ def read_campaigns(
         current_user: User = Depends(get_current_user),
         pagination: Pagination = Depends(),
         filters: CampaignQueryParams = Depends(),
-        service: CampaignService = Depends(get_campaign_service)):
-    """Endpoint to get all campaigns owned by the current user."""
-    logger.info(f"GET campaigns list by user {current_user.id}")
+        service: CampaignService = Depends(get_campaign_service)
+):
+    """Endpoint to get all campaigns
+    owned by the current user."""
+    logger.info(
+        f"GET campaigns list "
+        f"by user {current_user.id}"
+    )
     filters.user_id = current_user.id
     return service.list_campaigns(
         offset=pagination.offset,
@@ -90,15 +107,22 @@ def create_campaign(
         request: Request,
         campaign: CampaignCreateInput,
         current_user: User = Depends(get_current_user),
-        service: CampaignService = Depends(get_campaign_service)):
+        service: CampaignService = Depends(get_campaign_service)
+):
     """Endpoint to create a new campaign."""
-    logger.info(f"POST create campaign by user {current_user.id}")
+    logger.info(
+        f"POST create campaign "
+        f"by user {current_user.id}"
+    )
 
     # Set current user as owner
     campaign = CampaignCreate(**campaign.model_dump())
     campaign.set_user(current_user.id)
     created = service.create_campaign(campaign)
-    logger.info(f"Campaign {created.id} created by user {current_user.id}")
+    logger.info(
+        f"Campaign {created.id} "
+        f"created by user {current_user.id}"
+    )
     return created
 
 
@@ -108,7 +132,10 @@ def create_campaign(
 def update_campaign(
         request: Request,
         campaign: CampaignUpdate,
-        campaign_id: int = Path(..., description="The ID of the campaign to update."),
+        campaign_id: int = Path(
+            ...,
+            description="The ID of the campaign to update."
+        ),
         current_user: User = Depends(get_current_user),
         service: CampaignService = Depends(get_campaign_service)):
     """Endpoint to change campaign data."""
@@ -116,13 +143,20 @@ def update_campaign(
     # Check if the user is the owner
     existing_campaign = service.get_campaign(campaign_id)
     if existing_campaign.created_by != current_user.id:
-        logger.warning(f"User {current_user.id} tried to update campaign {campaign_id} not owned by them")
+        logger.warning(
+            f"User {current_user.id} "
+            f"tried to update campaign {campaign_id} "
+            f"not owned by them"
+        )
         raise HTTPException(
             status_code=403,
             detail="Not allowed"
         )
 
-    logger.info(f"PATCH update campaign {campaign_id} by user {current_user.id}")
+    logger.info(
+        f"PATCH update campaign {campaign_id} "
+        f"by user {current_user.id}"
+    )
     updated = service.update_campaign(campaign_id, campaign)
     if not updated:
         logger.warning(f"Campaign {campaign_id} not found")
@@ -137,21 +171,33 @@ def update_campaign(
 @limiter.limit("5/minute")
 def delete_campaign(
         request: Request,
-        campaign_id: int = Path(..., description="The ID of the campaign to delete."),
+        campaign_id: int = Path(
+            ...,
+            description="The ID of the campaign to delete."
+        ),
         current_user: User = Depends(get_current_user),
-        service: CampaignService = Depends(get_campaign_service)):
+        service: CampaignService = Depends(get_campaign_service)
+):
     """Endpoint to remove a campaign."""
 
     # Check if the user is the owner
     existing_campaign = service.get_campaign(campaign_id)
+
     if existing_campaign.created_by != current_user.id:
-        logger.warning(f"User {current_user.id} tried to delete campaign {campaign_id} not owned by them")
+        logger.warning(
+            f"User {current_user.id} tried to delete "
+            f"campaign {campaign_id} "
+            f"not owned by them"
+        )
         raise HTTPException(
             status_code=403,
             detail="Not allowed"
         )
 
-    logger.info(f"DELETE campaign {campaign_id} by user {current_user.id}")
+    logger.info(
+        f"DELETE campaign {campaign_id} "
+        f"by user {current_user.id}"
+    )
     deleted = service.delete_campaign(campaign_id)
     if not deleted:
         logger.warning(f"Campaign {campaign_id} not found")

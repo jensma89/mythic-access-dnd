@@ -3,17 +3,18 @@ dices.py
 
 API endpoints for dices.
 """
-from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
-from dependencies import Pagination, SessionDep
-from models.schemas.dice_schema import *
+from typing import List
+import logging
+
 from repositories.sql_dice_repository import SqlAlchemyDiceRepository
 from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
+from dependencies import Pagination, SessionDep
 from services.dice_service import DiceService
-from auth.auth import get_current_user
 from models.db_models.table_models import User
+from models.schemas.dice_schema import *
+from auth.auth import get_current_user
 from rate_limit import limiter
-import logging
 
 
 router = APIRouter(tags=["dices"])
@@ -34,11 +35,17 @@ def get_dice_service(session: SessionDep) \
 @limiter.limit("10/minute")
 def read_dice(
         request: Request,
-        dice_id: int = Path(..., description="The dice ID to retrieve."),
+        dice_id: int = Path(
+            ...,
+            description="The dice ID to retrieve."
+        ),
         current_user: User = Depends(get_current_user),
         service: DiceService = Depends(get_dice_service)):
     """Endpoint to get a single dice."""
-    logger.info(f"GET dice {dice_id} by user {current_user.id}")
+    logger.info(
+        f"GET dice {dice_id} "
+        f"by user {current_user.id}"
+    )
     dice = service.get_dice(dice_id)
     if not dice:
         logger.warning(f"Dice {dice_id} not found")
@@ -55,7 +62,8 @@ def read_dices(
         request: Request,
         current_user: User = Depends(get_current_user),
         pagination: Pagination = Depends(),
-        service: DiceService = Depends(get_dice_service)):
+        service: DiceService = Depends(get_dice_service)
+):
     """Endpoint to list all dices."""
     logger.info(f"GET dice list by user {current_user.id}")
     return service.list_dices(
@@ -109,14 +117,27 @@ def read_dices(
 @limiter.limit("30/minute")
 def roll_dice(
         request: Request,
-        dice_id: int = Path(..., description="The ID of the dice to roll."),
-        campaign_id: int | None = Query(None, description="Campaign ID."),
-        class_id: int | None = Query(None, description="Class ID."),
+        dice_id: int = Path(
+            ...,
+            description="The ID of the dice to roll."
+        ),
+        campaign_id: int | None = Query(
+            None,
+            description="Campaign ID."
+        ),
+        class_id: int | None = Query(
+            None,
+            description="Class ID."
+        ),
         current_user: User = Depends(get_current_user),
-        service: DiceService = Depends(get_dice_service)):
+        service: DiceService = Depends(get_dice_service)
+):
     """Endpoint to roll a specific dice
     and get the result (random)."""
-    logger.info(f"ROLL dice {dice_id} by user {current_user.id}")
+    logger.info(
+        f"ROLL dice {dice_id} "
+        f"by user {current_user.id}"
+    )
 
     # Check if the user is the owner
     db_dice = service.repo.get_by_id(dice_id)

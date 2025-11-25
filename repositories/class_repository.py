@@ -4,13 +4,16 @@ class_repository.py
 Defined methods for class management.
 """
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List
+
 from models.schemas.class_schema import *
 
 
 
 class ClassRepository(ABC):
-    """This class defines the management methods for classes."""
+    """This class defines
+    the management methods for classes."""
+
 
     @abstractmethod
     def get_by_id(self, class_id: int) \
@@ -20,12 +23,13 @@ class ClassRepository(ABC):
 
 
     @abstractmethod
-    def list_all(self,
-                 offset: int = 0,
-                 limit: int = 100,
-                 campaign_id: Optional[int] = None,
-                 name: Optional[str] = None
-                 ) -> List[ClassPublic]:
+    def list_all(
+            self,
+            offset: int = 0,
+            limit: int = 100,
+            campaign_id: Optional[int] = None,
+            name: Optional[str] = None
+    ) -> List[ClassPublic]:
         """Show all classes method."""
         pass
 
@@ -38,9 +42,10 @@ class ClassRepository(ABC):
 
 
     @abstractmethod
-    def update(self,
-               class_id: int,
-               dnd_class: ClassUpdate) \
+    def update(
+            self,
+            class_id: int,
+            dnd_class: ClassUpdate) \
             -> Optional[ClassPublic]:
         """Model to change data."""
         pass
@@ -55,21 +60,24 @@ class ClassRepository(ABC):
     @abstractmethod
     def get_by_campaign_id(self, campaign_id: int) \
             -> List[ClassPublic]:
-        """Get all classes belonging to a campaign."""
+        """Get all classes
+        belonging to a campaign."""
         pass
 
 
     @abstractmethod
     def list_by_user(self, user_id: int) \
             -> List[ClassPublic]:
-        """List all classes belonging to a specific user."""
+        """List all classes
+        belonging to a specific user."""
         pass
 
 
     @abstractmethod
     def list_by_campaign(self, campaign_id: int) \
             -> List[ClassPublic]:
-        """List all classes belonging to a specific campaign."""
+        """List all classes
+        belonging to a specific campaign."""
         pass
 
 

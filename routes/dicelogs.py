@@ -3,12 +3,12 @@ dicelogs.py
 
 API endpoints for dice log management.
 """
-from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Path, Request
+
 from dependencies import Pagination, SessionDep
-from models.schemas.dicelog_schema import *
 from repositories.sql_dicelog_repository import *
-from auth.auth import get_current_user
 from models.db_models.table_models import User
+from auth.auth import get_current_user
 from rate_limit import limiter
 import logging
 
@@ -31,7 +31,8 @@ def list_logs(
         request: Request,
         current_user: User = Depends(get_current_user),
         pagination: Pagination = Depends(),
-        dicelog_repo: SqlAlchemyDiceLogRepository = Depends(get_dicelog_repo)):
+        dicelog_repo: SqlAlchemyDiceLogRepository = Depends(get_dicelog_repo)
+):
     """Endpoint to list all dice logs
     for the current user."""
     logger.info(f"GET logs for user {current_user.id}")
@@ -40,7 +41,10 @@ def list_logs(
         offset=pagination.offset,
         limit=pagination.limit
     )
-    logger.info(f"Returned {len(logs)} logs for user {current_user.id}")
+    logger.info(
+        f"Returned {len(logs)} "
+        f"logs for user {current_user.id}"
+    )
     return logs
 
 
@@ -49,12 +53,18 @@ def list_logs(
 @limiter.limit("10/minute")
 def get_log(
         request: Request,
-        dicelog_id: int = Path(..., description="The log ID to retrieve."),
+        dicelog_id: int = Path(
+            ...,
+            description="The log ID to retrieve."
+        ),
         current_user: User = Depends(get_current_user),
         repo: SqlAlchemyDiceLogRepository = Depends(get_dicelog_repo)):
     """Endpoint to get a single dice log by ID
     (only if owned by current user)."""
-    logger.info(f"GET log {dicelog_id} by user {current_user.id}")
+    logger.info(
+        f"GET log {dicelog_id} "
+        f"by user {current_user.id}"
+    )
     dicelog = repo.get_by_id(dicelog_id)
     if not dicelog:
         logger.warning(f"Dice log {dicelog_id} not found")
@@ -64,7 +74,11 @@ def get_log(
         )
 
     if dicelog.user_id != current_user.id:
-        logger.warning(f"User {current_user.id} tried to access log {dicelog_id} not owned by them")
+        logger.warning(
+            f"User {current_user.id} tried to "
+            f"access log {dicelog_id} "
+            f"not owned by them"
+        )
         raise HTTPException(
             status_code=403,
             detail="Not allowed."

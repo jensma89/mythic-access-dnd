@@ -9,7 +9,8 @@ from typing import Optional
 
 
 class DiceBase(SQLModel):
-    """Base dice model to share common definitions."""
+    """Base dice model
+    to share common definitions."""
     name: str
     sides: int
 

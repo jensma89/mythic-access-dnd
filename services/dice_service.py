@@ -3,16 +3,17 @@ dice_service.py
 
 Business logic for dice handling.
 """
-from random import randint
-from datetime import datetime, timezone
-from fastapi import HTTPException
 from sqlalchemy.exc import SQLAlchemyError
-from typing import List, Optional
-from models.schemas.dice_schema import *
-from models.schemas.dicelog_schema import *
-from repositories.dice_repository import DiceRepository
-from repositories.dicelog_repository import DiceLogRepository
+from fastapi import HTTPException
+from datetime import timezone
+from random import randint
+from typing import List
 import logging
+
+from repositories.dicelog_repository import DiceLogRepository
+from repositories.dice_repository import DiceRepository
+from models.schemas.dicelog_schema import *
+from models.schemas.dice_schema import *
 
 
 
@@ -26,7 +27,8 @@ class DiceService:
     def __init__(
             self,
             repository: DiceRepository,
-            log_repository: Optional[DiceLogRepository] = None):
+            log_repository: Optional[DiceLogRepository] = None
+    ):
         self.repo = repository
         self.log_repo = log_repository
         logger.debug("DiceService initialized")
@@ -37,17 +39,28 @@ class DiceService:
         """Create a new dice."""
         try:
             created = self.repo.add(dice)
-            logger.info(f"Created Dice {created.id} - {created.name}")
+            logger.info(
+                f"Created Dice {created.id} "
+                f"- {created.name}"
+            )
             return created
         except SQLAlchemyError:
-            logger.exception("Database error while creating Dice", exc_info=True)
+            logger.exception(
+                "Database error "
+                "while creating Dice",
+                exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail="Database error "
                        "while creating dice."
             )
         except Exception:
-            logger.exception("Unexpected error while creating Dice", exc_info=True)
+            logger.exception(
+                "Unexpected error "
+                "while creating Dice",
+                exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail="Unexpected error "
@@ -67,17 +80,28 @@ class DiceService:
                     detail=f"Dice with ID {dice_id} "
                            f"not found."
                 )
-            logger.info(f"Retrieved Dice {dice_id} - {db_dice.name}")
+            logger.info(
+                f"Retrieved Dice {dice_id} "
+                f"- {db_dice.name}"
+            )
             return db_dice
         except SQLAlchemyError:
-            logger.exception(f"Database error while fetching Dice {dice_id}", exc_info=True)
+            logger.exception(
+                f"Database error "
+                f"while fetching Dice {dice_id}",
+                exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail="Database error "
                        "while fetching dice."
             )
         except Exception:
-            logger.exception(f"Unexpected error while fetching Dice {dice_id}", exc_info=True)
+            logger.exception(
+                f"Unexpected error "
+                f"while fetching Dice {dice_id}",
+                exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail="Unexpected error "
@@ -94,18 +118,31 @@ class DiceService:
         try:
             dices = self.repo.list_all(
                 offset=offset,
-                limit=limit)
-            logger.info(f"Listed {len(dices)} Dices (offset={offset}, limit={limit})")
+                limit=limit
+            )
+            logger.info(
+                f"Listed {len(dices)} "
+                f"Dices (offset={offset}, "
+                f"limit={limit})"
+            )
             return dices
         except SQLAlchemyError:
-            logger.exception("Database error while listing Dices", exc_info=True)
+            logger.exception(
+                "Database error "
+                "while listing Dices",
+                exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail="Database error "
                        "while listing dices."
             )
         except Exception:
-            logger.exception("Unexpected error while listing Dices", exc_info=True)
+            logger.exception(
+                "Unexpected error "
+                "while listing Dices",
+                exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail="Unexpected error "
@@ -122,24 +159,36 @@ class DiceService:
         try:
             updated = self.repo.update(dice_id, dice)
             if not updated:
-                logger.warning(f"Dice {dice_id} not found for update")
+                logger.warning(f"Dice {dice_id} "
+                               f"not found for update")
                 raise HTTPException(
                     status_code=404,
                     detail=f"Dice with ID {dice_id} "
                            f"not found."
                 )
-            logger.info(f"Updated Dice {dice_id} - {updated.name}")
+            logger.info(
+                f"Updated Dice {dice_id} "
+                f"- {updated.name}"
+            )
             return updated
 
         except SQLAlchemyError:
-            logger.exception(f"Database error while updating Dice {dice_id}", exc_info=True)
+            logger.exception(
+                f"Database error "
+                f"while updating Dice {dice_id}",
+                exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail="Database error "
                        "while updating dice."
             )
         except Exception:
-            logger.exception(f"Unexpected error while updating Dice {dice_id}", exc_info=True)
+            logger.exception(
+                f"Unexpected error "
+                f"while updating Dice {dice_id}",
+                exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail="Unexpected error "
@@ -154,23 +203,35 @@ class DiceService:
         try:
             deleted = self.repo.delete(dice_id)
             if not deleted:
-                logger.warning(f"Dice {dice_id} not found for deletion")
+                logger.warning(f"Dice {dice_id} "
+                               f"not found for deletion")
                 raise HTTPException(
                     status_code=404,
                     detail=f"Dice with ID {dice_id} "
                            f"not found."
                 )
-            logger.info(f"Deleted Dice {dice_id} - {deleted}")
+            logger.info(
+                f"Deleted Dice {dice_id} "
+                f"- {deleted}"
+            )
             return deleted
         except SQLAlchemyError:
-            logger.exception(f"Database error while deleting Dice {dice_id}", exc_info=True)
+            logger.exception(
+                f"Database error "
+                f"while deleting Dice {dice_id}",
+                exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail="Database error "
                        "while deleting dice."
             )
         except Exception:
-            logger.exception(f"Unexpected error while deleting Dice {dice_id}", exc_info=True)
+            logger.exception(
+                f"Unexpected error "
+                f"while deleting Dice {dice_id}",
+                exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail="Unexpected error "
@@ -185,10 +246,14 @@ class DiceService:
             class_id: int,
             diceset_id: int | None,
             name: str,
-            result: int):
+            result: int
+    ):
         """Log the dice data after a roll."""
         if not self.log_repo:
-            logger.warning("DiceLogRepository not provided, skipping roll log")
+            logger.warning(
+                "DiceLogRepository not provided, "
+                "skipping roll log"
+            )
             return
         try:
             log_entry = DiceLogCreate(
@@ -201,16 +266,27 @@ class DiceService:
                 timestamp=datetime.now(timezone.utc)
             )
             self.log_repo.log_roll(log_entry)
-            logger.info(f"Logged roll for Dice '{name}' by User {user_id}")
+            logger.info(
+                f"Logged roll for Dice '{name}' "
+                f"by User {user_id}"
+            )
         except SQLAlchemyError:
-            logger.exception("Database error while logging dice roll", exc_info=True)
+            logger.exception(
+                "Database error "
+                "while logging dice roll",
+                exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail="Database error "
                        "while logging dice roll."
             )
         except Exception:
-            logger.exception("Unexpected error while logging dice roll", exc_info=True)
+            logger.exception(
+                "Unexpected error "
+                "while logging dice roll",
+                exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail="Unexpected error "
@@ -230,14 +306,18 @@ class DiceService:
         and optionally log the result."""
         db_dice = self.repo.get_by_id(dice_id)
         if not db_dice:
-            logger.warning(f"Dice {dice_id} not found for roll")
+            logger.warning(f"Dice {dice_id} "
+                           f"not found for roll")
             raise HTTPException(
                 status_code=404,
                 detail=f"Dice with ID {dice_id} "
                        f"not found."
             )
         result = randint(1, db_dice.sides)
-        logger.info(f"Rolled Dice {dice_id} - {db_dice.name}: {result}")
+        logger.info(
+            f"Rolled Dice {dice_id} "
+            f"- {db_dice.name}: {result}"
+        )
 
         if (user_id is not None
                 and campaign_id is not None

@@ -30,7 +30,9 @@ class DiceLogPublic(DiceLogBase):
     id: int
     timestamp: Optional[datetime]
 
+
     class Config:
+        """Formatted timestamp."""
         json_encoders = {
             datetime: lambda v: v.strftime("%Y-%m-%d %H:%M:%S")
         }

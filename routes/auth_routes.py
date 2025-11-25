@@ -5,25 +5,32 @@ API endpoints to handle authentication operations.
 """
 from fastapi import APIRouter, Depends, Request
 from fastapi.security import OAuth2PasswordRequestForm
-from rate_limit import limiter
 from sqlmodel import Session
-from models.schemas.user_schema import UserCreate, UserMe, UserPublic
+
 from models.schemas.auth_schema import Token
+from services.auth_service import AuthService
 from auth.auth import get_current_user
 from dependencies import get_session
-from services.auth_service import AuthService
+from rate_limit import limiter
+from models.schemas.user_schema import (
+    UserCreate,
+    UserMe,
+    UserPublic
+)
 
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 auth_service = AuthService()
 
 
-@router.post("/register", response_model=UserPublic)
+@router.post("/register",
+             response_model=UserPublic)
 @limiter.limit("3/minute")
 def register_user(
         request: Request,
         user_data: UserCreate,
-        session: Session = Depends(get_session)):
+        session: Session = Depends(get_session)
+):
     """Endpoint to register a new user."""
     db_user = auth_service.register_user(session, user_data)
     return UserPublic(
@@ -33,7 +40,8 @@ def register_user(
     )
 
 
-@router.post("/login", response_model=Token)
+@router.post("/login",
+             response_model=Token)
 @limiter.limit("5/minute")
 def login_for_access_token(
         request: Request,
@@ -48,7 +56,8 @@ def login_for_access_token(
     )
 
 
-@router.get("/me", response_model=UserMe)
+@router.get("/me",
+            response_model=UserMe)
 @limiter.limit("30/minute")
 def get_my_profile(
         request: Request,

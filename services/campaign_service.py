@@ -5,14 +5,15 @@ Business logic for campaign.
 """
 from fastapi import HTTPException
 from sqlalchemy.exc import SQLAlchemyError
-from typing import List, Optional
-from dependencies import CampaignQueryParams
-from models.schemas.campaign_schema import *
+from typing import List
+import logging
+
 from repositories.campaign_repository import CampaignRepository
 from repositories.class_repository import ClassRepository
 from repositories.diceset_repository import DiceSetRepository
 from repositories.dicelog_repository import DiceLogRepository
-import logging
+from models.schemas.campaign_schema import *
+from dependencies import CampaignQueryParams
 
 
 
@@ -22,11 +23,13 @@ logger = logging.getLogger(__name__)
 class CampaignService:
     """Initialise the bussines logic
     for campaign service operations."""
-    def __init__(self,
-                 campaign_repo: CampaignRepository,
-                 class_repo: ClassRepository,
-                 diceset_repo: DiceSetRepository,
-                 dicelog_repo: DiceLogRepository):
+    def __init__(
+            self,
+            campaign_repo: CampaignRepository,
+            class_repo: ClassRepository,
+            diceset_repo: DiceSetRepository,
+            dicelog_repo: DiceLogRepository
+    ):
         self.campaign_repo = campaign_repo
         self.class_repo = class_repo
         self.diceset_repo = diceset_repo
@@ -42,15 +45,23 @@ class CampaignService:
         try:
             created = self.campaign_repo.add(campaign)
             if not created:
-                logger.warning("Campaign creation failed in repository")
+                logger.warning("Campaign creation "
+                               "failed in repository")
                 raise HTTPException(
                     status_code=400,
                     detail="Failed to create campaign."
                 )
-            logger.info(f"Created Campaign {created.id} - {created.title}")
+            logger.info(
+                f"Created Campaign {created.id} "
+                f"- {created.title}"
+            )
             return created
         except SQLAlchemyError:
-            logger.exception("Database error while creating Campaign", exc_info=True)
+            logger.exception(
+                "Database error "
+                "while creating Campaign",
+                exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail=f"Database error "
@@ -66,18 +77,31 @@ class CampaignService:
         try:
             campaign = self.campaign_repo.get_by_id(campaign_id)
             if not campaign:
-                logger.warning(f"Campaign {campaign_id} not found")
+                logger.warning(f"Campaign {campaign_id} "
+                               f"not found")
                 raise HTTPException(
                     status_code=404,
-                    detail=f"Campaign with ID {campaign_id} not found."
+                    detail=f"Campaign with ID "
+                           f"{campaign_id} not found."
                 )
 
-            logger.info(f"Retrieved Campaign {campaign_id} - {campaign.title}")
+            logger.info(
+                f"Retrieved Campaign {campaign_id} "
+                f"- {campaign.title}"
+            )
             return campaign
 
         except SQLAlchemyError:
-            logger.exception(f"Database error while retrieving Campaign {campaign_id}", exc_info=True)
-            raise HTTPException(status_code=500, detail="Database error while retrieving campaign.")
+            logger.exception(
+                f"Database error "
+                f"while retrieving Campaign {campaign_id}",
+                exc_info=True
+            )
+            raise HTTPException(
+                status_code=500,
+                detail="Database error "
+                       "while retrieving campaign."
+            )
 
 
     def list_campaigns(
@@ -94,11 +118,19 @@ class CampaignService:
                 offset=offset,
                 limit=limit
             )
-            logger.info(f"Listed {len(campaigns)} Campaigns (offset={offset}, limit={limit})")
+            logger.info(
+                f"Listed {len(campaigns)} "
+                f"Campaigns (offset={offset}, "
+                f"limit={limit})"
+            )
             return campaigns
 
         except SQLAlchemyError:
-            logger.exception("Database error while listing Campaigns", exc_info=True)
+            logger.exception(
+                "Database error "
+                "while listing Campaigns",
+                exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail=f"Database error "
@@ -117,17 +149,27 @@ class CampaignService:
                 campaign_id,
                 campaign)
             if not updated:
-                logger.warning(f"Campaign {campaign_id} not found for update")
+                logger.warning(
+                    f"Campaign {campaign_id} "
+                    f"not found for update"
+                )
                 raise HTTPException(
                     status_code=404,
                     detail=f"Campaign with ID {campaign_id} "
                            f"not found."
                 )
-            logger.info(f"Updated Campaign {campaign_id} - {updated.title}")
+            logger.info(
+                f"Updated Campaign {campaign_id} "
+                f"- {updated.title}"
+            )
             return updated
 
         except SQLAlchemyError:
-            logger.exception(f"Database error while updating Campaign {campaign_id}", exc_info=True)
+            logger.exception(
+                f"Database error "
+                f"while updating Campaign {campaign_id}",
+                exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail=f"Database error "
@@ -143,7 +185,10 @@ class CampaignService:
         try:
             campaign = self.campaign_repo.get_by_id(campaign_id)
             if not campaign:
-                logger.warning(f"Campaign {campaign_id} not found for deletion")
+                logger.warning(
+                    f"Campaign {campaign_id} "
+                    f"not found for deletion"
+                )
                 raise HTTPException(
                     status_code=404,
                     detail=f"Campaign with ID {campaign_id} "
@@ -169,23 +214,37 @@ class CampaignService:
             deleted_campaign = (self.campaign_repo
                               .delete(campaign_id))
             if not deleted_campaign:
-                logger.warning(f"Failed to delete Campaign {campaign_id}")
+                logger.warning(
+                    f"Failed to delete "
+                    f"Campaign {campaign_id}"
+                )
                 raise HTTPException(
                     status_code=400,
                     detail="Failed to delete campaign."
                 )
-            logger.info(f"Deleted Campaign {campaign_id} - {deleted_campaign}")
+            logger.info(
+                f"Deleted Campaign {campaign_id} "
+                f"- {deleted_campaign}"
+            )
             return deleted_campaign
 
         except SQLAlchemyError:
-            logger.exception(f"Database error while deleting Campaign {campaign_id}", exc_info=True)
+            logger.exception(
+                f"Database error "
+                f"while deleting Campaign {campaign_id}",
+                exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail=f"Database error "
                        f"while deleting campaign."
             )
         except Exception:
-            logger.exception(f"Unexpected error while deleting Campaign {campaign_id}", exc_info=True)
+            logger.exception(
+                f"Unexpected error "
+                f"while deleting Campaign {campaign_id}",
+                exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail=f"Unexpected error "

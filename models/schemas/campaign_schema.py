@@ -3,7 +3,6 @@ campaign_schema.py
 
 Request/response schemas for campaigns.
 """
-from sqlalchemy.testing import exclude
 from sqlmodel import Field, SQLModel
 from datetime import datetime
 from typing import Optional
@@ -11,7 +10,8 @@ from typing import Optional
 
 
 class CampaignBase(SQLModel):
-    """Base Campaign model that shares common definitions."""
+    """Base Campaign model
+    that shares common definitions."""
     title: str
     genre: str
     description: str
@@ -19,6 +19,7 @@ class CampaignBase(SQLModel):
 
 
 class CampaignCreateInput(SQLModel):
+    """Request input model."""
     title: str
     genre: str
     description: str
@@ -28,6 +29,7 @@ class CampaignCreateInput(SQLModel):
 class CampaignCreate(CampaignBase):
     """Fields to create a campaign."""
     created_by: Optional[int] = None
+
 
     def set_user(self, user_id: int):
         self.created_by = user_id
@@ -45,6 +47,7 @@ class CampaignPublic(CampaignBase):
     id: int
     created_by: int
     created_at: datetime
+
 
     class Config:
         """Formatted timestamp"""

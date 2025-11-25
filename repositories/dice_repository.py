@@ -4,13 +4,16 @@ dice_repository.py
 Defined methods for dice management.
 """
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List
+
 from models.schemas.dice_schema import *
 
 
 
 class DiceRepository(ABC):
-    """This class defines the management methods for dices."""
+    """This class defines
+    the management methods for dices."""
+
 
     @abstractmethod
     def get_by_id(self, dice_id: int) \
@@ -20,10 +23,11 @@ class DiceRepository(ABC):
 
 
     @abstractmethod
-    def list_all(self,
-                 offset: int = 0,
-                 limit: int = 100
-                 ) -> List[DicePublic]:
+    def list_all(
+            self,
+            offset: int = 0,
+            limit: int = 100
+    ) -> List[DicePublic]:
         """Show all dices method."""
         pass
 
@@ -36,9 +40,10 @@ class DiceRepository(ABC):
 
 
     @abstractmethod
-    def update(self,
-               dice_id: int,
-               dice: DiceUpdate) \
+    def update(
+            self,
+            dice_id: int,
+            dice: DiceUpdate) \
             -> Optional[DicePublic]:
         """Method to change data from a dice"""
         pass

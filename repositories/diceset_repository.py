@@ -4,13 +4,15 @@ diceset_repository
 Defined methods for dice set management.
 """
 from abc import ABC, abstractmethod
-from typing import List, Optional
+
 from models.schemas.diceset_schema import *
 
 
 
 class DiceSetRepository(ABC):
-    """This class defines the management methods for dice sets."""
+    """This class defines
+    the management methods for dice sets."""
+
 
     @abstractmethod
     def get_by_id(self, diceset_id: int) \
@@ -20,10 +22,11 @@ class DiceSetRepository(ABC):
 
 
     @abstractmethod
-    def list_all(self,
-                 offset: int = 0,
-                 limit: int = 100
-                 ) -> List[DiceSetPublic]:
+    def list_all(
+            self,
+            offset: int = 0,
+            limit: int = 100
+    ) -> List[DiceSetPublic]:
         """Show all dice sets method."""
         pass
 
@@ -36,11 +39,13 @@ class DiceSetRepository(ABC):
 
 
     @abstractmethod
-    def update(self,
-               diceset_id: int,
-               diceset: DiceSetUpdate) \
+    def update(
+            self,
+            diceset_id: int,
+            diceset: DiceSetUpdate) \
             -> Optional[DiceSetPublic]:
-        """Method to change the data from a dice set."""
+        """Method to change
+        the data from a dice set."""
         pass
 
 
@@ -53,26 +58,30 @@ class DiceSetRepository(ABC):
     @abstractmethod
     def get_by_class_id(self, class_id: int) \
             -> List[DiceSetPublic]:
-        """Get all dice sets belonging to a class."""
+        """Get all dice sets
+        belonging to a class."""
         pass
 
 
     @abstractmethod
     def list_by_user(self, user_id: int) \
             -> List[DiceSetPublic]:
-        """List all dice sets belonging to a specific user."""
+        """List all dice sets
+        belonging to a specific user."""
         pass
 
 
     @abstractmethod
     def list_by_campaign(self, campaign_id: int) \
             -> List[DiceSetPublic]:
-        """List all dice sets belonging to a specific campaign."""
+        """List all dice sets
+        belonging to a specific campaign."""
         pass
 
 
     @abstractmethod
     def list_by_class(self, class_id: int) \
             -> List[DiceSetPublic]:
-        """List all dice sets belonging to a specific DnD class."""
+        """List all dice sets
+        belonging to a specific DnD class."""
         pass

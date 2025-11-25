@@ -3,9 +3,11 @@ auth_service.py
 
 Business logic for authentication (register, login, hashing, token creation).
 """
-from datetime import timedelta
-from fastapi import HTTPException
 from sqlmodel import Session, select
+from fastapi import HTTPException
+from datetime import timedelta
+import logging
+
 from models.db_models.table_models import User
 from models.schemas.user_schema import UserCreate
 from models.schemas.auth_schema import Token
@@ -15,7 +17,6 @@ from auth.auth import (
     create_access_token,
     ACCESS_TOKEN_EXPIRE_MINUTES
 )
-import logging
 
 
 
@@ -24,19 +25,25 @@ logger = logging.getLogger(__name__)
 
 class AuthService:
 
-    def register_user(self, session:Session, user_data: UserCreate) -> User:
-        """Register a new user: check duplicates, hash password, store user."""
+    def register_user(
+            self,
+            session:Session,
+            user_data: UserCreate) \
+            -> User:
+        """Register a new user:
+        check duplicates, hash password, store user."""
         existing = session.exec(
             select(User).where(
-                (User.email == user_data.email) |
-                (User.user_name == user_data.user_name)
+                (User.email == user_data.email)
+                | (User.user_name == user_data.user_name)
             )
         ).first()
 
         if existing:
             raise HTTPException(
                 status_code=400,
-                detail="A user with that email or username already exists."
+                detail="A user with that email "
+                       "or username already exists."
             )
 
         db_user = User(
@@ -50,8 +57,14 @@ class AuthService:
         return db_user
 
 
-    def login(self, session: Session, login: str, password: str) -> Token:
-        """Authenticate user and issue access token."""
+    def login(
+            self,
+            session: Session,
+            login: str,
+            password: str) \
+            -> Token:
+        """Authenticate user
+        and issue access token."""
         user= authenticate_user(
             session=session,
             login=login,

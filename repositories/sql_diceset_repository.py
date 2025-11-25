@@ -3,12 +3,12 @@ sql_diceset_repository.py
 
 Concrete implementation for sqlalchemy, dice set management.
 """
-from typing import List, Optional
+import logging
 from sqlmodel import Session, select, delete
+
 from models.db_models.table_models import Dice, DiceSet, DiceSetDice
 from models.schemas.diceset_schema import *
 from repositories.diceset_repository import DiceSetRepository
-import logging
 
 
 logger = logging.getLogger(__name__)
@@ -24,36 +24,48 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
 
     def list_by_user(self, user_id: int) \
             -> List[DiceSetPublic]:
-        """List all dice sets belonging to a specific user."""
+        """List all dice sets
+        belonging to a specific user."""
         dicesets = self.session.exec(
             select(DiceSet)
             .where(DiceSet.user_id == user_id)
         ).all()
-        logger.debug(f"Retrieved {len(dicesets)} DiceSets for user {user_id}")
+        logger.debug(
+            f"Retrieved {len(dicesets)} "
+            f"DiceSets for user {user_id}"
+        )
         return [DiceSetPublic.model_validate(d)
                 for d in dicesets]
 
 
     def list_by_campaign(self, campaign_id: int) \
             -> List[DiceSetPublic]:
-        """List all dice sets belonging to a specific campaign."""
+        """List all dice sets
+        belonging to a specific campaign."""
         dicesets = self.session.exec(
             select(DiceSet)
             .where(DiceSet.campaign_id == campaign_id)
         ).all()
-        logger.debug(f"Retrieved {len(dicesets)} DiceSets for campaign {campaign_id}")
+        logger.debug(
+            f"Retrieved {len(dicesets)} "
+            f"DiceSets for campaign {campaign_id}"
+        )
         return [DiceSetPublic.model_validate(d)
                 for d in dicesets]
 
 
     def list_by_class(self, class_id: int) \
             -> List[DiceSetPublic]:
-        """List all dice sets belonging to a specific class."""
+        """List all dice sets
+        belonging to a specific class."""
         dicesets = self.session.exec(
             select(DiceSet)
             .where(DiceSet.class_id == class_id)
         ).all()
-        logger.debug(f"Retrieved {len(dicesets)} DiceSets for class {class_id}")
+        logger.debug(
+            f"Retrieved {len(dicesets)} "
+            f"DiceSets for class {class_id}"
+        )
         return [DiceSetPublic.model_validate(d)
                 for d in dicesets]
 
@@ -69,11 +81,18 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
         """Method to get a dice set by ID."""
         db_diceset = self.session.get(DiceSet, diceset_id)
         if not db_diceset:
-            logger.warning(f"Attempted to fetch non-existing DiceSet {diceset_id}")
+            logger.warning(
+                f"Attempted to fetch "
+                f"non existing DiceSet {diceset_id}"
+            )
             return None
 
         expanded_dices = []
-        for entry in getattr(db_diceset, "dice_entries", []) or []:
+        for entry in getattr(
+                db_diceset,
+                "dice_entries",
+                []
+        ) or []:
             if not getattr(entry, "dice", None):
                 dice_obj = self.session.get(Dice, entry.dice_id)
             else:
@@ -91,50 +110,67 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
                 for d in expanded_dices
             ]
         }
-        logger.debug(f"Retrieved {db_diceset} for dice set {diceset_id} with expanded dices {len(expanded_dices)}")
+        logger.debug(
+            f"Retrieved {db_diceset} "
+            f"for dice set {diceset_id} "
+            f"with expanded dices {len(expanded_dices)}"
+        )
         return DiceSetPublic.model_validate(payload)
 
 
-    def get_orm_by_id(self, diceset_id: int) -> Optional[DiceSet]:
-        """Return ORM DiceSet object (with dice_entries)"""
+    def get_orm_by_id(self, diceset_id: int) \
+            -> Optional[DiceSet]:
+        """Return ORM DiceSet object
+        (with dice_entries)"""
         return self.session.get(DiceSet, diceset_id)
 
 
-
-    def list_all(self,
-                 offset: int = 0,
-                 limit: int = 100
-                 ) -> List[DiceSetPublic]:
+    def list_all(
+            self,
+            offset: int = 0,
+            limit: int = 100
+    ) -> List[DiceSetPublic]:
         """Method to get a list of all dice sets."""
         dicesets = self.session.exec(
             select(DiceSet)
             .offset(offset)
             .limit(limit)
         ).all()
-        logger.debug(f"Retrieved {len(dicesets)} DiceSets.")
+        logger.debug(
+            f"Retrieved {len(dicesets)} "
+            f"DiceSets."
+        )
         return [DiceSetPublic.model_validate(d)
                 for d in dicesets]
 
 
-    def add(self, diceset: DiceSetCreate) -> Optional[DiceSetPublic]:
+    def add(self, diceset: DiceSetCreate) \
+            -> Optional[DiceSetPublic]:
         """Method to add a new dice set."""
         db_diceset = DiceSet(**diceset.model_dump())
         self.session.add(db_diceset)
         self.session.commit()
         self.session.refresh(db_diceset)
 
-        logger.info(f"DiceSet added: {db_diceset.id} for user {db_diceset.user_id}")
+        logger.info(
+            f"DiceSet added: {db_diceset.id} "
+            f"for user {db_diceset.user_id}"
+        )
         return self.get_by_id(db_diceset.id)
 
 
-    def update(self,
-               diceset_id: int,
-               diceset: DiceSetUpdate) \
+    def update(
+            self,
+            diceset_id: int,
+            diceset: DiceSetUpdate) \
             -> Optional[DiceSetPublic]:
         """Update a dice set."""
         db_diceset = self.session.get(DiceSet, diceset_id)
         if not db_diceset:
-            logger.warning(f"Attempted to update non-existing DiceSet {diceset_id}")
+            logger.warning(
+                f"Attempted to update "
+                f"non existing DiceSet {diceset_id}"
+            )
             return None
 
         update_data = diceset.model_dump(
@@ -173,7 +209,10 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
             self.session.commit()
 
         self.session.refresh(db_diceset)
-        logger.info(f"Updated DiceSet {diceset_id} for user {db_diceset.user_id}")
+        logger.info(
+            f"Updated DiceSet {diceset_id} "
+            f"for user {db_diceset.user_id}"
+        )
         return DiceSetPublic.model_validate(db_diceset)
 
 
@@ -182,7 +221,10 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
         """Remove a dice set."""
         db_diceset = self.session.get(DiceSet, diceset_id)
         if not db_diceset:
-            logger.warning(f"Attempted to delete non-existing DiceSet {diceset_id}")
+            logger.warning(
+                f"Attempted to delete "
+                f"non existing DiceSet {diceset_id}"
+            )
             return None
 
         # Delete all links first
@@ -194,17 +236,26 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
         # Delete the diceset
         self.session.delete(db_diceset)
         self.session.commit()
-        logger.info(f"Deleted DiceSet {diceset_id} for user {db_diceset.user_id}")
+        logger.info(
+            f"Deleted DiceSet {diceset_id} "
+            f"for user {db_diceset.user_id}"
+        )
         return DiceSetPublic.model_validate(db_diceset)
 
 
-    def set_dice_quantities(self, diceset_id: int, dice_count: dict):
-        """Store dice quantities for a dice set."""
+    def set_dice_quantities(
+            self,
+            diceset_id: int,
+            dice_count: dict
+    ):
+        """Store dice quantities
+        for a dice set."""
         session = self.session
 
         # Delete existing entries to fully rebuild
         session.exec(
-            delete(DiceSetDice).where(DiceSetDice.dice_set_id == diceset_id)
+            delete(DiceSetDice)
+            .where(DiceSetDice.dice_set_id == diceset_id)
         )
         session.commit()
 

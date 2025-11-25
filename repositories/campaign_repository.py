@@ -4,13 +4,16 @@ campaign_repository.py
 Defined methods for campaign management.
 """
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List
+
 from models.schemas.campaign_schema import *
 
 
 
 class CampaignRepository(ABC):
-    """This class defines the management methods for campaigns."""
+    """This class defines
+    the management methods for campaigns."""
+
 
     @abstractmethod
     def get_by_id(self, campaign_id: int) \
@@ -20,12 +23,13 @@ class CampaignRepository(ABC):
 
 
     @abstractmethod
-    def list_all(self,
-                 offset: int = 0,
-                 limit: int = 100,
-                 name: Optional[str] = None,
-                 user_id: Optional[int] = None
-                 ) -> List[CampaignPublic]:
+    def list_all(
+            self,
+            offset: int = 0,
+            limit: int = 100,
+            name: Optional[str] = None,
+            user_id: Optional[int] = None
+    ) -> List[CampaignPublic]:
         """Show all campaigns method,
         optional filtered by name or user."""
         pass
@@ -39,10 +43,11 @@ class CampaignRepository(ABC):
 
 
     @abstractmethod
-    def update(self,
-               campaign_id: int,
-               campaign: CampaignUpdate
-               ) -> Optional[CampaignPublic]:
+    def update(
+            self,
+            campaign_id: int,
+            campaign: CampaignUpdate
+    ) -> Optional[CampaignPublic]:
         """Method to make changes by campaigns."""
         pass
 
@@ -56,7 +61,8 @@ class CampaignRepository(ABC):
     @abstractmethod
     def list_by_user(self, user_id: int) \
             -> List[CampaignPublic]:
-        """List all campaigns belonging to a specific user."""
+        """List all campaigns
+        belonging to a specific user."""
         pass
 
 

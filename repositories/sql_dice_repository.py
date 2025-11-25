@@ -3,12 +3,13 @@ sql_dice_repository.py
 
 Concrete implementation of sqlalchemy, dice management.
 """
-from typing import List, Optional
+import logging
+from typing import List
 from sqlmodel import Session, select
+
 from models.db_models.table_models import Dice
 from models.schemas.dice_schema import *
 from repositories.dice_repository import DiceRepository
-import logging
 
 
 
@@ -29,22 +30,31 @@ class SqlAlchemyDiceRepository(DiceRepository):
         """Method to get dice by ID."""
         db_dice = self.session.get(Dice, dice_id)
         if db_dice:
-            logger.debug(f"Dice found: {dice_id} - {db_dice.name}")
+            logger.debug(
+                f"Dice found: {dice_id} "
+                f"- {db_dice.name}"
+            )
             return DicePublic.model_validate(db_dice)
         logger.warning(f"Dice not found: {dice_id}")
         return None
 
 
-    def list_all(self,
-                 offset: int = 0,
-                 limit: int = 100
-                 ) -> List[DicePublic]:
+    def list_all(
+            self,
+            offset: int = 0,
+            limit: int = 100
+    ) -> List[DicePublic]:
         """Method to show all dices."""
         dices = self.session.exec(
             select(Dice)
             .offset(offset)
-            .limit(limit)).all()
-        logger.debug(f"Listed {len(dices)} dices (offset={offset}, limit={limit})")
+            .limit(limit)
+        ).all()
+        logger.debug(
+            f"Listed {len(dices)} "
+            f"dices (offset={offset}, "
+            f"limit={limit})"
+        )
         return [DicePublic.model_validate(d)
                 for d in dices]
 
@@ -56,18 +66,25 @@ class SqlAlchemyDiceRepository(DiceRepository):
         self.session.add(db_dice)
         self.session.commit()
         self.session.refresh(db_dice)
-        logger.info(f"Dice added: {db_dice.id} - {db_dice.name}")
+        logger.info(
+            f"Dice added: {db_dice.id} "
+            f"- {db_dice.name}"
+        )
         return DicePublic.model_validate(db_dice)
 
 
-    def update(self,
-               dice_id: int,
-               dice: DiceUpdate) \
+    def update(
+            self,
+            dice_id: int,
+            dice: DiceUpdate) \
             -> Optional[DicePublic]:
         """Method to change data from a dice."""
         db_dice = self.session.get(Dice, dice_id)
         if not db_dice:
-            logger.warning(f"Attempted to update non-existing dice {dice_id}")
+            logger.warning(
+                f"Attempted to update "
+                f"non existing dice {dice_id}"
+            )
             return None
 
         for key, value in dice.model_dump(
@@ -76,7 +93,10 @@ class SqlAlchemyDiceRepository(DiceRepository):
         self.session.add(db_dice)
         self.session.commit()
         self.session.refresh(db_dice)
-        logger.info(f"Updated dice: {dice_id} - {db_dice.name}")
+        logger.info(
+            f"Updated dice: {dice_id} "
+            f"- {db_dice.name}"
+        )
         return DicePublic.model_validate(db_dice)
 
 
@@ -85,11 +105,17 @@ class SqlAlchemyDiceRepository(DiceRepository):
         """Method to remove a dice."""
         db_dice = self.session.get(Dice, dice_id)
         if not db_dice:
-            logger.warning(f"Attempted to delete non-existing dice {dice_id}")
+            logger.warning(
+                f"Attempted to delete "
+                f"non existing dice {dice_id}"
+            )
             return None
         self.session.delete(db_dice)
         self.session.commit()
-        logger.info(f"Deleted dice: {dice_id} - {db_dice.name}")
+        logger.info(
+            f"Deleted dice: {dice_id} "
+            f"- {db_dice.name}"
+        )
         return DicePublic.model_validate(db_dice)
 
 
@@ -100,6 +126,9 @@ class SqlAlchemyDiceRepository(DiceRepository):
             select(Dice)
             .where(Dice.class_id == class_id)
         ).all()
-        logger.debug(f"Retrieved {len(dices)} dices for class {class_id}")
+        logger.debug(
+            f"Retrieved {len(dices)} "
+            f"dices for class {class_id}"
+        )
         return [DicePublic.model_validate(d)
                 for d in dices]

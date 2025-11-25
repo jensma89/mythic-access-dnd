@@ -16,14 +16,21 @@ class User(SQLModel, table=True):
     user_name: str = Field(unique=True, index=True)
     email: str = Field(unique=True, index=True)
     hashed_password: str
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )
     updated_at: datetime | None = None
 
     # Relationship to campaign
     campaigns: List["Campaign"] = Relationship(back_populates="creator")
 
+
     def __repr__(self):
-        return f"<User id={self.id} user_name={self.user_name} email={self.email}>"
+        return (
+            f"<User id={self.id} "
+            f"user_name={self.user_name} "
+            f"email={self.email}>"
+        )
 
 
 class Campaign(SQLModel, table=True):
@@ -36,10 +43,15 @@ class Campaign(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     title: str = Field(index=True)
     genre: str | None = None
-    description: str | None = Field(default=None, description="Story of the campaign")
+    description: str | None = Field(
+        default=None,
+        description="Story of the campaign"
+    )
     max_classes: int
     created_by: int = Field(foreign_key="user.id")
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )
 
     # ORM link to User
     creator: Optional[User] = Relationship(back_populates="campaigns")
@@ -47,8 +59,12 @@ class Campaign(SQLModel, table=True):
     # Relationship to Class
     classes: List["Class"] = Relationship(back_populates="campaign")
 
+
     def __repr__(self):
-        return f"<Campaign id={self.id} title={self.title} created_by={self.created_by}>"
+        return (
+            f"<Campaign id={self.id} "
+            f"title={self.title} "
+            f"created_by={self.created_by}>")
 
 
 class Class(SQLModel, table=True):
@@ -78,10 +94,16 @@ class Class(SQLModel, table=True):
     )
     notes: str | None = None
     inventory: str | None = None
-    campaign_id: int = Field(foreign_key="campaign.id",
-                             nullable=False,
-                             index=True)
-    user_id: int = Field(foreign_key="user.id", nullable=False, index=True)
+    campaign_id: int = Field(
+        foreign_key="campaign.id",
+        nullable=False,
+        index=True
+    )
+    user_id: int = Field(
+        foreign_key="user.id",
+        nullable=False,
+        index=True
+    )
 
     # Link to Campaign
     campaign: "Campaign" = Relationship(back_populates="classes")
@@ -89,18 +111,28 @@ class Class(SQLModel, table=True):
     # Link to DiceSet
     dice_sets: List["DiceSet"] = Relationship(back_populates="class_")
 
+
     def __repr__(self):
-        return f"<Class id={self.id} name={self.name} campaign_id={self.campaign_id}>"
+        return (
+            f"<Class id={self.id} "
+            f"name={self.name} "
+            f"campaign_id={self.campaign_id}>"
+        )
 
 
 class DiceSetDice(SQLModel, table=True):
     """Table model for Dice to DiceSet relationships."""
 
-    dice_set_id: int = Field(foreign_key="diceset.id", primary_key=True)
-    dice_id: int = Field(foreign_key="dice.id", primary_key=True)
+    dice_set_id: int = Field(
+        foreign_key="diceset.id", primary_key=True
+    )
+    dice_id: int = Field(
+        foreign_key="dice.id", primary_key=True
+    )
     quantity: int = Field(default=1)
 
     diceset: "DiceSet" = Relationship(back_populates="dice_entries")
+
     dice: "Dice" = Relationship(back_populates="dice_entries")
 
 
@@ -110,7 +142,10 @@ class DiceSet(SQLModel, table=True):
     name: str = Field(default="Dice set", nullable=False)
     class_id: int = Field(foreign_key="class.id", nullable=False)
     campaign_id: int = Field(foreign_key="campaign.id", nullable=False)
-    user_id: int = Field(foreign_key="user.id", nullable=False, index=True)
+    user_id: int = Field(
+        foreign_key="user.id",
+        nullable=False,
+        index=True)
 
     dice_entries: List[DiceSetDice] = Relationship(back_populates="diceset")
 
@@ -124,8 +159,13 @@ class DiceSet(SQLModel, table=True):
         sa_relationship_kwargs={}
     )
 
+
     def __repr__(self):
-        return f"<DiceSet id={self.id} name={self.name} class_id={self.class_id}>"
+        return (
+            f"<DiceSet id={self.id} "
+            f"name={self.name} "
+            f"class_id={self.class_id}>"
+        )
 
 
 class Dice(SQLModel, table=True):
@@ -156,5 +196,10 @@ class DiceLog(SQLModel, table=True):
     roll: str = Field(nullable=False)
     result: int = Field(nullable=False)
 
+
     def __repr__(self):
-        return f"<DiceLog id={self.id} user_id={self.user_id} result={self.result}>"
+        return (
+            f"<DiceLog id={self.id} "
+            f"user_id={self.user_id} "
+            f"result={self.result}>"
+        )

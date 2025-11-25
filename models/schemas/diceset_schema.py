@@ -5,7 +5,11 @@ Request/response schema for dice sets.
 """
 from sqlmodel import SQLModel
 from typing import List, Optional
-from models.schemas.dice_schema import DicePublic, DiceRollResult
+
+from models.schemas.dice_schema import (
+    DicePublic,
+    DiceRollResult
+)
 
 
 class DiceSetBase(SQLModel):
@@ -15,7 +19,8 @@ class DiceSetBase(SQLModel):
 
 
 class DiceSetCreateInput(SQLModel):
-    """Model to create a dice set (Request body input)."""
+    """Model to create a dice set
+    (Request body input)."""
     name: str
     class_id: int
     campaign_id: int
@@ -25,6 +30,7 @@ class DiceSetCreateInput(SQLModel):
 class DiceSetCreate(DiceSetCreateInput):
     """Intern model to create a dice set."""
     user_id: Optional[int] = None
+
 
     def set_user(self, user_id: int, ):
         """Set the ID from current user."""
@@ -45,7 +51,8 @@ class DiceSetPublic(DiceSetBase):
 
 
 class DiceSetRollResult(SQLModel):
-    """Model to respond the data after roll a dice set."""
+    """Model to respond the data
+    after roll a dice set."""
     diceset_id: int
     name: str
     results: List[DiceRollResult]

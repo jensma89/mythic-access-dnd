@@ -9,6 +9,8 @@ from sqlmodel import create_engine, Session, SQLModel
 from dotenv import load_dotenv
 import os
 
+
+
 load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 
@@ -49,7 +51,8 @@ class UserQueryParams:
             self,
         name: str | None = Query(
             None,
-            description="Filter by username.")):
+            description="Filter by username.")
+    ):
         self.name = name
 
 
@@ -60,10 +63,12 @@ class CampaignQueryParams:
             user_id: int | None = Query(
                 None,
                 ge=1,
-                description="Filter by user ID."),
+                description="Filter by user ID."
+            ),
             name: str | None = Query(
                 None,
-                description="Filter by campaign title.")):
+                description="Filter by campaign title.")
+    ):
         self.user_id = user_id
         self.name = name
 
@@ -75,9 +80,11 @@ class ClassQueryParams:
     campaign_id: int | None = Query(
         None,
         ge=1,
-        description="Filter by campaign ID."),
+        description="Filter by campaign ID."
+    ),
     name: str | None = Query(
         None,
-        description="Filter by class name.")):
+        description="Filter by class name.")
+    ):
         self.campaign_id = campaign_id
         self.name = name

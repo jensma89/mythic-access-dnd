@@ -1,7 +1,7 @@
 """
 auth_schema.py
 
-Pydantic auth schema.
+Pydantic auth schema for validation.
 """
 from pydantic import BaseModel
 

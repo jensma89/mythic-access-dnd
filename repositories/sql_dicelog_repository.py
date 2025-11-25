@@ -3,12 +3,13 @@ sql_dicelog_repository.py
 
 Concrete implementation for sqlalchemy, campaign management.
 """
-from typing import List, Optional
+import logging
+from typing import List
 from sqlmodel import Session, select
+
 from models.db_models.table_models import DiceLog
 from models.schemas.dicelog_schema import *
 from repositories.dicelog_repository import DiceLogRepository
-import logging
 
 
 
@@ -31,43 +32,58 @@ class SqlAlchemyDiceLogRepository(DiceLogRepository):
             select(DiceLog)
             .where(DiceLog.user_id == user_id)
         ).all()
-        logger.debug(f"Retrieved {len(dicelogs)} DiceLogs for user {user_id}")
+        logger.debug(
+            f"Retrieved {len(dicelogs)} "
+            f"DiceLogs for user {user_id}"
+        )
         return [DiceLogPublic.model_validate(l)
                 for l in dicelogs]
 
 
     def list_by_campaign(self, campaign_id: int) \
             -> List[DiceLogPublic]:
-        """List all dice logs belonging to a specific campaign."""
+        """List all dice logs
+        belonging to a specific campaign."""
         dicelogs = self.session.exec(
             select(DiceLog)
             .where(DiceLog.campaign_id == campaign_id)
         ).all()
-        logger.debug(f"Retrieved {len(dicelogs)} DiceLogs for campaign {campaign_id}")
+        logger.debug(
+            f"Retrieved {len(dicelogs)} "
+            f"DiceLogs for campaign {campaign_id}"
+        )
         return [DiceLogPublic.model_validate(l)
                 for l in dicelogs]
 
 
     def list_by_class(self, class_id: int) \
             -> List[DiceLogPublic]:
-        """List all dice logs belonging to a specific DnD class."""
+        """List all dice logs
+        belonging to a specific DnD class."""
         dicelogs = self.session.exec(
             select(DiceLog)
             .where(DiceLog.class_id == class_id)
         ).all()
-        logger.debug(f"Retrieved {len(dicelogs)} DiceLogs for class {class_id}")
+        logger.debug(
+            f"Retrieved {len(dicelogs)} "
+            f"DiceLogs for class {class_id}"
+        )
         return [DiceLogPublic.model_validate(d)
                 for d in dicelogs]
 
 
     def list_by_diceset(self, diceset_id: int) \
             -> List[DiceLogPublic]:
-        """List all dice logs belonging to a specific dice set."""
+        """List all dice logs
+        belonging to a specific dice set."""
         dicelogs = self.session.exec(
             select(DiceLog)
             .where(DiceLog.diceset_id == diceset_id)
         ).all()
-        logger.debug(f"Retrieved {len(dicelogs)} DiceLogs for dice set {diceset_id}")
+        logger.debug(
+            f"Retrieved {len(dicelogs)} "
+            f"DiceLogs for dice set {diceset_id}"
+        )
         return [DiceLogPublic.model_validate(log)
                 for log in dicelogs]
 
@@ -77,7 +93,10 @@ class SqlAlchemyDiceLogRepository(DiceLogRepository):
         """Method to get a dice log by ID."""
         db_dicelog = self.session.get(DiceLog, dicelog_id)
         if db_dicelog:
-            logger.debug(f"DiceLog found: {dicelog_id} for user {db_dicelog.user_id}")
+            logger.debug(
+                f"DiceLog found: {dicelog_id} "
+                f"for user {db_dicelog.user_id}"
+            )
             return DiceLogPublic.model_validate(db_dicelog)
         logger.warning(f"DiceLog not found: {dicelog_id}")
         return None
@@ -90,7 +109,10 @@ class SqlAlchemyDiceLogRepository(DiceLogRepository):
         self.session.add(db_dicelog)
         self.session.commit()
         self.session.refresh(db_dicelog)
-        logger.info(f"DiceLog added: {db_dicelog.id} for user {db_dicelog.user_id}")
+        logger.info(
+            f"DiceLog added: {db_dicelog.id} "
+            f"for user {db_dicelog.user_id}"
+        )
 
         # FIFO cleanup delete oldest if bigger than 100
         logs = self.session.exec(
@@ -104,7 +126,10 @@ class SqlAlchemyDiceLogRepository(DiceLogRepository):
             for old_log in logs[100:]:
                 self.session.delete(old_log)
             self.session.commit()
-            logger.debug(f"Old DiceLogs deleted for user {log.user_id}, kept 100 newest")
+            logger.debug(
+                f"Old DiceLogs deleted for user {log.user_id}, "
+                f"kept 100 newest"
+            )
         return DiceLogPublic.model_validate(db_dicelog)
 
 
@@ -113,11 +138,17 @@ class SqlAlchemyDiceLogRepository(DiceLogRepository):
         """Delete a dice log by ID."""
         db_dicelog = self.session.get(DiceLog, dicelog_id)
         if not db_dicelog:
-            logger.warning(f"Attempted to delete non-existing DiceLog {dicelog_id}")
+            logger.warning(
+                f"Attempted to delete "
+                f"non existing DiceLog {dicelog_id}"
+            )
             return None
         self.session.delete(db_dicelog)
         self.session.commit()
-        logger.info(f"Deleted DiceLog: {dicelog_id} for user {db_dicelog.user_id}")
+        logger.info(
+            f"Deleted DiceLog: {dicelog_id} "
+            f"for user {db_dicelog.user_id}"
+        )
         return DiceLogPublic.model_validate(db_dicelog)
 
 
@@ -135,12 +166,18 @@ class SqlAlchemyDiceLogRepository(DiceLogRepository):
             .offset(offset)
             .limit(limit)
         ).all()
-        logger.debug(f"Retrieved {len(dicelogs)} DiceLogs for user {user_id}")
+        logger.debug(
+            f"Retrieved {len(dicelogs)} "
+            f"DiceLogs for user {user_id}"
+        )
         return [DiceLogPublic.model_validate(d)
                 for d in dicelogs]
 
 
     def log_roll(self, log: DiceLogCreate) -> DiceLogPublic:
         """Method for services to store dice rolls."""
-        logger.debug(f"Logging dice roll for user {log.user_id}")
+        logger.debug(
+            f"Logging dice roll "
+            f"for user {log.user_id}"
+        )
         return self.add(log)

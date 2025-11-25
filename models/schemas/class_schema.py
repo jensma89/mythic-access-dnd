@@ -20,7 +20,8 @@ class ClassSkills(SQLModel):
 
 
 class ClassBase(SQLModel):
-    """Base Class model that shares common definitions."""
+    """Base Class model
+    that shares common definitions."""
     name: str
     race: str
     skills: ClassSkills
@@ -31,12 +32,14 @@ class ClassCreateInput(SQLModel):
     name: str
     race: str
     campaign_id: int
-    skills: Optional[ClassSkills] = Field(default_factory=ClassSkills)
+    skills: Optional[ClassSkills] = Field(
+        default_factory=ClassSkills)
 
 
 class ClassCreate(ClassCreateInput):
     """Intern model to create a class."""
     user_id: Optional[int] = None
+
 
     def set_user(self, user_id: int):
         """Set the current user ID."""

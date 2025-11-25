@@ -3,12 +3,14 @@ sql_campaign_repository.py
 
 Concrete implementation for sqlalchemy, campaign management.
 """
-from typing import List, Optional
+import logging
+from typing import List
 from sqlmodel import Session, select
+
 from models.db_models.table_models import Campaign
 from models.schemas.campaign_schema import *
 from repositories.campaign_repository import CampaignRepository
-import logging
+
 
 
 
@@ -25,24 +27,32 @@ class SqlAlchemyCampaignRepository(CampaignRepository):
 
     def list_by_user(self, user_id: int) \
             -> List[CampaignPublic]:
-        """List all campaigns belonging to a specific user."""
+        """List all campaigns
+        belonging to a specific user."""
         campaigns = self.session.exec(
             select(Campaign)
             .where(Campaign.created_by == user_id)
         ).all()
-        logger.debug(f"Retrieved {len(campaigns)} campaigns for user {user_id}")
+        logger.debug(
+            f"Retrieved {len(campaigns)} "
+            f"campaigns for user {user_id}"
+        )
         return [CampaignPublic.model_validate(c)
                 for c in campaigns]
 
 
     def list_by_campaign(self, campaign_id: int) \
             -> List[CampaignPublic]:
-        """Return a single campaign as list for uniformity."""
+        """Return a single campaign
+        as list for uniformity."""
         campaign = self.session.exec(
             select(Campaign)
             .where(Campaign.id == campaign_id)
         ).all()
-        logger.debug(f"Retrieved {len(campaign)} campaigns for campaign_id {campaign_id}")
+        logger.debug(
+            f"Retrieved {len(campaign)} "
+            f"campaigns for campaign_id {campaign_id}"
+        )
         return [CampaignPublic.model_validate(c)
                 for c in campaign]
 
@@ -52,18 +62,22 @@ class SqlAlchemyCampaignRepository(CampaignRepository):
         """Method to get campaign by ID."""
         db_campaign = self.session.get(Campaign, campaign_id)
         if db_campaign:
-            logger.debug(f"Campaign found: {campaign_id} - {db_campaign.title}")
+            logger.debug(
+                f"Campaign found: {campaign_id} "
+                f"- {db_campaign.title}"
+            )
             return CampaignPublic.model_validate(db_campaign)
         logger.warning(f"Campaign not found: {campaign_id}")
         return None
 
 
-    def list_all(self,
-                 offset: int = 0,
-                 limit: int = 100,
-                 name: Optional[str] = None,
-                 user_id: Optional[int] = None
-                 ) -> List[CampaignPublic]:
+    def list_all(
+            self,
+            offset: int = 0,
+            limit: int = 100,
+            name: Optional[str] = None,
+            user_id: Optional[int] = None
+    ) -> List[CampaignPublic]:
         """Method to show all users,
         optional filtered by name or user."""
         query = select(Campaign)
@@ -71,16 +85,23 @@ class SqlAlchemyCampaignRepository(CampaignRepository):
         if name:
             query = (
                 query
-                .where(Campaign.title.ilike(f"%{name}%")))
+                .where(Campaign.title.ilike(f"%{name}%"))
+            )
         if user_id:
             query = (
                 query
-                .where(Campaign.created_by == user_id))
+                .where(Campaign.created_by == user_id)
+            )
 
         campaigns = self.session.exec(
             query.offset(offset)
-            .limit(limit)).all()
-        logger.debug(f"Listed {len(campaigns)} campaigns with filters name={name}, user_id={user_id}")
+            .limit(limit)
+        ).all()
+        logger.debug(
+            f"Listed {len(campaigns)} "
+            f"campaigns with filters name={name}, "
+            f"user_id={user_id}"
+        )
         return [CampaignPublic.model_validate(c)
                 for c in campaigns]
 
@@ -92,18 +113,25 @@ class SqlAlchemyCampaignRepository(CampaignRepository):
         self.session.add(db_campaign)
         self.session.commit()
         self.session.refresh(db_campaign)
-        logger.info(f"Campaign added: {db_campaign.id} - {db_campaign.title}")
+        logger.info(
+            f"Campaign added: {db_campaign.id} "
+            f"- {db_campaign.title}"
+        )
         return CampaignPublic.model_validate(db_campaign)
 
 
-    def update(self,
-               campaign_id: int,
-               campaign: CampaignUpdate) \
+    def update(
+            self,
+            campaign_id: int,
+            campaign: CampaignUpdate) \
             -> Optional[CampaignPublic]:
         """Method to change the data of campaign."""
         db_campaign = self.session.get(Campaign, campaign_id)
         if not db_campaign:
-            logger.warning(f"Attempted to update non existing campaign: {campaign_id}")
+            logger.warning(
+                f"Attempted to update "
+                f"non existing campaign: {campaign_id}"
+            )
             return None
         for key, value in campaign.model_dump(
                 exclude_unset=True).items():
@@ -111,7 +139,10 @@ class SqlAlchemyCampaignRepository(CampaignRepository):
         self.session.add(db_campaign)
         self.session.commit()
         self.session.refresh(db_campaign)
-        logger.info(f"Updated campaign: {campaign_id} - {db_campaign.title}")
+        logger.info(
+            f"Updated campaign: {campaign_id} "
+            f"- {db_campaign.title}"
+        )
         return CampaignPublic.model_validate(db_campaign)
 
 
@@ -120,9 +151,15 @@ class SqlAlchemyCampaignRepository(CampaignRepository):
         """Method to remove a campaign."""
         db_campaign = self.session.get(Campaign, campaign_id)
         if not db_campaign:
-            logger.warning(f"Attempted to delete non-existing campaign {campaign_id}")
+            logger.warning(
+                f"Attempted to delete "
+                f"non existing campaign {campaign_id}"
+            )
             return None
         self.session.delete(db_campaign)
         self.session.commit()
-        logger.info(f"Deleted campaign: {campaign_id} - {db_campaign.title}")
+        logger.info(
+            f"Deleted campaign: {campaign_id} "
+            f"- {db_campaign.title}"
+        )
         return CampaignPublic.model_validate(db_campaign)
