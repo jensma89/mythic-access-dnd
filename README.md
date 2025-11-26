@@ -136,7 +136,7 @@ GET - /healthz - Basic health check endpoint for Render
 
 ## Rate Limiting
 
-each endpoint is protected by rate limiting with slowapi → Each endpoint is protected by rate limiting via slowapi.
+Each endpoint is protected by rate limiting via slowapi.
 
 
 ---
