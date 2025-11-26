@@ -49,6 +49,13 @@ On Render, set these under Environment → Environment Variables.
 
 ## API Endpoints
 
+
+- Start
+
+GET - / - Start page with welcome message
+
+---
+
 - Authentication
 
 POST - /auth/register - Register a new user
@@ -127,6 +134,7 @@ GET - /dicelogs - List all dice logs from user ID
 
 GET - /dicelogs/{id} - Get a specific dice log from user ID
 
+---
 
 - Health Check - 
 
