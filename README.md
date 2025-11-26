@@ -52,7 +52,7 @@ On Render, set these under Environment → Environment Variables.
 
 - Start
 
-GET - / - Start page with welcome message
+GET - "/" - Start page with welcome message
 
 ---
 
