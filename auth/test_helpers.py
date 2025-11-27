@@ -5,6 +5,7 @@ test_helpers.py
 """
 from datetime import timedelta
 from sqlmodel import Session
+import uuid
 
 from models.db_models.table_models import User
 from auth.auth import hash_password, create_access_token
@@ -14,9 +15,11 @@ from auth.auth import hash_password, create_access_token
 def create_test_user(session: Session):
     """Create a test user
     to test endpoints with token."""
+    suffix = uuid.uuid4().hex[:8] # Create random id
+
     test_user = User(
-        user_name="test_user",
-        email="test_user@example.com",
+        user_name=f"test_user_{suffix}",
+        email=f"test_{suffix}@example.com",
         hashed_password=hash_password("password123")
     )
     session.add(test_user)
