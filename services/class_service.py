@@ -22,10 +22,12 @@ class ClassService:
     """Business logic
     for class service operations."""
 
-    def __init__(self,
-                 class_repo: ClassRepository,
-                 diceset_repo: DiceSetRepository,
-                 dicelog_repo: DiceLogRepository):
+    def __init__(
+            self,
+            class_repo: ClassRepository,
+            diceset_repo: DiceSetRepository,
+            dicelog_repo: DiceLogRepository
+    ):
         self.class_repo = class_repo
         self.diceset_repo = diceset_repo
         self.dicelog_repo = dicelog_repo
@@ -44,7 +46,10 @@ class ClassService:
                 .get_by_campaign_id(dnd_class.campaign_id))
 
             if len(existing_classes) >= 4:
-                logger.warning(f"Campaign {dnd_class.campaign_id} already has 4 classes")
+                logger.warning(
+                    f"Campaign {dnd_class.campaign_id} "
+                    f"already has 4 classes"
+                )
                 raise HTTPException(
                     status_code=400,
                     detail="Campaign already has 4 classes. "
@@ -58,18 +63,29 @@ class ClassService:
                     status_code=400,
                     detail="Failed to create a new class."
                 )
-            logger.info(f"Created Class {new_class.id} - {new_class.name}")
+            logger.info(
+                f"Created Class {new_class.id} "
+                f"- {new_class.name}"
+            )
             return new_class
 
         except SQLAlchemyError:
-            logger.exception("Database error while creating Class", exc_info=True)
+            logger.exception(
+                "Database error "
+                "while creating Class",
+                exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail=f"Database error "
                        f"while create a class."
             )
         except Exception:
-            logger.exception("Unexpected error while creating Class", exc_info=True)
+            logger.exception(
+                "Unexpected error "
+                "while creating Class",
+                exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail=f"Unexpected error "
@@ -92,10 +108,17 @@ class ClassService:
                     detail=f"Class with ID {class_id} "
                            f"not found."
                 )
-            logger.info(f"Retrieved Class {class_id} - {dnd_class.name}")
+            logger.info(
+                f"Retrieved Class {class_id} "
+                f"- {dnd_class.name}"
+            )
             return dnd_class
         except SQLAlchemyError:
-            logger.exception(f"Database error while retrieving Class {class_id}", exc_info=True)
+            logger.exception(
+                f"Database error "
+                f"while retrieving Class {class_id}",
+                exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail=f"Database error "
@@ -117,10 +140,18 @@ class ClassService:
                 offset=offset,
                 limit=limit
             )
-            logger.info(f"Listed {len(classes)} Classes (offset={offset}, limit={limit})")
+            logger.info(
+                f"Listed {len(classes)} "
+                f"Classes (offset={offset},"
+                f" limit={limit})"
+            )
             return classes
         except SQLAlchemyError:
-            logger.exception("Database error while listing Classes", exc_info=True)
+            logger.exception(
+                "Database error "
+                "while listing Classes",
+                exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail=f"Database error "
@@ -139,17 +170,27 @@ class ClassService:
                 class_id,
                 dnd_class)
             if not updated_class:
-                logger.warning(f"Class {class_id} not found for update")
+                logger.warning(
+                    f"Class {class_id} "
+                    f"not found for update"
+                )
                 raise HTTPException(
                     status_code=404,
                     detail=f"Class with ID {class_id} "
                            f"not found."
                 )
-            logger.info(f"Updated Class {class_id} - {updated_class.name}")
+            logger.info(
+                f"Updated Class {class_id} "
+                f"- {updated_class.name}"
+            )
             return updated_class
 
         except SQLAlchemyError:
-            logger.exception(f"Database error while updating Class {class_id}", exc_info=True)
+            logger.exception(
+                f"Database error "
+                f"while updating Class {class_id}",
+                exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail=f"Database error "
@@ -165,7 +206,8 @@ class ClassService:
         try:
             existing_class = self.class_repo.get_by_id(class_id)
             if not existing_class:
-                logger.warning(f"Class {class_id} not found for deletion")
+                logger.warning(
+                    f"Class {class_id} not found for deletion")
                 raise HTTPException(
                     status_code=404,
                     detail=f"Class with ID {class_id} not found."
@@ -192,18 +234,29 @@ class ClassService:
                     status_code=400,
                     detail="Failed to delete class."
                 )
-            logger.info(f"Deleted Class {class_id} - {deleted_class}")
+            logger.info(
+                f"Deleted Class {class_id} "
+                f"- {deleted_class}"
+            )
             return deleted_class
 
         except SQLAlchemyError:
-            logger.exception(f"Database error while deleting Class {class_id}", exc_info=True)
+            logger.exception(
+                f"Database error "
+                f"while deleting Class {class_id}",
+                exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail=f"Database error "
                        f"while deleting class."
             )
         except Exception:
-            logger.exception(f"Unexpected error while deleting Class {class_id}", exc_info=True)
+            logger.exception(
+                f"Unexpected error "
+                f"while deleting Class {class_id}",
+                exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail=f"Unexpected error "

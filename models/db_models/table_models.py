@@ -63,6 +63,7 @@ class Class(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(index=True, nullable=False)
     race: str | None = None
+    dnd_class: str
     skills: Dict[str, int] = Field(
         sa_column=Column(JSON, nullable=False),
         default_factory=lambda: {

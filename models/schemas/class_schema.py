@@ -22,6 +22,7 @@ class ClassSkills(SQLModel):
 class ClassBase(SQLModel):
     """Base Class model that shares common definitions."""
     name: str
+    dnd_class: str
     race: str
     skills: ClassSkills
 
@@ -31,7 +32,9 @@ class ClassCreateInput(SQLModel):
     name: str
     race: str
     campaign_id: int
-    skills: Optional[ClassSkills] = Field(default_factory=ClassSkills)
+    skills: Optional[ClassSkills] = Field(
+        default_factory=ClassSkills
+    )
 
 
 class ClassCreate(ClassCreateInput):
@@ -45,6 +48,7 @@ class ClassCreate(ClassCreateInput):
 
 class ClassUpdate(SQLModel):
     """Model to update a existing class."""
+    dnd_class: Optional[str] = None
     skills: Optional[ClassSkills] = None
     notes: Optional[str] = None
     inventory: Optional[str] = None

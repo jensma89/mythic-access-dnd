@@ -40,7 +40,10 @@ def get_class_service(session: SessionDep) \
 @limiter.limit("10/minute")
 def read_class(
         request: Request,
-        class_id: int = Path(..., description="The ID of the class to retrieve."),
+        class_id: int = Path(
+            ...,
+            description="The ID of the class to retrieve."
+        ),
         current_user: User = Depends(get_current_user),
         service: ClassService = Depends(get_class_service)):
     """Endpoint to get a single dnd class."""
@@ -96,7 +99,10 @@ def create_class(
 def update_class(
         request: Request,
         dnd_class: ClassUpdate,
-        class_id: int = Path(..., description="The ID of the class to update."),
+        class_id: int = Path(
+            ...,
+            description="The ID of the class to update."
+        ),
         current_user: User = Depends(get_current_user),
         service: ClassService = Depends(get_class_service)):
     """Endpoint to change class data."""
@@ -104,13 +110,20 @@ def update_class(
     # Check if the user is the owner
     existing_class = service.get_class(class_id)
     if existing_class.user_id != current_user.id:
-        logger.warning(f"User {current_user.id} tried to update class {class_id} not owned by them")
+        logger.warning(
+            f"User {current_user.id} "
+            f"tried to update class {class_id} "
+            f"not owned by them"
+        )
         raise HTTPException(
             status_code=403,
             detail="Not allowed"
         )
 
-    logger.info(f"PATCH update class {class_id} by user {current_user.id}")
+    logger.info(
+        f"PATCH update class {class_id} "
+        f"by user {current_user.id}"
+    )
     updated = service.update_class(class_id, dnd_class)
     if not updated:
         logger.warning(f"Class {class_id} not found")
@@ -125,7 +138,10 @@ def update_class(
 @limiter.limit("5/minute")
 def delete_class(
         request: Request,
-        class_id: int = Path(..., description="The ID of the class to delete."),
+        class_id: int = Path(
+            ...,
+            description="The ID of the class to delete."
+        ),
         current_user: User = Depends(get_current_user),
         service: ClassService = Depends(get_class_service)):
     """Endpoint to delete a class by ID."""
@@ -133,13 +149,20 @@ def delete_class(
     # Check if the user is the owner
     existing_class = service.get_class(class_id)
     if existing_class.user_id != current_user.id:
-        logger.warning(f"User {current_user.id} tried to delete class {class_id} not owned by them")
+        logger.warning(
+            f"User {current_user.id} "
+            f"tried to delete class {class_id} "
+            f"not owned by them"
+        )
         raise HTTPException(
             status_code=403,
             detail="Not allowed"
         )
 
-    logger.info(f"DELETE class {class_id} by user {current_user.id}")
+    logger.info(
+        f"DELETE class {class_id} "
+        f"by user {current_user.id}"
+    )
     deleted = service.delete_class(class_id)
     if not deleted:
         logger.warning(f"Class {class_id} not found")
