@@ -45,7 +45,7 @@ class DiceRepository(ABC):
 
 
     @abstractmethod
-    def delete(self, dice_id: int) -> bool:
+    def delete(self, dice_id: int):
         """Method to remove a dice."""
         pass
 

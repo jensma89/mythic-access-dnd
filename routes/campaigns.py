@@ -3,11 +3,12 @@ campaigns.py
 
 The API routes for campaigns.
 """
+import logging
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Path, Request
 from dependencies import CampaignQueryParams, Pagination, SessionDep
 from models.schemas.campaign_schema import *
-from services.campaign_service import CampaignService
+from services.campaign.campaign_service import CampaignService
 from repositories.sql_campaign_repository import SqlAlchemyCampaignRepository
 from repositories.sql_class_repository import SqlAlchemyClassRepository
 from repositories.sql_diceset_repository import SqlAlchemyDiceSetRepository
@@ -15,7 +16,6 @@ from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
 from auth.auth import get_current_user
 from models.db_models.table_models import User
 from rate_limit import limiter
-import logging
 
 
 router = APIRouter(tags=["campaigns"])

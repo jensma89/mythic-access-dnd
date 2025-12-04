@@ -48,7 +48,7 @@ class CampaignRepository(ABC):
 
 
     @abstractmethod
-    def delete(self, campaign_id: int) -> bool:
+    def delete(self, campaign_id: int):
         """Method to remove a campaign."""
         pass
 

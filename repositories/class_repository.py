@@ -47,7 +47,7 @@ class ClassRepository(ABC):
 
 
     @abstractmethod
-    def delete(self, class_id: int) -> bool:
+    def delete(self, class_id: int):
         """Delete class method."""
         pass
 
