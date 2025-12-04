@@ -31,5 +31,5 @@ class DiceDeleteError(Exception):
 
 
 class DiceRollError(Exception):
-    """Raised when roll a dice fails."""
+    """Raised when rolling a dice fails."""
     pass
