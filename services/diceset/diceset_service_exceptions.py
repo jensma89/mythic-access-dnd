@@ -10,26 +10,26 @@ class DiceSetServiceError(Exception):
     pass
 
 
-class DiceSetNotFoundError(Exception):
+class DiceSetNotFoundError(DiceSetServiceError):
     """Raised when a dice set is not found."""
     pass
 
 
-class DiceSetCreateError(Exception):
+class DiceSetCreateError(DiceSetServiceError):
     """Raised when creating a dice set fails."""
     pass
 
 
-class DiceSetUpdateError(Exception):
+class DiceSetUpdateError(DiceSetServiceError):
     """Raised when updating a dice set fails."""
     pass
 
 
-class DiceSetDeleteError(Exception):
+class DiceSetDeleteError(DiceSetServiceError):
     """Raised when deleting a dice set fails"""
     pass
 
 
-class DiceSetRollError(Exception):
+class DiceSetRollError(DiceSetServiceError):
     """Raised when rolling a dice set fails."""
     pass

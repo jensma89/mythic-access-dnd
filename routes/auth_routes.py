@@ -11,7 +11,7 @@ from models.schemas.user_schema import UserCreate, UserMe, UserPublic
 from models.schemas.auth_schema import Token
 from auth.auth import get_current_user
 from dependencies import get_session
-from services.auth_service import AuthService
+from services.auth.auth_service import AuthService
 
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])

@@ -10,21 +10,21 @@ class ClassServiceError(Exception):
     pass
 
 
-class ClassNotFoundError(Exception):
+class ClassNotFoundError(ClassServiceError):
     """Raised when a dnd_class is not found."""
     pass
 
 
-class ClassCreateError(Exception):
+class ClassCreateError(ClassServiceError):
     """Raised when creating a dnd_class fails."""
     pass
 
 
-class ClassUpdateError(Exception):
+class ClassUpdateError(ClassServiceError):
     """Raised when updating a dnd_class fails."""
     pass
 
 
-class ClassDeleteError(Exception):
+class ClassDeleteError(ClassServiceError):
     """Raised when deleting a dnd_class fails"""
     pass

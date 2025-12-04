@@ -215,10 +215,14 @@ class CampaignService:
             )
             return deleted_campaign
 
+
+        except CampaignServiceError:
+            raise
+
         except Exception:
             logger.exception(
-                f"Error while deleting "
-                f"Campaign {campaign_id}",
-                exc_info=True
+                "Error while deleting campaign"
             )
-            raise CampaignServiceError("while deleting campaign.")
+            raise CampaignServiceError(
+                "Error while deleting campaign."
+            )

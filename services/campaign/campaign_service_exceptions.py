@@ -10,21 +10,21 @@ class CampaignServiceError(Exception):
     pass
 
 
-class CampaignNotFoundError(Exception):
+class CampaignNotFoundError(CampaignServiceError):
     """Raised when a campaign is not found."""
     pass
 
 
-class CampaignCreateError(Exception):
+class CampaignCreateError(CampaignServiceError):
     """Raised when creating a campaign fails."""
     pass
 
 
-class CampaignUpdateError(Exception):
+class CampaignUpdateError(CampaignServiceError):
     """Raised when updating a campaign fails."""
     pass
 
 
-class CampaignDeleteError(Exception):
+class CampaignDeleteError(CampaignServiceError):
     """Raised when deleting a campaign fails"""
     pass

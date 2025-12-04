@@ -10,21 +10,21 @@ class UserServiceError(Exception):
     pass
 
 
-class UserNotFoundError(Exception):
+class UserNotFoundError(UserServiceError):
     """Raised when a user is not found."""
     pass
 
 
-class UserCreateError(Exception):
+class UserCreateError(UserServiceError):
     """Raised when creating a user fails."""
     pass
 
 
-class UserUpdateError(Exception):
+class UserUpdateError(UserServiceError):
     """Raised when updating a user fails."""
     pass
 
 
-class UserDeleteError(Exception):
+class UserDeleteError(UserServiceError):
     """Raised when deleting a user fails"""
     pass

@@ -10,26 +10,26 @@ class DiceServiceError(Exception):
     pass
 
 
-class DiceNotFoundError(Exception):
+class DiceNotFoundError(DiceServiceError):
     """Raised when a dice is not found."""
     pass
 
 
-class DiceCreateError(Exception):
+class DiceCreateError(DiceServiceError):
     """Raised when creating a dice fails."""
     pass
 
 
-class DiceUpdateError(Exception):
+class DiceUpdateError(DiceServiceError):
     """Raised when updating a dice fails."""
     pass
 
 
-class DiceDeleteError(Exception):
+class DiceDeleteError(DiceServiceError):
     """Raised when deleting a dice fails"""
     pass
 
 
-class DiceRollError(Exception):
+class DiceRollError(DiceServiceError):
     """Raised when rolling a dice fails."""
     pass

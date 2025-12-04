@@ -44,15 +44,19 @@ class UserService:
         try:
             created_user = self.user_repo.add(user)
             if not created_user:
-                raise UserCreateError("Failed to create User.")
+                raise UserCreateError(
+                    "Failed to create User."
+                )
+            return created_user
+
+        except Exception:
             logger.error(
-                "Error "
-                "while creating user",
+                "Error while creating user",
                 exc_info=True
             )
-            return created_user
-        except Exception:
-            raise UserCreateError("Error while creating user.")
+            raise UserCreateError(
+                "Error while creating user."
+            )
 
 
     def get_user(self, user_id: int) \
@@ -61,15 +65,28 @@ class UserService:
         try:
             user = self.user_repo.get_by_id(user_id)
             if not user:
-                logger.warning(f"User {user_id} not found")
+                logger.warning(
+                    f"User {user_id} not found"
+                )
                 raise UserNotFoundError(
                     f"User with user ID {user_id} "
                     f"not found."
                 )
             logger.debug(f"Retrieved User {user_id}")
             return user
+
+        except UserNotFoundError:
+            raise
+
         except Exception:
-            raise UserServiceError("Error while retrieving user.")
+            logger.error(
+                f"Error while retrieving "
+                f"User {user_id}",
+                exc_info=True
+            )
+            raise UserServiceError(
+                "Error while retrieving user."
+            )
 
 
     def list_users(
@@ -118,11 +135,24 @@ class UserService:
                     "Error while updating user",
                     exc_info=True
                 )
-                raise UserUpdateError("Error while updating user.")
+                raise UserUpdateError(
+                    "Error while updating user."
+                )
             logger.info(f"Updated User {user_id}")
             return updated_user
+
+        except (UserNotFoundError, UserUpdateError):
+            raise
+
         except Exception:
-            raise UserUpdateError("Error while updating user.")
+            logger.error(
+                f"Error while updating "
+                f"user {user_id}",
+                exc_info=True
+            )
+            raise UserUpdateError(
+                "Error while updating user."
+            )
 
 
     def delete_user(self, user_id: int) -> Optional[UserPublic]:
@@ -179,13 +209,18 @@ class UserService:
             # Finally delete user
             deleted_user = self.user_repo.delete(user_id)
             if not deleted_user:
-                logger.error(f"Failed to delete User {user_id}")
-                raise UserDeleteError("Failed to delete user.")
+                logger.error(
+                    f"Failed to delete User {user_id}"
+                )
+                raise UserDeleteError(
+                    "Failed to delete user."
+                )
             logger.info(
                 f"Deleted User {user_id} "
                 f"- {deleted_user.user_name}"
             )
             return deleted_user
+
         except Exception:
             logger.error(
                 f"Error while deleting "
