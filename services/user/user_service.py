@@ -3,9 +3,9 @@ user_service.py
 
 Business logic for user.
 """
-from fastapi import HTTPException
-from sqlalchemy.exc import SQLAlchemyError
-from typing import List, Optional
+import logging
+from typing import List
+
 from dependencies import UserQueryParams
 from models.schemas.user_schema import *
 from repositories.user_repository import UserRepository
@@ -13,7 +13,6 @@ from repositories.campaign_repository import CampaignRepository
 from repositories.class_repository import ClassRepository
 from repositories.diceset_repository import DiceSetRepository
 from repositories.dicelog_repository import DiceLogRepository
-import logging
 
 
 

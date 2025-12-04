@@ -7,11 +7,10 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Path, Request
 from dependencies import Pagination, SessionDep, UserQueryParams
 from models.db_models.table_models import User
-from models.schemas.user_schema import (UserCreate,
-                                        UserUpdate,
+from models.schemas.user_schema import (UserUpdate,
                                         UserPublic)
 from repositories.sql_user_repository import SqlAlchemyUserRepository
-from services.user_service import UserService
+from services.user.user_service import UserService
 from repositories.sql_campaign_repository import SqlAlchemyCampaignRepository
 from repositories.sql_class_repository import SqlAlchemyClassRepository
 from repositories.sql_diceset_repository import SqlAlchemyDiceSetRepository
