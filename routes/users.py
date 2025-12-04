@@ -106,7 +106,8 @@ def update_user(
 def delete_user(
         request: Request,
         current_user: User = Depends(get_current_user),
-        service: UserService = Depends(get_user_service)):
+        service: UserService = Depends(get_user_service)
+):
     """Delete the authenticated user + all related resources."""
     logger.warning(f"DELETE /users/me/delete requested by user {current_user.id}")
 
