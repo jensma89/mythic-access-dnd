@@ -10,7 +10,7 @@ from models.schemas.user_schema import *
 
 
 class UserRepository(ABC):
-    """This class defines the management methods for users."""
+    """This dnd_class defines the management methods for users."""
 
     @abstractmethod
     def get_by_id(self, user_id: int) \

@@ -1,7 +1,7 @@
 """
 class_repository.py
 
-Defined methods for class management.
+Defined methods for dnd_class management.
 """
 from abc import ABC, abstractmethod
 from typing import List, Optional
@@ -10,12 +10,12 @@ from models.schemas.class_schema import *
 
 
 class ClassRepository(ABC):
-    """This class defines the management methods for classes."""
+    """This dnd_class defines the management methods for classes."""
 
     @abstractmethod
     def get_by_id(self, class_id: int) \
             -> Optional[ClassPublic]:
-        """Method to get class by ID."""
+        """Method to get dnd_class by ID."""
         pass
 
 
@@ -33,7 +33,7 @@ class ClassRepository(ABC):
     @abstractmethod
     def add(self, dnd_class: ClassCreate) \
             -> ClassPublic:
-        """Add new class method."""
+        """Add new dnd_class method."""
         pass
 
 
@@ -48,7 +48,7 @@ class ClassRepository(ABC):
 
     @abstractmethod
     def delete(self, class_id: int):
-        """Delete class method."""
+        """Delete dnd_class method."""
         pass
 
 

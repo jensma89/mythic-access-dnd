@@ -48,12 +48,12 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
 
     def list_by_class(self, class_id: int) \
             -> List[DiceSetPublic]:
-        """List all dice sets belonging to a specific class."""
+        """List all dice sets belonging to a specific dnd_class."""
         dicesets = self.session.exec(
             select(DiceSet)
             .where(DiceSet.class_id == class_id)
         ).all()
-        logger.debug(f"Retrieved {len(dicesets)} DiceSets for class {class_id}")
+        logger.debug(f"Retrieved {len(dicesets)} DiceSets for dnd_class {class_id}")
         return [DiceSetPublic.model_validate(d)
                 for d in dicesets]
 

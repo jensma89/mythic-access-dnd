@@ -1,7 +1,7 @@
 """
 sql_class_repository.py
 
-Concrete implementation for sqlalchemy, class management.
+Concrete implementation for sqlalchemy, dnd_class management.
 """
 from typing import List, Optional
 from sqlmodel import Session, select
@@ -16,8 +16,8 @@ logger = logging.getLogger(__name__)
 
 
 class SqlAlchemyClassRepository(ClassRepository):
-    """This class implement
-        the class handling methods with sqlalchemy."""
+    """This dnd_class implement
+        the dnd_class handling methods with sqlalchemy."""
 
     def __init__(self, session: Session):
         self.session = session
@@ -57,7 +57,7 @@ class SqlAlchemyClassRepository(ClassRepository):
 
     def list_by_class(self, class_id: int) \
             -> List[ClassPublic]:
-        """Return a single class as list."""
+        """Return a single dnd_class as list."""
         dnd_class = self.session.exec(
             select(Class)
             .where(Class.id == class_id)
@@ -78,7 +78,7 @@ class SqlAlchemyClassRepository(ClassRepository):
 
     def get_by_id(self, class_id: int) \
             -> Optional[ClassPublic]:
-        """Method to get a class by ID."""
+        """Method to get a dnd_class by ID."""
         db_class = self.session.get(Class, class_id)
         if db_class:
             logger.debug(f"Class found: {class_id} - {db_class.name}")
@@ -120,7 +120,7 @@ class SqlAlchemyClassRepository(ClassRepository):
 
     def add(self, dnd_class: ClassCreate) \
             -> ClassPublic:
-        """Method to create a new class."""
+        """Method to create a new dnd_class."""
         db_class = Class(**dnd_class.model_dump())
         self.session.add(db_class)
         self.session.commit()
@@ -133,12 +133,12 @@ class SqlAlchemyClassRepository(ClassRepository):
                class_id: int,
                dnd_class: ClassUpdate) \
             -> Optional[ClassPublic]:
-        """Method to change data from a class."""
+        """Method to change data from a dnd_class."""
         db_class = self.session.get(Class, class_id)
         if not db_class:
             logger.warning(
                 f"Attempted to update "
-                f"non-existing class {class_id}"
+                f"non-existing dnd_class {class_id}"
             )
             return None
         for key, value in dnd_class.model_dump(
@@ -148,7 +148,7 @@ class SqlAlchemyClassRepository(ClassRepository):
         self.session.commit()
         self.session.refresh(db_class)
         logger.info(
-            f"Updated class: {class_id} "
+            f"Updated dnd_class: {class_id} "
             f"- {db_class.name}"
         )
         return ClassPublic.model_validate(db_class)
@@ -156,15 +156,15 @@ class SqlAlchemyClassRepository(ClassRepository):
 
     def delete(self, class_id: int) \
             -> Optional[ClassPublic]:
-        """Method to remove a class."""
+        """Method to remove a dnd_class."""
         db_class = self.session.get(Class, class_id)
         if not db_class:
             logger.warning(
                 f"Attempted to delete "
-                f"non-existing class {class_id}"
+                f"non-existing dnd_class {class_id}"
             )
             return None
         self.session.delete(db_class)
         self.session.commit()
-        logger.info(f"Deleted class: {class_id} - {db_class.name}")
+        logger.info(f"Deleted dnd_class: {class_id} - {db_class.name}")
         return ClassPublic.model_validate(db_class)

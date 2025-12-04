@@ -3,15 +3,15 @@ class_service.py
 
 Business logic for classes.
 """
-from fastapi import HTTPException
-from sqlalchemy.exc import SQLAlchemyError
+import logging
+from typing import List
+
 from dependencies import ClassQueryParams
-from typing import List, Optional
 from models.schemas.class_schema import *
 from repositories.class_repository import ClassRepository
 from repositories.diceset_repository import DiceSetRepository
 from repositories.dicelog_repository import DiceLogRepository
-import logging
+from services.dnd_class.class_service_exceptions import *
 
 
 
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 class ClassService:
     """Business logic
-    for class service operations."""
+    for dnd_class service operations."""
 
     def __init__(
             self,
@@ -38,7 +38,7 @@ class ClassService:
             self,
             dnd_class: ClassCreate) \
             -> ClassPublic:
-        """Create a new class (max. 4 per campaign)."""
+        """Create a new dnd_class (max. 4 per campaign)."""
         try:
             #Check the count of classes for a campaign
             existing_classes = (
@@ -50,18 +50,19 @@ class ClassService:
                     f"Campaign {dnd_class.campaign_id} "
                     f"already has 4 classes"
                 )
-                raise HTTPException(
-                    status_code=400,
-                    detail="Campaign already has 4 classes. "
-                           "Maximum reached."
+                raise ClassCreateError(
+                    "Campaign already has 4 classes. "
+                    "Maximum reached."
                 )
-            # If limit not reached, create a new class
+
+            # If limit not reached, create a new dnd_class
             new_class = self.class_repo.add(dnd_class)
             if not new_class:
-                logger.warning("Class creation failed in repository")
-                raise HTTPException(
-                    status_code=400,
-                    detail="Failed to create a new class."
+                logger.warning(
+                    "Class creation failed in repository"
+                )
+                raise ClassCreateError(
+                    "Failed to create a new dnd_class."
                 )
             logger.info(
                 f"Created Class {new_class.id} "
@@ -69,27 +70,13 @@ class ClassService:
             )
             return new_class
 
-        except SQLAlchemyError:
-            logger.exception(
-                "Database error "
-                "while creating Class",
-                exc_info=True
-            )
-            raise HTTPException(
-                status_code=500,
-                detail=f"Database error "
-                       f"while create a class."
-            )
         except Exception:
             logger.exception(
-                "Unexpected error "
-                "while creating Class",
+                "Error while creating Class",
                 exc_info=True
             )
-            raise HTTPException(
-                status_code=500,
-                detail=f"Unexpected error "
-                       f"while create a class."
+            raise ClassServiceError(
+                "while create a dnd class."
             )
 
 
@@ -97,32 +84,32 @@ class ClassService:
             self,
             class_id: int) \
             -> Optional[ClassPublic]:
-        """Get the class by id."""
+        """Get the dnd_class by id."""
         try:
             dnd_class = (self.class_repo
                          .get_by_id(class_id))
             if not dnd_class:
-                logger.warning(f"Class {class_id} not found")
-                raise HTTPException(
-                    status_code=404,
-                    detail=f"Class with ID {class_id} "
-                           f"not found."
+                logger.warning(
+                    f"Class {class_id} not found"
+                )
+                raise ClassNotFoundError(
+                    f"Class with ID {class_id} "
+                    f"not found."
                 )
             logger.info(
                 f"Retrieved Class {class_id} "
                 f"- {dnd_class.name}"
             )
             return dnd_class
-        except SQLAlchemyError:
+
+        except Exception:
             logger.exception(
-                f"Database error "
-                f"while retrieving Class {class_id}",
+                f"Error while retrieving "
+                f"Class {class_id}",
                 exc_info=True
             )
-            raise HTTPException(
-                status_code=500,
-                detail=f"Database error "
-                       f"while retrieving class."
+            raise ClassServiceError(
+                "Error while retrieving dnd_class."
             )
 
 
@@ -146,16 +133,15 @@ class ClassService:
                 f" limit={limit})"
             )
             return classes
-        except SQLAlchemyError:
+
+        except Exception:
             logger.exception(
-                "Database error "
-                "while listing Classes",
+                "Error while "
+                "listing Classes",
                 exc_info=True
             )
-            raise HTTPException(
-                status_code=500,
-                detail=f"Database error "
-                       f"while listing classes."
+            raise ClassServiceError(
+                f"Error while listing classes."
             )
 
 
@@ -164,7 +150,7 @@ class ClassService:
             class_id: int,
             dnd_class: ClassUpdate) \
             -> Optional[ClassPublic]:
-        """Make changes by a class."""
+        """Make changes by a dnd_class."""
         try:
             updated_class = self.class_repo.update(
                 class_id,
@@ -174,10 +160,9 @@ class ClassService:
                     f"Class {class_id} "
                     f"not found for update"
                 )
-                raise HTTPException(
-                    status_code=404,
-                    detail=f"Class with ID {class_id} "
-                           f"not found."
+                raise ClassNotFoundError(
+                    f"Class with ID {class_id} "
+                    f"not found."
                 )
             logger.info(
                 f"Updated Class {class_id} "
@@ -185,32 +170,31 @@ class ClassService:
             )
             return updated_class
 
-        except SQLAlchemyError:
+        except Exception:
             logger.exception(
-                f"Database error "
-                f"while updating Class {class_id}",
+                f"Error while updating "
+                f"Class {class_id}",
                 exc_info=True
             )
-            raise HTTPException(
-                status_code=500,
-                detail=f"Database error "
-                       f"while updating class."
+            raise ClassServiceError(
+                f"Error while updating dnd_class."
             )
 
 
     def delete_class(
             self,
             class_id: int):
-        """Remove a class and the belonging entries:
+        """Remove a dnd_class and the belonging entries:
         dice sets and dice logs."""
         try:
             existing_class = self.class_repo.get_by_id(class_id)
             if not existing_class:
                 logger.warning(
-                    f"Class {class_id} not found for deletion")
-                raise HTTPException(
-                    status_code=404,
-                    detail=f"Class with ID {class_id} not found."
+                    f"Class {class_id} "
+                    f"not found for deletion"
+                )
+                raise ClassNotFoundError(
+                    f"Class with ID {class_id} not found."
                 )
 
             # Delete dice logs
@@ -226,13 +210,15 @@ class ClassService:
                     self.dicelog_repo.delete(log.id)
                 self.diceset_repo.delete(diceset.id)
 
-            # Finally delete class
+            # Finally delete dnd_class
             deleted_class = self.class_repo.delete(class_id)
             if not deleted_class:
-                logger.warning(f"Failed to delete Class {class_id}")
-                raise HTTPException(
-                    status_code=400,
-                    detail="Failed to delete class."
+                logger.warning(
+                    f"Failed to delete "
+                    f"Class {class_id}"
+                )
+                raise ClassServiceError(
+                    "Failed to delete dnd_class."
                 )
             logger.info(
                 f"Deleted Class {class_id} "
@@ -240,25 +226,12 @@ class ClassService:
             )
             return deleted_class
 
-        except SQLAlchemyError:
-            logger.exception(
-                f"Database error "
-                f"while deleting Class {class_id}",
-                exc_info=True
-            )
-            raise HTTPException(
-                status_code=500,
-                detail=f"Database error "
-                       f"while deleting class."
-            )
         except Exception:
             logger.exception(
-                f"Unexpected error "
-                f"while deleting Class {class_id}",
+                f"Error while deleting "
+                f"Class {class_id}",
                 exc_info=True
             )
-            raise HTTPException(
-                status_code=500,
-                detail=f"Unexpected error "
-                       f"while deleting class."
+            raise ClassServiceError(
+                "Error while deleting dnd_class."
             )

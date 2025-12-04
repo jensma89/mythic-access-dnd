@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 def get_user_service(session: SessionDep) \
         -> UserService:
     """Factory to get the user, campaign,
-    class, dice set and dice log service."""
+    dnd_class, dice set and dice log service."""
     user_repo = SqlAlchemyUserRepository(session)
     campaign_repo = SqlAlchemyCampaignRepository(session)
     class_repo = SqlAlchemyClassRepository(session)

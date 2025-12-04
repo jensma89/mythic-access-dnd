@@ -10,7 +10,7 @@ from models.schemas.campaign_schema import *
 
 
 class CampaignRepository(ABC):
-    """This class defines the management methods for campaigns."""
+    """This dnd_class defines the management methods for campaigns."""
 
     @abstractmethod
     def get_by_id(self, campaign_id: int) \

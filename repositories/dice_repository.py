@@ -10,7 +10,7 @@ from models.schemas.dice_schema import *
 
 
 class DiceRepository(ABC):
-    """This class defines the management methods for dices."""
+    """This dnd_class defines the management methods for dices."""
 
     @abstractmethod
     def get_by_id(self, dice_id: int) \
@@ -53,5 +53,5 @@ class DiceRepository(ABC):
     @abstractmethod
     def get_by_class_id(self, class_id: int) \
             -> List[DicePublic]:
-        """Get all dices belonging to a class."""
+        """Get all dices belonging to a dnd_class."""
         pass

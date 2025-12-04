@@ -78,6 +78,6 @@ class ClassQueryParams:
         description="Filter by campaign ID."),
     name: str | None = Query(
         None,
-        description="Filter by class name.")):
+        description="Filter by dnd_class name.")):
         self.campaign_id = campaign_id
         self.name = name

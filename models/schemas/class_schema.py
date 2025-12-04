@@ -38,7 +38,7 @@ class ClassCreateInput(SQLModel):
 
 
 class ClassCreate(ClassCreateInput):
-    """Intern model to create a class."""
+    """Intern model to create a dnd_class."""
     user_id: Optional[int] = None
 
     def set_user(self, user_id: int):
@@ -47,7 +47,7 @@ class ClassCreate(ClassCreateInput):
 
 
 class ClassUpdate(SQLModel):
-    """Model to update a existing class."""
+    """Model to update a existing dnd_class."""
     dnd_class: Optional[str] = None
     skills: Optional[ClassSkills] = None
     notes: Optional[str] = None

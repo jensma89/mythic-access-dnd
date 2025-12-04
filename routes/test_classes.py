@@ -1,7 +1,7 @@
 """
 test_classes.py
 
-Tests for class endpoints.
+Tests for dnd_class endpoints.
 """
 from fastapi.testclient import TestClient
 
@@ -37,7 +37,7 @@ def get_class_service(session):
 
 
 def test_create_class():
-    """Test creating a new class."""
+    """Test creating a new dnd_class."""
     session = next(get_test_session())
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
@@ -63,7 +63,7 @@ def test_create_class():
 
 
 def test_read_class_success():
-    """Test reading a class successfully."""
+    """Test reading a dnd_class successfully."""
     session = next(get_test_session())
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
@@ -88,7 +88,7 @@ def test_read_class_success():
 
 
 def test_read_class_not_found():
-    """Test reading a non-existing class returns 404."""
+    """Test reading a non-existing dnd_class returns 404."""
     session = next(get_test_session())
     user = create_test_user(session)
 
@@ -101,7 +101,7 @@ def test_read_class_not_found():
 
 
 def test_update_class_success():
-    """Test updating a class successfully."""
+    """Test updating a dnd_class successfully."""
     session = next(get_test_session())
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
@@ -131,7 +131,7 @@ def test_update_class_success():
 
 
 def test_update_class_forbidden():
-    """Test that updating a class
+    """Test that updating a dnd_class
     by another user is forbidden."""
     session = next(get_test_session())
     owner = create_test_user(session)
@@ -160,7 +160,7 @@ def test_update_class_forbidden():
 
 
 def test_delete_class_success():
-    """Test deleting a class successfully."""
+    """Test deleting a dnd_class successfully."""
     session = next(get_test_session())
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
@@ -185,7 +185,7 @@ def test_delete_class_success():
 
 
 def test_delete_class_forbidden():
-    """Test that deleting a class
+    """Test that deleting a dnd_class
     by another user is forbidden."""
     session = next(get_test_session())
     owner = create_test_user(session)

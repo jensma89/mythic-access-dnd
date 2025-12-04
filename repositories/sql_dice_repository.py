@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class SqlAlchemyDiceRepository(DiceRepository):
-    """This class implement
+    """This dnd_class implement
     the dice handling methods with sqlalchemy."""
 
     def __init__(self, session: Session):
@@ -95,11 +95,11 @@ class SqlAlchemyDiceRepository(DiceRepository):
 
     def get_by_class_id(self, class_id: int) \
             -> List[DicePublic]:
-        """Get all dices belonging to a class."""
+        """Get all dices belonging to a dnd_class."""
         dices = self.session.exec(
             select(Dice)
             .where(Dice.class_id == class_id)
         ).all()
-        logger.debug(f"Retrieved {len(dices)} dices for class {class_id}")
+        logger.debug(f"Retrieved {len(dices)} dices for dnd_class {class_id}")
         return [DicePublic.model_validate(d)
                 for d in dices]

@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class SqlAlchemyCampaignRepository(CampaignRepository):
-    """This class implement
+    """This dnd_class implement
     the campaign handling methods with sqlalchemy."""
     def __init__(self, session: Session):
         self.session = session

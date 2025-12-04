@@ -10,7 +10,7 @@ from models.schemas.dicelog_schema import *
 
 
 class DiceLogRepository(ABC):
-    """This class defines
+    """This dnd_class defines
     the management methods for dice logs."""
 
 
@@ -62,7 +62,7 @@ class DiceLogRepository(ABC):
     @abstractmethod
     def list_by_class(self, class_id: int) \
             -> List[DiceLogPublic]:
-        """List all dice logs belonging to a specific class."""
+        """List all dice logs belonging to a specific dnd_class."""
         pass
 
 

@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 def get_campaign_service(session: SessionDep) \
         -> CampaignService:
-    """Factory to get the campaign, class,
+    """Factory to get the campaign, dnd_class,
     dice set and dice log service."""
     campaign_repo = SqlAlchemyCampaignRepository(session)
     class_repo = SqlAlchemyClassRepository(session)

@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class SqlAlchemyDiceLogRepository(DiceLogRepository):
-    """This class implement
+    """This dnd_class implement
     the dice log handling methods with sqlalchemy."""
 
     def __init__(self, session: Session):
@@ -50,12 +50,12 @@ class SqlAlchemyDiceLogRepository(DiceLogRepository):
 
     def list_by_class(self, class_id: int) \
             -> List[DiceLogPublic]:
-        """List all dice logs belonging to a specific DnD class."""
+        """List all dice logs belonging to a specific DnD dnd_class."""
         dicelogs = self.session.exec(
             select(DiceLog)
             .where(DiceLog.class_id == class_id)
         ).all()
-        logger.debug(f"Retrieved {len(dicelogs)} DiceLogs for class {class_id}")
+        logger.debug(f"Retrieved {len(dicelogs)} DiceLogs for dnd_class {class_id}")
         return [DiceLogPublic.model_validate(d)
                 for d in dicelogs]
 

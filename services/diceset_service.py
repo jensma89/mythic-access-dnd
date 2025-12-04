@@ -34,12 +34,12 @@ class DiceSetService:
 
     def create_diceset(self, diceset: DiceSetCreate) -> DiceSetPublic:
         try:
-            # Validation max 5 sets per dnd class
+            # Validation max 5 sets per dnd dnd_class
             existing_sets = self.diceset_repo.get_by_class_id(diceset.class_id)
             logger.info(f"Creating DiceSet for Class {diceset.class_id}. Existing sets: {len(existing_sets)}")
             if len(existing_sets) >= 5:
                 logger.warning(f"Cannot create DiceSet for Class {diceset.class_id}: max 5 sets reached")
-                raise HTTPException(status_code=400, detail="Maximum of 5 dice sets per class reached.")
+                raise HTTPException(status_code=400, detail="Maximum of 5 dice sets per dnd_class reached.")
 
             # Check dice existence
             if self.dice_repo and diceset.dice_ids:
@@ -172,7 +172,7 @@ class DiceSetService:
             self,
             diceset_id: int) \
             -> Optional[DiceSetPublic]:
-        """Remove a class and the belonging entries:
+        """Remove a dnd_class and the belonging entries:
         dice sets and dice logs."""
         try:
             # Delete dice logs

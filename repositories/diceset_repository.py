@@ -10,7 +10,7 @@ from models.schemas.diceset_schema import *
 
 
 class DiceSetRepository(ABC):
-    """This class defines the management methods for dice sets."""
+    """This dnd_class defines the management methods for dice sets."""
 
     @abstractmethod
     def get_by_id(self, diceset_id: int) \
@@ -53,7 +53,7 @@ class DiceSetRepository(ABC):
     @abstractmethod
     def get_by_class_id(self, class_id: int) \
             -> List[DiceSetPublic]:
-        """Get all dice sets belonging to a class."""
+        """Get all dice sets belonging to a dnd_class."""
         pass
 
 
@@ -74,5 +74,5 @@ class DiceSetRepository(ABC):
     @abstractmethod
     def list_by_class(self, class_id: int) \
             -> List[DiceSetPublic]:
-        """List all dice sets belonging to a specific DnD class."""
+        """List all dice sets belonging to a specific DnD dnd_class."""
         pass
