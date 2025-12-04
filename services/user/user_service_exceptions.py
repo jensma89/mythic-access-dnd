@@ -22,7 +22,9 @@ class UserCreateError(Exception):
 
 class UserUpdateError(Exception):
     """Raised when updating a user fails."""
+    pass
 
 
 class UserDeleteError(Exception):
     """Raised when deleting a user fails"""
+    pass

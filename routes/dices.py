@@ -9,7 +9,7 @@ from dependencies import Pagination, SessionDep
 from models.schemas.dice_schema import *
 from repositories.sql_dice_repository import SqlAlchemyDiceRepository
 from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
-from services.dice_service import DiceService
+from services.dice.dice_service import DiceService
 from auth.auth import get_current_user
 from models.db_models.table_models import User
 from rate_limit import limiter

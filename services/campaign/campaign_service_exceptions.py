@@ -22,7 +22,9 @@ class CampaignCreateError(Exception):
 
 class CampaignUpdateError(Exception):
     """Raised when updating a campaign fails."""
+    pass
 
 
 class CampaignDeleteError(Exception):
     """Raised when deleting a campaign fails"""
+    pass

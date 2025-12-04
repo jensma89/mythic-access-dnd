@@ -22,7 +22,9 @@ class ClassCreateError(Exception):
 
 class ClassUpdateError(Exception):
     """Raised when updating a dnd_class fails."""
+    pass
 
 
 class ClassDeleteError(Exception):
     """Raised when deleting a dnd_class fails"""
+    pass
