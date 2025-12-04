@@ -76,7 +76,7 @@ class ClassService:
                 exc_info=True
             )
             raise ClassServiceError(
-                "while create a dnd class."
+                "while create a dnd dnd_class."
             )
 
 

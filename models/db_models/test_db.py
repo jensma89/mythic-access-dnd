@@ -6,7 +6,7 @@ from sqlmodel import SQLModel, create_engine, Session
 
 
 # Remove old test DB file so tests start with a clean DB
-TEST_DB_PATH = "./test.db"
+TEST_DB_PATH = "./test.db.sql"
 if os.path.exists(TEST_DB_PATH):
     os.remove(TEST_DB_PATH)
 

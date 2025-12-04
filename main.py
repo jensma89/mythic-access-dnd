@@ -11,7 +11,13 @@ from slowapi.middleware import SlowAPIMiddleware
 from slowapi.errors import RateLimitExceeded
 from rate_limit import limiter
 from fastapi.middleware.cors import CORSMiddleware
-from routes import auth_routes, campaigns, classes, dices, dicesets, dicelogs, users
+from routes.user import users
+from routes.dnd_class import dnd_classes
+from routes.diceset import dicesets
+from routes.dicelog import dicelogs
+from routes.dice import dices
+from routes.campaign import campaigns
+from routes.auth import auth_routes
 import logging
 
 
@@ -64,7 +70,7 @@ app.add_middleware(
 app.include_router(auth_routes.router)
 app.include_router(users.router)
 app.include_router(campaigns.router)
-app.include_router(classes.router)
+app.include_router(dnd_classes.router)
 app.include_router(dices.router)
 app.include_router(dicesets.router)
 app.include_router(dicelogs.router)

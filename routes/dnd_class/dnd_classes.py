@@ -1,5 +1,5 @@
 """
-classes.py
+dnd_classes.py
 
 The API endpoints for classes.
 """
