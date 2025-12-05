@@ -4,7 +4,7 @@ table_models.py
 Table models for DB.
 """
 from sqlmodel import Column, Field, Relationship, SQLModel
-from sqlalchemy import JSON, UniqueConstraint
+from sqlalchemy import DateTime, JSON, Text, UniqueConstraint
 from datetime import datetime, timezone
 from typing import Dict, List, Optional
 
@@ -21,7 +21,12 @@ class User(SQLModel, table=True):
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc)
     )
-    updated_at: datetime | None = None
+    updated_at: datetime | None = Field(
+        sa_column=Column(
+            DateTime(timezone=True),
+            onupdate=datetime.now(timezone.utc)
+        )
+    )
 
     # Relationship to campaign
     campaigns: List["Campaign"] = Relationship(
@@ -49,6 +54,7 @@ class Campaign(SQLModel, table=True):
     title: str = Field(index=True)
     genre: str | None = None
     description: str | None = Field(
+        sa_column=Column(Text, nullable=True),
         default=None,
         description="Story of the campaign"
     )
@@ -105,8 +111,8 @@ class Class(SQLModel, table=True):
 
         }
     )
-    notes: str | None = None
-    inventory: str | None = None
+    notes: str | None = Field(sa_column=Column(Text, nullable=True))
+    inventory: str | None = Field(sa_column=Column(Text, nullable=True))
     campaign_id: int = Field(
         foreign_key="campaign.id",
         nullable=False,
@@ -119,10 +125,10 @@ class Class(SQLModel, table=True):
     )
 
     # Link to Campaign
-    campaign: "Campaign" = Relationship(back_populates="classes")
+    campaign: Optional["Campaign"] = Relationship(back_populates="classes")
 
     # Link to DiceSet
-    dice_sets: List["DiceSet"] = Relationship(back_populates="class_")
+    dice_sets: List["DiceSet"] = Relationship(back_populates="dnd_class_")
 
     def __repr__(self):
         return f"<Class id={self.id} name={self.name} campaign_id={self.campaign_id}>"
@@ -135,8 +141,9 @@ class DiceSetDice(SQLModel, table=True):
     dice_id: int = Field(foreign_key="dice.id", primary_key=True)
     quantity: int = Field(default=1)
 
-    diceset: "DiceSet" = Relationship(back_populates="dice_entries")
-    dice: "Dice" = Relationship(back_populates="dice_entries")
+    diceset: Optional["DiceSet"] = Relationship(back_populates="dice_entries")
+
+    dice: Optional["Dice"] = Relationship(back_populates="dice_entries")
 
 
 class DiceSet(SQLModel, table=True):
@@ -152,7 +159,7 @@ class DiceSet(SQLModel, table=True):
     dice_entries: List[DiceSetDice] = Relationship(back_populates="diceset")
 
     # Relationship to Class
-    dnd_class_: "Class" = Relationship(back_populates="dice_sets")
+    dnd_class_: Optional["Class"] = Relationship(back_populates="dice_sets")
 
     # Many-to-many relationship to Dice
     dices: List["Dice"] = Relationship(
@@ -162,7 +169,7 @@ class DiceSet(SQLModel, table=True):
     )
 
     def __repr__(self):
-        return f"<DiceSet id={self.id} name={self.name} dnd_class_id={self.class_id}>"
+        return f"<DiceSet id={self.id} name={self.name} dnd_class_id={self.dnd_class_id}>"
 
 
 class Dice(SQLModel, table=True):
