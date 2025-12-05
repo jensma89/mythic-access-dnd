@@ -6,7 +6,7 @@ Tests for campaign endpoints.
 from fastapi.testclient import TestClient
 
 from main import app
-from dependencies import get_session
+from dependencies import get_session as prod_get_session
 from models.db_models.test_db import get_session as get_test_session
 from auth.test_helpers import create_test_user, get_test_token
 from services.campaign.campaign_service import CampaignService
@@ -18,7 +18,7 @@ from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
 
 
 # Override DB dependency
-app.dependency_overrides[get_session] = get_test_session
+app.dependency_overrides[prod_get_session] = get_test_session
 client = TestClient(app)
 
 

@@ -30,6 +30,7 @@ class ClassBase(SQLModel):
 class ClassCreateInput(SQLModel):
     """Input model for request body."""
     name: str
+    dnd_class: str
     race: str
     campaign_id: int
     skills: Optional[ClassSkills] = Field(

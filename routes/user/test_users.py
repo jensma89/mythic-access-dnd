@@ -6,14 +6,14 @@ Test the user endpoints.
 from fastapi.testclient import TestClient
 
 from main import app
-from dependencies import get_session
+from dependencies import get_session as prod_get_session
 from models.db_models.test_db import get_session as get_test_session
 from auth.test_helpers import create_test_user, get_test_token
 
 
 
 # Override DB with test DB
-app.dependency_overrides[get_session] = get_test_session
+app.dependency_overrides[prod_get_session] = get_test_session
 
 client = TestClient(app)
 
@@ -24,7 +24,6 @@ def auth_header(user):
     return {"Authorization": f"Bearer {token}"}
 
 
-# GET /users/{id}
 
 def test_get_single_user():
     """Test to retrieve a single user by ID."""
@@ -65,7 +64,6 @@ def test_get_single_user_unauthorized():
     assert response.status_code == 401
 
 
-# GET /users/
 
 def test_list_users():
     """Test list users."""
@@ -90,7 +88,6 @@ def test_list_users_unauthorized():
     assert response.status_code == 401
 
 
-# PATCH /users/me/update
 
 def test_update_user():
     """Test for update a user."""
@@ -117,7 +114,6 @@ def test_update_user_unauthorized():
     assert response.status_code == 401
 
 
-# DELETE /users/me/delete
 
 def test_delete_user():
     session = next(get_test_session())

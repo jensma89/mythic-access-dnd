@@ -12,47 +12,75 @@ from typing import Dict, List, Optional
 
 class User(SQLModel, table=True):
     """The table model for users."""
+    __tablename__ = "user"
+
     id: int | None = Field(default=None, primary_key=True)
     user_name: str = Field(unique=True, index=True)
     email: str = Field(unique=True, index=True)
     hashed_password: str
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )
     updated_at: datetime | None = None
 
     # Relationship to campaign
-    campaigns: List["Campaign"] = Relationship(back_populates="creator")
+    campaigns: List["Campaign"] = Relationship(
+        back_populates="creator"
+    )
 
     def __repr__(self):
-        return f"<User id={self.id} user_name={self.user_name} email={self.email}>"
+        return (f"<User id={self.id} "
+                f"user_name={self.user_name} "
+                f"email={self.email}>")
 
 
 class Campaign(SQLModel, table=True):
     """Model to create a campaigns table."""
+    __tablename__ = "campaign"
+
     __table_args__ = (
-        UniqueConstraint("title",
-                         "created_by",
-                         name="uq_user_title"),
+        UniqueConstraint(
+            "title",
+            "created_by",
+            name="uq_user_title"
+        ),
     )
     id: int | None = Field(default=None, primary_key=True)
     title: str = Field(index=True)
     genre: str | None = None
-    description: str | None = Field(default=None, description="Story of the campaign")
+    description: str | None = Field(
+        default=None,
+        description="Story of the campaign"
+    )
     max_classes: int
     created_by: int = Field(foreign_key="user.id")
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(
+        default_factory=lambda:
+        datetime.now(timezone.utc)
+    )
 
     # ORM link to User
-    creator: Optional[User] = Relationship(back_populates="campaigns")
+    creator: Optional[User] = Relationship(
+        back_populates="campaigns"
+    )
 
     # Relationship to Class
-    classes: List["Class"] = Relationship(back_populates="campaign")
+    classes: List["Class"] = Relationship(
+        back_populates="campaign"
+    )
 
     def __repr__(self):
-        return f"<Campaign id={self.id} title={self.title} created_by={self.created_by}>"
+        return (
+            f"<Campaign id={self.id} "
+            f"title={self.title} "
+            f"created_by={self.created_by}>"
+        )
 
 
 class Class(SQLModel, table=True):
-    """Table model for classes."""
+    """Table model for dnd classes."""
+    __tablename__ = "dnd_class"
+
     __table_args__ = (
         UniqueConstraint(
             "name",
@@ -79,10 +107,16 @@ class Class(SQLModel, table=True):
     )
     notes: str | None = None
     inventory: str | None = None
-    campaign_id: int = Field(foreign_key="campaign.id",
-                             nullable=False,
-                             index=True)
-    user_id: int = Field(foreign_key="user.id", nullable=False, index=True)
+    campaign_id: int = Field(
+        foreign_key="campaign.id",
+        nullable=False,
+        index=True
+    )
+    user_id: int = Field(
+        foreign_key="user.id",
+        nullable=False,
+        index=True
+    )
 
     # Link to Campaign
     campaign: "Campaign" = Relationship(back_populates="classes")
@@ -107,16 +141,18 @@ class DiceSetDice(SQLModel, table=True):
 
 class DiceSet(SQLModel, table=True):
     """Table model for dice sets."""
+    __tablename__ = "diceset"
+
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(default="Dice set", nullable=False)
-    class_id: int = Field(foreign_key="dnd_class.id", nullable=False)
+    dnd_class_id: int = Field(foreign_key="dnd_class.id", nullable=False)
     campaign_id: int = Field(foreign_key="campaign.id", nullable=False)
     user_id: int = Field(foreign_key="user.id", nullable=False, index=True)
 
     dice_entries: List[DiceSetDice] = Relationship(back_populates="diceset")
 
     # Relationship to Class
-    class_: "Class" = Relationship(back_populates="dice_sets")
+    dnd_class_: "Class" = Relationship(back_populates="dice_sets")
 
     # Many-to-many relationship to Dice
     dices: List["Dice"] = Relationship(
@@ -126,11 +162,13 @@ class DiceSet(SQLModel, table=True):
     )
 
     def __repr__(self):
-        return f"<DiceSet id={self.id} name={self.name} class_id={self.class_id}>"
+        return f"<DiceSet id={self.id} name={self.name} dnd_class_id={self.class_id}>"
 
 
 class Dice(SQLModel, table=True):
     """Different dices table model."""
+    __tablename__ = "dice"
+
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(index=True, nullable=False)
     sides: int
@@ -146,6 +184,8 @@ class Dice(SQLModel, table=True):
 
 class DiceLog(SQLModel, table=True):
     """Table model for dice logs."""
+    __tablename__ = "dicelog"
+
     id: int | None = Field(default=None, primary_key=True)
     timestamp: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
@@ -153,7 +193,7 @@ class DiceLog(SQLModel, table=True):
     user_id: int = Field(foreign_key="user.id", nullable=False)
     campaign_id: int = Field(foreign_key="campaign.id", nullable=False)
     diceset_id: int | None = Field(foreign_key="diceset.id", nullable=True)
-    class_id: int = Field(foreign_key="dnd_class.id", nullable=False)
+    dnd_class_id: int = Field(foreign_key="dnd_class.id", nullable=False)
     roll: str = Field(nullable=False)
     result: int = Field(nullable=False)
 

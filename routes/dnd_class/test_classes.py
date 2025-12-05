@@ -6,10 +6,10 @@ Tests for dnd_class endpoints.
 from fastapi.testclient import TestClient
 
 from main import app
-from dependencies import get_session
+from dependencies import get_session as prod_get_session
 from models.db_models.test_db import get_session as get_test_session
 from auth.test_helpers import create_test_user, get_test_token, create_test_campaign
-from services.class_service import ClassService
+from services.dnd_class.class_service import ClassService
 from models.schemas.class_schema import ClassCreate, ClassUpdate, ClassSkills
 from repositories.sql_class_repository import SqlAlchemyClassRepository
 from repositories.sql_diceset_repository import SqlAlchemyDiceSetRepository
@@ -17,7 +17,7 @@ from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
 
 
 # Override DB dependency
-app.dependency_overrides[get_session] = get_test_session
+app.dependency_overrides[prod_get_session] = get_test_session
 client = TestClient(app)
 
 
@@ -44,7 +44,8 @@ def test_create_class():
 
     # Create payload with required skills
     payload = ClassCreate(
-        name="Wizard",
+        name="Testurion",
+        dnd_class="Warrior",
         race="Human",
         campaign_id=campaign.id,
         skills=ClassSkills()
@@ -58,7 +59,7 @@ def test_create_class():
     )
     assert response.status_code == 200
     data = response.json()
-    assert data["name"] == "Wizard"
+    assert data["name"] == "Testurion"
     assert data["user_id"] == user.id
 
 
@@ -71,7 +72,8 @@ def test_read_class_success():
     service = get_class_service(session)
 
     payload = ClassCreate(
-        name="Fighter",
+        name="Fidus",
+        dnd_class="Mage",
         race="Human",
         campaign_id=campaign.id,
         skills=ClassSkills()
@@ -109,7 +111,8 @@ def test_update_class_success():
     service = get_class_service(session)
 
     payload = ClassCreate(
-        name="Rogue",
+        name="Aldrion",
+        dnd_class="Rogue",
         race="Elf",
         campaign_id=campaign.id,
         skills=ClassSkills()
@@ -141,7 +144,8 @@ def test_update_class_forbidden():
     service = get_class_service(session)
 
     payload = ClassCreate(
-        name="Paladin",
+        name="Hannes",
+        dnd_class="Paladin",
         race="Human",
         campaign_id=campaign.id,
         skills=ClassSkills()
@@ -168,7 +172,8 @@ def test_delete_class_success():
     service = get_class_service(session)
 
     payload = ClassCreate(
-        name="Cleric",
+        name="Schimli",
+        dnd_class="Ranger",
         race="Dwarf",
         campaign_id=campaign.id,
         skills=ClassSkills()
@@ -195,7 +200,8 @@ def test_delete_class_forbidden():
     service = get_class_service(session)
 
     payload = ClassCreate(
-        name="Bard",
+        name="Songus",
+        dnd_class="Bard",
         race="Halfling",
         campaign_id=campaign.id,
         skills=ClassSkills()

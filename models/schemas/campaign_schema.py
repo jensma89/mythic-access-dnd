@@ -3,7 +3,6 @@ campaign_schema.py
 
 Request/response schemas for campaigns.
 """
-from sqlalchemy.testing import exclude
 from sqlmodel import Field, SQLModel
 from datetime import datetime
 from typing import Optional

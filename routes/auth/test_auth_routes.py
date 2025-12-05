@@ -6,14 +6,14 @@ Test the auth endpoints for register/login and users/me.
 from fastapi.testclient import TestClient
 
 from main import app
-from dependencies import get_session
+from dependencies import get_session as prod_get_session
 from models.db_models.test_db import get_session as get_test_session
 from auth.test_helpers import create_test_user, get_test_token
 
 
 
 # Override the DB dependency for tests
-app.dependency_overrides[get_session] = get_test_session
+app.dependency_overrides[prod_get_session] = get_test_session
 
 client = TestClient(app)
 
