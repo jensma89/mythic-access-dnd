@@ -3,7 +3,7 @@ auth_routes.py
 
 API endpoints to handle authentication operations.
 """
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends,HTTPException, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from rate_limit import limiter
 from sqlmodel import Session
@@ -12,6 +12,7 @@ from models.schemas.auth_schema import Token
 from auth.auth import get_current_user
 from dependencies import get_session
 from services.auth.auth_service import AuthService
+from services.auth.auth_service_exceptions import UserAlreadyExistsError, InvalidCredentialsError
 
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -25,12 +26,18 @@ def register_user(
         user_data: UserCreate,
         session: Session = Depends(get_session)):
     """Endpoint to register a new user."""
-    db_user = auth_service.register_user(session, user_data)
+    try:
+        db_user = auth_service.register_user(session, user_data)
+    except UserAlreadyExistsError:
+        raise HTTPException(
+            status_code=400,
+            detail="User already exists."
+        )
     return UserPublic(
         id=db_user.id,
         user_name=db_user.user_name,
         created_at=db_user.created_at
-    )
+        )
 
 
 @router.post("/login", response_model=Token)
@@ -41,11 +48,17 @@ def login_for_access_token(
         session: Session = Depends(get_session)
 ):
     """Endpoint to authenticate a user via login."""
-    return auth_service.login(
-        session=session,
-        login=form_data.username,
-        password=form_data.password
-    )
+    try:
+        return auth_service.login(
+            session=session,
+            login=form_data.username,
+            password=form_data.password
+        )
+    except InvalidCredentialsError:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid credentials."
+        )
 
 
 @router.get("/me", response_model=UserMe)

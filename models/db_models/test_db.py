@@ -3,7 +3,6 @@ test_db.py
 
 
 """
-
 import os
 from sqlmodel import SQLModel, create_engine, Session
 from models.db_models.table_models import (
@@ -28,8 +27,11 @@ test_engine = create_engine(
     connect_args={"check_same_thread": False}
 )
 
-# Create tables
+
+# Drop & recreate all tables once at the start
+SQLModel.metadata.drop_all(test_engine)
 SQLModel.metadata.create_all(test_engine)
+
 
 # Helper: create session
 def get_session():

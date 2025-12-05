@@ -70,7 +70,7 @@ def test_me():
     token = get_test_token(test_user)
 
     response = client.get(
-        "auth/me",
+        "/auth/me",
         headers={"Authorization": f"Bearer {token}"}
     )
 

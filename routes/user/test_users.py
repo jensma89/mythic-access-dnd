@@ -88,7 +88,6 @@ def test_list_users_unauthorized():
     assert response.status_code == 401
 
 
-
 def test_update_user():
     """Test for update a user."""
     session = next(get_test_session())
