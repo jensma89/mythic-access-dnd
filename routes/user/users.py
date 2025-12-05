@@ -5,6 +5,7 @@ The API endpoints for users.
 """
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Path, Request
+
 from dependencies import Pagination, SessionDep, UserQueryParams
 from models.db_models.table_models import User
 from models.schemas.user_schema import UserUpdate, UserPublic
@@ -18,7 +19,7 @@ from auth.auth import get_current_user
 from rate_limit import limiter
 import logging
 
-
+from services.user.user_service_exceptions import UserNotFoundError
 
 router = APIRouter(tags=["users"])
 logger = logging.getLogger(__name__)
@@ -50,14 +51,24 @@ def read_user(
         service: UserService = Depends(get_user_service)):
     """Endpoint to get a single user."""
     logger.debug(f"GET /users/{user_id} requested")
-    user = service.get_user(user_id)
-    if not user:
-        logger.warning(f"User {user_id} not found")
+    try:
+        user = service.get_user(user_id)
+        return user
+    except UserNotFoundError:
+        logger.warning(f"User {user_id} not found.")
         raise HTTPException(
             status_code=404,
             detail="User not found."
         )
-    return user
+    except Exception:
+        logger.error(
+            f"Unexpected error while "
+            f"retrieving User {user_id}"
+        )
+        raise HTTPException(
+            status_code=500,
+            detail="Internal server error."
+        )
 
 
 @router.get("/users/",
@@ -91,11 +102,17 @@ def update_user(
     updated = service.update_user(current_user.id, user)
 
     if not updated:
-        logger.error(f"Update failed, User {current_user.id} not found")
+        logger.error(
+            f"Update failed, "
+            f"User {current_user.id} not found"
+        )
         raise HTTPException(
             status_code=404,
             detail="User not found")
-    logger.info(f"User {current_user.id} updated successfully.")
+    logger.info(
+        f"User {current_user.id} "
+        f"updated successfully."
+    )
     return updated
 
 
