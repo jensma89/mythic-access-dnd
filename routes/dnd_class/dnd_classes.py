@@ -11,6 +11,7 @@ from services.dnd_class.class_service import ClassService
 from repositories.sql_class_repository import SqlAlchemyClassRepository
 from repositories.sql_diceset_repository import SqlAlchemyDiceSetRepository
 from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
+from services.dnd_class.class_service_exceptions import ClassNotFoundError, ClassServiceError
 from auth.auth import get_current_user
 from models.db_models.table_models import User
 from rate_limit import limiter
@@ -19,7 +20,6 @@ import logging
 
 router = APIRouter(tags=["classes"])
 logger = logging.getLogger(__name__)
-
 
 
 def get_class_service(session: SessionDep) \
@@ -48,13 +48,21 @@ def read_class(
         service: ClassService = Depends(get_class_service)):
     """Endpoint to get a single dnd dnd_class."""
     logger.info(f"GET dnd_class {class_id} by user {current_user.id}")
-    dnd_class = service.get_class(class_id)
-    if not dnd_class:
-        logger.warning(f"Class {class_id} not found")
+    try:
+        dnd_class = service.get_class(class_id)
+
+        if dnd_class.user_id != current_user.id:
+            raise HTTPException(
+                status_code=403,
+                detail="Not allowed"
+            )
+        return dnd_class
+
+    except ClassNotFoundError:
         raise HTTPException(
             status_code=404,
-            detail="Class not found.")
-    return dnd_class
+            detail="Class not found"
+        )
 
 
 @router.get("/classes/",
@@ -147,26 +155,19 @@ def delete_class(
     """Endpoint to delete a dnd_class by ID."""
 
     # Check if the user is the owner
-    existing_class = service.get_class(class_id)
-    if existing_class.user_id != current_user.id:
-        logger.warning(
-            f"User {current_user.id} "
-            f"tried to delete dnd_class {class_id} "
-            f"not owned by them"
-        )
-        raise HTTPException(
-            status_code=403,
-            detail="Not allowed"
-        )
+    try:
+        existing_class = service.get_class(class_id)
 
-    logger.info(
-        f"DELETE dnd_class {class_id} "
-        f"by user {current_user.id}"
-    )
-    deleted = service.delete_class(class_id)
-    if not deleted:
-        logger.warning(f"Class {class_id} not found")
+        if existing_class.user_id != current_user.id:
+            raise HTTPException(
+                status_code=403,
+                detail="Not allowed"
+            )
+        deleted = service.delete_class(class_id)
+        return deleted
+
+    except ClassNotFoundError:
         raise HTTPException(
             status_code=404,
-            detail="Class not found.")
-    return deleted
+            detail="Class not found"
+        )

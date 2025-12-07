@@ -3,11 +3,11 @@ sql_diceset_repository.py
 
 Concrete implementation for sqlalchemy, dice set management.
 """
-from typing import List, Optional
 from sqlmodel import Session, select, delete
 from models.db_models.table_models import Dice, DiceSet, DiceSetDice
 from models.schemas.diceset_schema import *
 from repositories.diceset_repository import DiceSetRepository
+from typing import List, Optional
 import logging
 
 
@@ -46,22 +46,22 @@ class SqlAlchemyDiceSetRepository(DiceSetRepository):
                 for d in dicesets]
 
 
-    def list_by_class(self, class_id: int) \
+    def list_by_class(self, dnd_class_id: int) \
             -> List[DiceSetPublic]:
         """List all dice sets belonging to a specific dnd_class."""
         dicesets = self.session.exec(
             select(DiceSet)
-            .where(DiceSet.class_id == class_id)
+            .where(DiceSet.dnd_class_id == dnd_class_id)
         ).all()
-        logger.debug(f"Retrieved {len(dicesets)} DiceSets for dnd_class {class_id}")
+        logger.debug(f"Retrieved {len(dicesets)} DiceSets for dnd_class {dnd_class_id}")
         return [DiceSetPublic.model_validate(d)
                 for d in dicesets]
 
 
-    def get_by_class_id(self, class_id: int) \
+    def get_by_class_id(self, dnd_class_id: int) \
             -> List[DiceSetPublic]:
         """Legacy alias for list_by_class."""
-        return self.list_by_class(class_id)
+        return self.list_by_class(dnd_class_id)
 
 
     def get_by_id(self, diceset_id: int) \

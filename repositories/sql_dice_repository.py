@@ -3,11 +3,11 @@ sql_dice_repository.py
 
 Concrete implementation of sqlalchemy, dice management.
 """
-from typing import List, Optional
 from sqlmodel import Session, select
 from models.db_models.table_models import Dice
 from models.schemas.dice_schema import *
 from repositories.dice_repository import DiceRepository
+from typing import List, Optional
 import logging
 
 

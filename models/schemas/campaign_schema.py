@@ -3,7 +3,7 @@ campaign_schema.py
 
 Request/response schemas for campaigns.
 """
-from sqlmodel import Field, SQLModel
+from sqlmodel import SQLModel
 from datetime import datetime
 from typing import Optional
 

@@ -4,8 +4,8 @@ dicelog_repository.py
 Defined methods for dice log management.
 """
 from abc import ABC, abstractmethod
-from typing import List, Optional
 from models.schemas.dicelog_schema import *
+from typing import List, Optional
 
 
 

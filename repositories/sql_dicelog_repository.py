@@ -3,11 +3,11 @@ sql_dicelog_repository.py
 
 Concrete implementation for sqlalchemy, campaign management.
 """
-from typing import List, Optional
 from sqlmodel import Session, select
 from models.db_models.table_models import DiceLog
 from models.schemas.dicelog_schema import *
 from repositories.dicelog_repository import DiceLogRepository
+from typing import List, Optional
 import logging
 
 
@@ -48,14 +48,14 @@ class SqlAlchemyDiceLogRepository(DiceLogRepository):
                 for l in dicelogs]
 
 
-    def list_by_class(self, class_id: int) \
+    def list_by_class(self, dnd_class_id: int) \
             -> List[DiceLogPublic]:
         """List all dice logs belonging to a specific DnD dnd_class."""
         dicelogs = self.session.exec(
             select(DiceLog)
-            .where(DiceLog.class_id == class_id)
+            .where(DiceLog.dnd_class_id == dnd_class_id)
         ).all()
-        logger.debug(f"Retrieved {len(dicelogs)} DiceLogs for dnd_class {class_id}")
+        logger.debug(f"Retrieved {len(dicelogs)} DiceLogs for dnd_class {dnd_class_id}")
         return [DiceLogPublic.model_validate(d)
                 for d in dicelogs]
 

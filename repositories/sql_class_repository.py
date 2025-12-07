@@ -3,11 +3,11 @@ sql_class_repository.py
 
 Concrete implementation for sqlalchemy, dnd_class management.
 """
-from typing import List, Optional
 from sqlmodel import Session, select
 from models.db_models.table_models import Class, Campaign
 from models.schemas.class_schema import *
 from repositories.class_repository import ClassRepository
+from typing import List, Optional
 import logging
 
 

@@ -13,10 +13,13 @@ from repositories.sql_campaign_repository import SqlAlchemyCampaignRepository
 from repositories.sql_class_repository import SqlAlchemyClassRepository
 from repositories.sql_diceset_repository import SqlAlchemyDiceSetRepository
 from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
+from services.campaign.campaign_service_exceptions import (
+    CampaignNotFoundError,
+    CampaignServiceError
+)
 from auth.auth import get_current_user
 from models.db_models.table_models import User
 from rate_limit import limiter
-
 
 router = APIRouter(tags=["campaigns"])
 logger = logging.getLogger(__name__)
@@ -43,20 +46,40 @@ def get_campaign_service(session: SessionDep) \
 @limiter.limit("10/minute")
 def read_campaign(
         request: Request,
-        campaign_id: int = Path(..., description="The ID of the campaign to retrieve"),
+        campaign_id: int = Path(
+            ...,
+            description="The ID of the campaign to retrieve"
+        ),
         current_user: User = Depends(get_current_user),
-        service: CampaignService = Depends(get_campaign_service)):
+        service: CampaignService = Depends(get_campaign_service)
+):
     """Endpoint to get a single campaign (owner only)."""
-    logger.info(f"GET campaign {campaign_id} by user {current_user.id}")
-    campaign = service.get_campaign(campaign_id)
-    if not campaign:
-        logger.warning(f"Campaign {campaign_id} not found")
+    logger.info(f"GET campaign {campaign_id} "
+                f"by user {current_user.id}")
+    try:
+        campaign = service.get_campaign(campaign_id)
+    except CampaignNotFoundError:
+        logger.warning(
+            f"Campaign {campaign_id} not found"
+        )
         raise HTTPException(
             status_code=404,
             detail="Campaign not found."
         )
+    except CampaignServiceError:
+        logger.exception(
+            f"Error while retrieving "
+            f"campaign {campaign_id}"
+        )
+        raise HTTPException(
+            status_code=500,
+            detail="Error while retrieving campaign."
+        )
     if campaign.created_by != current_user.id:
-        logger.warning(f"User {current_user.id} tried to access campaign {campaign_id} not owned by them")
+        logger.warning(
+            f"User {current_user.id} tried to access "
+            f"campaign {campaign_id} not owned by them"
+        )
         raise HTTPException(
             status_code=403,
             detail="Not allowed"

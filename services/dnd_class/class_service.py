@@ -102,6 +102,8 @@ class ClassService:
             )
             return dnd_class
 
+        except ClassNotFoundError:
+            raise
         except Exception:
             logger.exception(
                 f"Error while retrieving "
@@ -226,6 +228,8 @@ class ClassService:
             )
             return deleted_class
 
+        except ClassNotFoundError:
+            raise
         except Exception:
             logger.exception(
                 f"Error while deleting "

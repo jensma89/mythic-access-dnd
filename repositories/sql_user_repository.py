@@ -3,12 +3,12 @@ sql_user_repository.py
 
 Concrete implementation for sqlalchemy, user management.
 """
-from typing import List, Optional
 from sqlmodel import Session, select
 from models.db_models.table_models import User
 from models.schemas.user_schema import *
 from repositories.user_repository import UserRepository
 from auth.auth import hash_password
+from typing import List, Optional
 import logging
 
 

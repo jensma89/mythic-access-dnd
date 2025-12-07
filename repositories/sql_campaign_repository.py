@@ -3,11 +3,11 @@ sql_campaign_repository.py
 
 Concrete implementation for sqlalchemy, campaign management.
 """
-from typing import List, Optional
 from sqlmodel import Session, select
 from models.db_models.table_models import Campaign
 from models.schemas.campaign_schema import *
 from repositories.campaign_repository import CampaignRepository
+from typing import List, Optional
 import logging
 
 

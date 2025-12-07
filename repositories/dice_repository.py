@@ -4,8 +4,8 @@ dice_repository.py
 Defined methods for dice management.
 """
 from abc import ABC, abstractmethod
-from typing import List, Optional
 from models.schemas.dice_schema import *
+from typing import List, Optional
 
 
 

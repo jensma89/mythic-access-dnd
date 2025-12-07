@@ -4,8 +4,8 @@ user_repository.py
 Defined methods for user management.
 """
 from abc import ABC, abstractmethod
-from typing import List, Optional
 from models.schemas.user_schema import *
+from typing import List, Optional
 
 
 

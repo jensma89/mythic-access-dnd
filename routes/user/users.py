@@ -15,11 +15,10 @@ from repositories.sql_campaign_repository import SqlAlchemyCampaignRepository
 from repositories.sql_class_repository import SqlAlchemyClassRepository
 from repositories.sql_diceset_repository import SqlAlchemyDiceSetRepository
 from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
+from services.user.user_service_exceptions import UserNotFoundError
 from auth.auth import get_current_user
 from rate_limit import limiter
 import logging
-
-from services.user.user_service_exceptions import UserNotFoundError
 
 router = APIRouter(tags=["users"])
 logger = logging.getLogger(__name__)

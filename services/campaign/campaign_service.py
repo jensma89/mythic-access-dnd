@@ -87,6 +87,8 @@ class CampaignService:
             )
             return campaign
 
+        except CampaignNotFoundError:
+            raise
         except Exception:
             logger.exception(
                 f"Error while retrieving "

@@ -3,10 +3,10 @@ dicelogs.py
 
 API endpoints for dice log management.
 """
-from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Path, Request
 from dependencies import Pagination, SessionDep
-from models.schemas.dicelog_schema import *
 from repositories.sql_dicelog_repository import *
+from models.schemas.dicelog_schema import *
 from auth.auth import get_current_user
 from models.db_models.table_models import User
 from rate_limit import limiter
