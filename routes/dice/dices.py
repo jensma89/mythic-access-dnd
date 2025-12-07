@@ -9,6 +9,7 @@ from dependencies import Pagination, SessionDep
 from models.schemas.dice_schema import *
 from repositories.sql_dice_repository import SqlAlchemyDiceRepository
 from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
+from services.dice.dice_service_exceptions import DiceNotFoundError
 from services.dice.dice_service import DiceService
 from auth.auth import get_current_user
 from models.db_models.table_models import User
@@ -29,8 +30,7 @@ def get_dice_service(session: SessionDep) \
     return DiceService(dice_repo, log_repo)
 
 
-@router.get("/dices/{dice_id}",
-            response_model=DicePublic)
+@router.get("/dices/{dice_id}", response_model=DicePublic)
 @limiter.limit("10/minute")
 def read_dice(
         request: Request,
@@ -39,13 +39,14 @@ def read_dice(
         service: DiceService = Depends(get_dice_service)):
     """Endpoint to get a single dice."""
     logger.info(f"GET dice {dice_id} by user {current_user.id}")
-    dice = service.get_dice(dice_id)
-    if not dice:
-        logger.warning(f"Dice {dice_id} not found")
+    try:
+        dice = service.get_dice(dice_id)
+        return dice
+    except DiceNotFoundError:
         raise HTTPException(
             status_code=404,
-            detail="Dice not found.")
-    return dice
+            detail="Dice not found"
+        )
 
 
 @router.get("/dices/",
@@ -111,7 +112,7 @@ def roll_dice(
         request: Request,
         dice_id: int = Path(..., description="The ID of the dice to roll."),
         campaign_id: int | None = Query(None, description="Campaign ID."),
-        class_id: int | None = Query(None, description="Class ID."),
+        dnd_class_id: int | None = Query(None, description="Class ID."),
         current_user: User = Depends(get_current_user),
         service: DiceService = Depends(get_dice_service)):
     """Endpoint to roll a specific dice
@@ -131,7 +132,7 @@ def roll_dice(
         dice_id=dice_id,
         user_id=current_user.id,
         campaign_id=campaign_id,
-        class_id=class_id
+        dnd_class_id=dnd_class_id
     )
     if not roll_result:
         logger.warning(f"Dice {dice_id} not found for roll")

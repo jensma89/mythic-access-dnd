@@ -14,10 +14,9 @@ class DiceBase(SQLModel):
     sides: int
 
 
-class DiceCreate(SQLModel):
+class DiceCreate(DiceBase):
     """Model to create a new dice."""
-    name: str
-    sides: int
+    pass
 
 
 class DiceUpdate(SQLModel):
@@ -31,6 +30,8 @@ class DicePublic(DiceBase):
     id: int
 
 
-class DiceRollResult(DiceBase):
+class DiceRollResult(DicePublic):
     """Model to respond the roll result."""
+    name: str
     result: int
+    sides: int

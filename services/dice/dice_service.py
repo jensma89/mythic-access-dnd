@@ -72,6 +72,9 @@ class DiceService:
             )
             return db_dice
 
+        except DiceNotFoundError:
+            raise
+
         except Exception:
             logger.exception(
                 f"Error while fetching "
@@ -180,7 +183,7 @@ class DiceService:
             self,
             user_id: int,
             campaign_id: int,
-            class_id: int,
+            dnd_class_id: int,
             diceset_id: int | None,
             name: str,
             result: int):
@@ -194,7 +197,7 @@ class DiceService:
             log_entry = DiceLogCreate(
                 user_id=user_id,
                 campaign_id=campaign_id,
-                class_id=class_id,
+                dnd_class_id=dnd_class_id,
                 diceset_id=diceset_id,
                 roll=name,
                 result=result,
@@ -222,7 +225,7 @@ class DiceService:
             dice_id: int,
             user_id: int,
             campaign_id: int,
-            class_id: int,
+            dnd_class_id: int,
     ):
         """Roll a dice (e.g. d6 -> random 1-6)
         and optionally log the result."""
@@ -244,11 +247,11 @@ class DiceService:
 
         if (user_id is not None
                 and campaign_id is not None
-                and class_id is not None):
+                and dnd_class_id is not None):
             self._log_roll(
                 user_id=user_id,
                 campaign_id=campaign_id,
-                class_id=class_id,
+                dnd_class_id=dnd_class_id,
                 diceset_id=None,
                 name=db_dice.name,
                 result=result
