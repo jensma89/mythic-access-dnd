@@ -39,16 +39,16 @@ class DiceSetService:
         try:
             # Validation max 5 sets per dnd dnd_class
             existing_sets = self.diceset_repo.get_by_class_id(
-                diceset.class_id
+                diceset.dnd_class_id
             )
             logger.info(
-                f"Creating DiceSet for Class {diceset.class_id}. "
+                f"Creating DiceSet for Class {diceset.dnd_class_id}. "
                 f"Existing sets: {len(existing_sets)}"
             )
             if len(existing_sets) >= 5:
                 logger.warning(
                     f"Cannot create DiceSet for "
-                    f"Class {diceset.class_id}: "
+                    f"Class {diceset.dnd_class_id}: "
                     f"max 5 sets reached"
                 )
                 raise DiceSetCreateError(
@@ -73,7 +73,7 @@ class DiceSetService:
             logger.info(
                 f"Created DiceSet {created.id} "
                 f"- {created.name} for "
-                f"Class {diceset.class_id}"
+                f"Class {diceset.dnd_class_id}"
             )
 
             # Count duplicates and persist quantities
@@ -243,7 +243,7 @@ class DiceSetService:
             self,
             user_id: int,
             campaign_id: int,
-            class_id: int,
+            dnd_class_id: int,
             diceset_id: int,
             name: str,
             results: list,
@@ -259,7 +259,7 @@ class DiceSetService:
             log_entry = DiceLogCreate(
                 user_id=user_id,
                 campaign_id=campaign_id,
-                class_id=class_id,
+                dnd_class_id=dnd_class_id,
                 diceset_id=diceset_id,
                 roll=f"{name}: {[r.result for r in results]}",
                 result=total,
@@ -286,7 +286,7 @@ class DiceSetService:
             self,
             user_id: int,
             campaign_id: int,
-            class_id: int,
+            dnd_class_id: int,
             diceset_id: int):
         """Roll all dices in a set
         and return each result + total sum."""
@@ -328,7 +328,7 @@ class DiceSetService:
             self._log_roll(
                 user_id,
                 campaign_id,
-                class_id,
+                dnd_class_id,
                 diceset_id,
                 diceset.name,
                 results,
