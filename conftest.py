@@ -14,6 +14,6 @@ sys.path.insert(0, str(project_root))
 # Set environment variables BEFORE any imports
 os.environ['DATABASE_URL'] = 'sqlite:///./models/db_models/test.db.sql'
 
-# For SECRET_KEY: Use environment variable if set (in CI), otherwise use test key
-if 'SECRET_KEY' not in os.environ:
-    os.environ['SECRET_KEY'] = 'test-secret-key-for-local-testing-only'
+# ALWAYS set SECRET_KEY if not already set (for tests to work)
+if not os.environ.get('SECRET_KEY'):
+    os.environ['SECRET_KEY'] = 'test-secret-key-for-testing-only-do-not-use-in-production'
