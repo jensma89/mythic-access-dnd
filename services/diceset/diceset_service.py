@@ -93,6 +93,8 @@ class DiceSetService:
             # Return fresh expanded object
             return self.diceset_repo.get_by_id(created.id)
 
+        except (DiceSetCreateError, DiceSetNotFoundError):
+            raise
         except Exception:
             logger.exception(
                 "Error while creating DiceSet",
@@ -126,6 +128,8 @@ class DiceSetService:
             )
             return db_diceset
 
+        except DiceSetNotFoundError:
+            raise
         except Exception:
             logger.exception(
                 f"Error while fetching "
@@ -183,6 +187,8 @@ class DiceSetService:
             )
             return updated
 
+        except DiceSetNotFoundError:
+            raise
         except Exception:
             logger.exception(
                 f"Error while updating "
@@ -228,6 +234,8 @@ class DiceSetService:
             )
             return deleted
 
+        except DiceSetNotFoundError:
+            raise
         except Exception:
             logger.exception(
                 f"Error while deleting "
