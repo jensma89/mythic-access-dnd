@@ -23,6 +23,6 @@ jobs:
         pip install pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-    - name: Run tests
+    - name: Run tests with coverage
       run: |
-        pytest
+        pytest --cov=./ --cov-report=term-missing
