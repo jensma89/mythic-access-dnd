@@ -8,6 +8,8 @@ from fastapi.testclient import TestClient
 from main import app
 from dependencies import get_session as prod_get_session
 from models.db_models.test_db import get_session as get_test_session
+from models.db_models.test_db import test_engine
+from sqlmodel import Session
 from auth.test_helpers import create_test_user, get_test_token
 
 
@@ -26,9 +28,8 @@ def auth_header(user):
 def test_get_single_user():
     """Test to retrieve a single user by ID."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
-
     response = client.get(
         f"/users/{user.id}",
         headers=auth_header(user)
@@ -43,9 +44,8 @@ def test_get_single_user():
 def test_get_single_user_not_found():
     """Test for user not found."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
-
     response = client.get(
         "/users/99999",
         headers=auth_header(create_test_user(
@@ -69,10 +69,9 @@ def test_get_single_user_unauthorized():
 def test_list_users():
     """Test list users."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user_1 = create_test_user(session)
     user_2 = create_test_user(session)
-
     response = client.get(
         "/users/",
         headers=auth_header(user_1)
@@ -94,9 +93,8 @@ def test_list_users_unauthorized():
 def test_update_user():
     """Test for update a user."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
-
     response = client.patch(
         "/users/me/update",
         json={"user_name": "updated_name"},
@@ -121,9 +119,8 @@ def test_update_user_unauthorized():
 
 def test_delete_user():
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
-
     response = client.delete(
         "/users/me/delete",
         headers=auth_header(user)

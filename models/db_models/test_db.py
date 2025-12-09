@@ -5,6 +5,7 @@ Creates a fake database SQLite for unit tests.
 """
 import os
 from sqlmodel import SQLModel, create_engine, Session
+from sqlalchemy.pool import NullPool
 from models.db_models.table_models import (
     User,
     Campaign,
@@ -22,12 +23,11 @@ if os.path.exists(TEST_DB_PATH):
     os.remove(TEST_DB_PATH)
 
 # Engine for file-based sqlite test DB
+# Use NullPool to avoid connection pool issues in tests
 test_engine = create_engine(
     f"sqlite:///{TEST_DB_PATH}",
     connect_args={"check_same_thread": False},
-    pool_size=20,
-    max_overflow=20,
-    pool_timeout=20
+    poolclass=NullPool,  # Disable connection pooling for tests - creates new connection each time
 )
 
 

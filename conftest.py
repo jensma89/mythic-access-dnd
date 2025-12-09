@@ -6,6 +6,7 @@ Pytest configuration - sets environment variables before any imports.
 import os
 import sys
 from pathlib import Path
+from contextlib import contextmanager
 
 # Add project root to Python path
 project_root = Path(__file__).parent
@@ -20,7 +21,8 @@ if not os.environ.get('SECRET_KEY'):
 
 # Import after environment setup
 from fastapi.testclient import TestClient
-from models.db_models.test_db import get_session as get_test_session
+from models.db_models.test_db import get_session as get_test_session, test_engine
+from sqlmodel import Session
 from auth.test_helpers import create_test_user, get_test_token
 from main import app
 from dependencies import get_session as prod_get_session
@@ -29,36 +31,16 @@ from dependencies import get_session as prod_get_session
 app.dependency_overrides[prod_get_session] = get_test_session
 
 
+@contextmanager
 def get_db_session():
-    """Get a test database session with proper cleanup."""
-    gen = get_test_session()
-    session = next(gen)
+    """Get a test database session with automatic cleanup."""
+    session = Session(test_engine)
     try:
         yield session
     finally:
-        try:
-            next(gen)
-        except StopIteration:
-            pass
+        session.close()
 
 
-def get_test_user():
-    """Create and return a test user with isolated session."""
-    session = next(get_test_session())
-    user = create_test_user(session)
-    return user, session
-
-
-def get_auth_client():
-    """
-    Get an authenticated test client with a test user.
-    Returns: (client, test_user, session)
-    """
-    session = next(get_test_session())
-    test_user = create_test_user(session)
-    token = get_test_token(test_user)
-
-    client = TestClient(app)
-    client.headers = {"Authorization": f"Bearer {token}"}
-
-    return client, test_user, session
+def get_session_for_test():
+    """Get a test database session that will be auto-closed."""
+    return Session(test_engine)

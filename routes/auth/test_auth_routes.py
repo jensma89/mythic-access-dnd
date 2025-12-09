@@ -8,6 +8,8 @@ from fastapi.testclient import TestClient
 from main import app
 from dependencies import get_session as prod_get_session
 from models.db_models.test_db import get_session as get_test_session
+from models.db_models.test_db import test_engine
+from sqlmodel import Session
 from auth.test_helpers import create_test_user, get_test_token
 
 # Override the DB dependency for tests
@@ -18,7 +20,7 @@ app.dependency_overrides[prod_get_session] = get_test_session
 
 def test_register():
     """Test user registration using the test DB."""
-    session = next(get_test_session())
+    session = Session(test_engine)
     client = TestClient(app)
 
     response = client.post(
@@ -41,7 +43,7 @@ def test_register():
 def test_login():
     """Test the user login using the test DB."""
     # Use test session
-    session = next(get_test_session())
+    session = Session(test_engine)
     test_user = create_test_user(session)
     client = TestClient(app)
 
@@ -62,7 +64,7 @@ def test_login():
 
 def test_me():
     """Test the /auth/me endpoint."""
-    session = next(get_test_session())
+    session = Session(test_engine)
     test_user = create_test_user(session)
     token = get_test_token(test_user)
 
@@ -77,13 +79,11 @@ def test_me():
     assert data["id"] == test_user.id
     assert data["user_name"] == test_user.user_name
     assert data["email"] == test_user.email
-
-
 # Error tests
 
 def test_register_duplicate_email():
     """Registering the same email twice."""
-    session = next(get_test_session())
+    session = Session(test_engine)
     client = TestClient(app)
 
     # First user (normal)
@@ -111,7 +111,7 @@ def test_register_duplicate_email():
 
 def test_login_wrong_password():
     """Login with incorrect password."""
-    session = next(get_test_session())
+    session = Session(test_engine)
     test_user = create_test_user(session)
     client = TestClient(app)
 

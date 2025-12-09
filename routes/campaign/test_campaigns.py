@@ -8,6 +8,8 @@ from fastapi.testclient import TestClient
 from main import app
 from dependencies import get_session as prod_get_session
 from models.db_models.test_db import get_session as get_test_session
+from models.db_models.test_db import test_engine
+from sqlmodel import Session
 from auth.test_helpers import create_test_user, get_test_token
 from services.campaign.campaign_service import CampaignService
 from models.schemas.campaign_schema import CampaignCreate
@@ -39,7 +41,7 @@ def get_campaign_service(session):
 
 def test_create_campaign():
     """Test to create a new campaign."""
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
     client = TestClient(app)
 
@@ -65,7 +67,7 @@ def test_create_campaign():
 
 def test_read_campaign_success():
     """Test for reading a campaign."""
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
     client = TestClient(app)
 
@@ -91,7 +93,7 @@ def test_read_campaign_success():
 
 def test_read_campaign_not_found():
     """Test for retrieve non existing campaign."""
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
     client = TestClient(app)
 
@@ -105,7 +107,7 @@ def test_read_campaign_not_found():
 
 def test_read_campaign_forbidden():
     """Test to read a campaign from a another user."""
-    session = next(get_test_session())
+    session = Session(test_engine)
     owner = create_test_user(session)
     other = create_test_user(session)
     client = TestClient(app)
@@ -133,7 +135,7 @@ def test_read_campaign_forbidden():
 
 def test_update_campaign_success():
     """Test for updating campaign successfully."""
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
     client = TestClient(app)
 
@@ -163,7 +165,7 @@ def test_update_campaign_success():
 
 def test_update_campaign_forbidden():
     """Test to update by unauthorized user."""
-    session = next(get_test_session())
+    session = Session(test_engine)
     owner = create_test_user(session)
     other = create_test_user(session)
     client = TestClient(app)
@@ -190,7 +192,7 @@ def test_update_campaign_forbidden():
 
 def test_delete_campaign_success():
     """Test delete campaign successfully."""
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
     client = TestClient(app)
 
@@ -215,7 +217,7 @@ def test_delete_campaign_success():
 
 def test_delete_campaign_forbidden():
     """Test to delete campaign by unauthorized user."""
-    session = next(get_test_session())
+    session = Session(test_engine)
     owner = create_test_user(session)
     other = create_test_user(session)
     client = TestClient(app)
@@ -236,3 +238,4 @@ def test_delete_campaign_forbidden():
         headers=auth_header(other)
     )
     assert response.status_code == 403
+

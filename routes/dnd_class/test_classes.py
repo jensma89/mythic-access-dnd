@@ -8,6 +8,8 @@ from fastapi.testclient import TestClient
 from main import app
 from dependencies import get_session as prod_get_session
 from models.db_models.test_db import get_session as get_test_session
+from models.db_models.test_db import test_engine
+from sqlmodel import Session
 from auth.test_helpers import create_test_user, get_test_token, create_test_campaign
 from services.dnd_class.class_service import ClassService
 from models.schemas.class_schema import ClassCreate, ClassUpdate, ClassSkills
@@ -38,10 +40,9 @@ def get_class_service(session):
 def test_create_class():
     """Test creating a new dnd_class."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
-
     # Create payload with required skills
     payload = ClassCreate(
         name="Testurion",
@@ -66,10 +67,9 @@ def test_create_class():
 def test_read_class_success():
     """Test reading a dnd_class successfully."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
-
     service = get_class_service(session)
 
     payload = ClassCreate(
@@ -93,9 +93,8 @@ def test_read_class_success():
 def test_read_class_not_found():
     """Test reading a non-existing dnd_class returns 404."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
-
     response = client.get(
         "/classes/9999",
         headers=auth_header(user)
@@ -107,10 +106,9 @@ def test_read_class_not_found():
 def test_update_class_success():
     """Test updating a dnd_class successfully."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
-
     service = get_class_service(session)
 
     payload = ClassCreate(
@@ -140,11 +138,10 @@ def test_update_class_forbidden():
     """Test that updating a dnd_class
     by another user is forbidden."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     owner = create_test_user(session)
     other = create_test_user(session)
     campaign = create_test_campaign(session, owner)
-
     service = get_class_service(session)
 
     payload = ClassCreate(
@@ -170,10 +167,9 @@ def test_update_class_forbidden():
 def test_delete_class_success():
     """Test deleting a dnd_class successfully."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
-
     service = get_class_service(session)
 
     payload = ClassCreate(
@@ -198,11 +194,10 @@ def test_delete_class_forbidden():
     """Test that deleting a dnd_class
     by another user is forbidden."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     owner = create_test_user(session)
     other = create_test_user(session)
     campaign = create_test_campaign(session, owner)
-
     service = get_class_service(session)
 
     payload = ClassCreate(
@@ -220,3 +215,4 @@ def test_delete_class_forbidden():
         headers=auth_header(other)
     )
     assert response.status_code == 403
+

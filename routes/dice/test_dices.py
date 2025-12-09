@@ -8,6 +8,8 @@ from fastapi.testclient import TestClient
 from main import app
 from dependencies import get_session as prod_get_session
 from models.db_models.test_db import get_session as get_test_session
+from models.db_models.test_db import test_engine
+from sqlmodel import Session
 from auth.test_helpers import create_test_user, get_test_token, create_test_campaign
 from services.dice.dice_service import DiceService
 from models.schemas.dice_schema import DiceCreate
@@ -59,9 +61,8 @@ def create_test_dice(session, name="D6", sides=6):
 def test_read_dice_success():
     """Test reading a dice successfully."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
-
     # Create a test dice
     dice = create_test_dice(session, "D20", 20)
 
@@ -79,9 +80,8 @@ def test_read_dice_success():
 def test_read_dice_not_found():
     """Test reading a non-existing dice returns 404."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
-
     response = client.get(
         "/dices/99999",
         headers=auth_header(user)
@@ -96,9 +96,8 @@ def test_read_dice_not_found():
 def test_read_dices_list():
     """Test listing all dices."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
-
     # Create some test dices
     create_test_dice(session, "D4", 4)
     create_test_dice(session, "D8", 8)
@@ -116,9 +115,8 @@ def test_read_dices_list():
 def test_roll_dice_success():
     """Test rolling a dice successfully."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
-
     # Create a test dice
     dice = create_test_dice(session, "D6", 6)
 
@@ -138,9 +136,8 @@ def test_roll_dice_success():
 def test_roll_dice_not_found():
     """Test rolling a non-existing dice returns 404."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
-
     response = client.post(
         "/dices/99999/roll",
         headers=auth_header(user)
@@ -152,10 +149,9 @@ def test_roll_dice_not_found():
 def test_roll_dice_with_campaign():
     """Test rolling a dice with campaign_id parameter."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
-
     # Create a test dice
     dice = create_test_dice(session, "D12", 12)
 
@@ -173,10 +169,9 @@ def test_roll_dice_with_campaign():
 def test_roll_dice_with_class():
     """Test rolling a dice with class_id parameter."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
-
     # Create a class
     class_service = get_class_service(session)
     payload = ClassCreate(
@@ -206,10 +201,9 @@ def test_roll_dice_with_class():
 def test_roll_dice_with_campaign_and_class():
     """Test rolling a dice with both campaign_id and class_id."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
-
     # Create a class
     class_service = get_class_service(session)
     payload = ClassCreate(
@@ -239,9 +233,8 @@ def test_roll_dice_with_campaign_and_class():
 def test_read_dices_pagination():
     """Test pagination for dice list."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
-
     # Create multiple test dices
     for i in range(10):
         create_test_dice(session, f"D{i+4}", i+4)
@@ -260,9 +253,8 @@ def test_roll_dice_multiple_times():
     """Test rolling the same dice multiple times
     produces different results."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
-
     # Create a test dice with many sides
     dice = create_test_dice(session, "D20", 20)
 
@@ -279,3 +271,4 @@ def test_roll_dice_multiple_times():
     assert all(1 <= r <= 20 for r in results)
     # Check we got at least some variation (not all same)
     assert len(set(results)) > 1
+

@@ -14,6 +14,8 @@ from services.user.user_service_exceptions import (
 )
 from models.schemas.user_schema import UserCreate, UserUpdate
 from models.db_models.test_db import get_session as get_test_session
+from models.db_models.test_db import test_engine
+from sqlmodel import Session
 from repositories.sql_user_repository import SqlAlchemyUserRepository
 from repositories.sql_campaign_repository import SqlAlchemyCampaignRepository
 from repositories.sql_class_repository import SqlAlchemyClassRepository
@@ -26,7 +28,7 @@ from auth.test_helpers import create_test_user
 def test_create_user():
     """Test to create a new user."""
     import uuid
-    session = next(get_test_session())
+    session = Session(test_engine)
 
     service = UserService(
         user_repo=SqlAlchemyUserRepository(session),
@@ -50,7 +52,7 @@ def test_create_user():
 
 def test_get_user():
     """Test to get a user by ID."""
-    session = next(get_test_session())
+    session = Session(test_engine)
 
     user = create_test_user(session)
 
@@ -70,7 +72,7 @@ def test_get_user():
 
 def test_get_user_not_found():
     """Test get user with non-existent ID."""
-    session = next(get_test_session())
+    session = Session(test_engine)
 
     service = UserService(
         user_repo=SqlAlchemyUserRepository(session),
@@ -86,7 +88,7 @@ def test_get_user_not_found():
 
 def test_list_users():
     """Test to list all users."""
-    session = next(get_test_session())
+    session = Session(test_engine)
 
     create_test_user(session)
     create_test_user(session)
@@ -107,7 +109,7 @@ def test_list_users():
 
 def test_list_users_with_filter():
     """Test list users with name filter."""
-    session = next(get_test_session())
+    session = Session(test_engine)
 
     service = UserService(
         user_repo=SqlAlchemyUserRepository(session),
@@ -132,7 +134,7 @@ def test_list_users_with_filter():
 
 def test_update_user():
     """Test to update a user."""
-    session = next(get_test_session())
+    session = Session(test_engine)
 
     import uuid
     service = UserService(
@@ -163,7 +165,7 @@ def test_update_user():
 
 def test_update_user_not_found():
     """Test update with non-existent user ID."""
-    session = next(get_test_session())
+    session = Session(test_engine)
 
     service = UserService(
         user_repo=SqlAlchemyUserRepository(session),
@@ -181,7 +183,7 @@ def test_update_user_not_found():
 
 def test_delete_user():
     """Test to delete a user."""
-    session = next(get_test_session())
+    session = Session(test_engine)
 
     user = create_test_user(session)
 
@@ -205,7 +207,7 @@ def test_delete_user():
 
 def test_delete_user_not_found():
     """Test delete with non-existent user ID."""
-    session = next(get_test_session())
+    session = Session(test_engine)
 
     service = UserService(
         user_repo=SqlAlchemyUserRepository(session),
@@ -217,3 +219,4 @@ def test_delete_user_not_found():
 
     with pytest.raises((UserNotFoundError, UserDeleteError)):
         service.delete_user(99999)
+

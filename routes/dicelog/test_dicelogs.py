@@ -9,6 +9,8 @@ from datetime import datetime, timezone
 from main import app
 from dependencies import get_session as prod_get_session
 from models.db_models.test_db import get_session as get_test_session
+from models.db_models.test_db import test_engine
+from sqlmodel import Session
 from auth.test_helpers import create_test_user, get_test_token, create_test_campaign
 from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
 from repositories.sql_dice_repository import SqlAlchemyDiceRepository
@@ -102,9 +104,8 @@ def create_test_dicelog(session, user, campaign, dnd_class, diceset=None, roll="
 def test_list_logs_empty():
     """Test listing logs when there are none."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
-
     response = client.get(
         "/dicelogs/",
         headers=auth_header(user)
@@ -119,10 +120,9 @@ def test_list_logs_empty():
 def test_list_logs_with_entries():
     """Test listing logs when entries exist."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
-
     # Create class
     class_service = get_class_service(session)
     class_payload = ClassCreate(
@@ -153,10 +153,9 @@ def test_list_logs_with_entries():
 def test_list_logs_pagination():
     """Test pagination for dice logs."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
-
     # Create class
     class_service = get_class_service(session)
     class_payload = ClassCreate(
@@ -199,12 +198,11 @@ def test_list_logs_pagination():
 def test_list_logs_only_own():
     """Test that users only see their own logs."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user1 = create_test_user(session)
     user2 = create_test_user(session)
     campaign1 = create_test_campaign(session, user1)
     campaign2 = create_test_campaign(session, user2)
-
     # Create class for user1
     class_service = get_class_service(session)
     class_payload1 = ClassCreate(
@@ -246,10 +244,9 @@ def test_list_logs_only_own():
 def test_get_log_success():
     """Test getting a single log by ID."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
-
     # Create class
     class_service = get_class_service(session)
     class_payload = ClassCreate(
@@ -279,9 +276,8 @@ def test_get_log_success():
 def test_get_log_not_found():
     """Test getting a non-existing log returns 404."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
-
     response = client.get(
         "/dicelogs/99999",
         headers=auth_header(user)
@@ -293,11 +289,10 @@ def test_get_log_not_found():
 def test_get_log_forbidden():
     """Test that accessing another user's log is forbidden."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     owner = create_test_user(session)
     other = create_test_user(session)
     campaign = create_test_campaign(session, owner)
-
     # Create class for owner
     class_service = get_class_service(session)
     class_payload = ClassCreate(
@@ -325,10 +320,9 @@ def test_get_log_forbidden():
 def test_list_logs_with_diceset():
     """Test that logs with diceset_id are returned correctly."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
-
     # Create class
     class_service = get_class_service(session)
     class_payload = ClassCreate(
@@ -368,10 +362,9 @@ def test_list_logs_with_diceset():
 def test_list_logs_with_single_dice():
     """Test that logs without diceset_id (single dice rolls) work correctly."""
     client = TestClient(app)
-    session = next(get_test_session())
+    session = Session(test_engine)
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
-
     # Create class
     class_service = get_class_service(session)
     class_payload = ClassCreate(
@@ -399,3 +392,4 @@ def test_list_logs_with_single_dice():
     # Find logs without diceset
     single_dice_logs = [log for log in data if log.get("diceset_id") is None]
     assert len(single_dice_logs) >= 1
+
