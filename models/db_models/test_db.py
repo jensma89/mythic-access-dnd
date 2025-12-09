@@ -24,7 +24,10 @@ if os.path.exists(TEST_DB_PATH):
 # Engine for file-based sqlite test DB
 test_engine = create_engine(
     f"sqlite:///{TEST_DB_PATH}",
-    connect_args={"check_same_thread": False}
+    connect_args={"check_same_thread": False},
+    pool_size=20,
+    max_overflow=20,
+    pool_timeout=20
 )
 
 
