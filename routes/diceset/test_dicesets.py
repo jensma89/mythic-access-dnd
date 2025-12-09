@@ -23,7 +23,6 @@ from services.dnd_class.class_service import ClassService
 
 # Override DB dependency
 app.dependency_overrides[prod_get_session] = get_test_session
-client = TestClient(app)
 
 
 def auth_header(user):
@@ -80,6 +79,7 @@ def create_test_diceset(session, user, dnd_class, campaign, name="TestSet", dice
 
 def test_create_diceset_empty():
     """Test creating a dice set without dices."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
@@ -117,6 +117,7 @@ def test_create_diceset_empty():
 
 def test_create_diceset_with_dices():
     """Test creating a dice set with multiple dices."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
@@ -158,6 +159,7 @@ def test_create_diceset_with_dices():
 
 def test_create_diceset_with_duplicates():
     """Test creating a dice set with duplicate dices."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
@@ -202,6 +204,7 @@ def test_create_diceset_with_duplicates():
 
 def test_read_diceset_success():
     """Test reading a dice set successfully."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
@@ -233,6 +236,7 @@ def test_read_diceset_success():
 
 def test_read_diceset_not_found():
     """Test reading a non-existing dice set returns 404."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
 
@@ -248,6 +252,7 @@ def test_read_diceset_not_found():
 
 def test_read_dicesets_list():
     """Test listing all dice sets."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
@@ -280,6 +285,7 @@ def test_read_dicesets_list():
 
 def test_update_diceset_success():
     """Test updating a dice set successfully."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
@@ -316,6 +322,7 @@ def test_update_diceset_success():
 
 def test_update_diceset_forbidden():
     """Test that updating a dice set by another user is forbidden."""
+    client = TestClient(app)
     session = next(get_test_session())
     owner = create_test_user(session)
     other = create_test_user(session)
@@ -349,6 +356,7 @@ def test_update_diceset_forbidden():
 
 def test_delete_diceset_success():
     """Test deleting a dice set successfully."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
@@ -378,6 +386,7 @@ def test_delete_diceset_success():
 
 def test_delete_diceset_forbidden():
     """Test that deleting a dice set by another user is forbidden."""
+    client = TestClient(app)
     session = next(get_test_session())
     owner = create_test_user(session)
     other = create_test_user(session)
@@ -407,6 +416,7 @@ def test_delete_diceset_forbidden():
 
 def test_roll_diceset_success():
     """Test rolling a dice set successfully."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
@@ -447,6 +457,7 @@ def test_roll_diceset_success():
 
 def test_roll_diceset_forbidden():
     """Test that rolling a dice set by another user is forbidden."""
+    client = TestClient(app)
     session = next(get_test_session())
     owner = create_test_user(session)
     other = create_test_user(session)
@@ -477,6 +488,7 @@ def test_roll_diceset_forbidden():
 
 def test_create_diceset_max_limit():
     """Test that max 5 dice sets per class is enforced."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
@@ -534,6 +546,7 @@ def test_create_diceset_max_limit():
 
 def test_read_dicesets_pagination():
     """Test pagination for dice sets list."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)

@@ -21,7 +21,6 @@ from services.dnd_class.class_service import ClassService
 
 # Override DB dependency
 app.dependency_overrides[prod_get_session] = get_test_session
-client = TestClient(app)
 
 
 def auth_header(user):
@@ -59,6 +58,7 @@ def create_test_dice(session, name="D6", sides=6):
 
 def test_read_dice_success():
     """Test reading a dice successfully."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
 
@@ -78,6 +78,7 @@ def test_read_dice_success():
 
 def test_read_dice_not_found():
     """Test reading a non-existing dice returns 404."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
 
@@ -94,6 +95,7 @@ def test_read_dice_not_found():
 
 def test_read_dices_list():
     """Test listing all dices."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
 
@@ -113,6 +115,7 @@ def test_read_dices_list():
 
 def test_roll_dice_success():
     """Test rolling a dice successfully."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
 
@@ -134,6 +137,7 @@ def test_roll_dice_success():
 
 def test_roll_dice_not_found():
     """Test rolling a non-existing dice returns 404."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
 
@@ -147,6 +151,7 @@ def test_roll_dice_not_found():
 
 def test_roll_dice_with_campaign():
     """Test rolling a dice with campaign_id parameter."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
@@ -167,6 +172,7 @@ def test_roll_dice_with_campaign():
 
 def test_roll_dice_with_class():
     """Test rolling a dice with class_id parameter."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
@@ -199,6 +205,7 @@ def test_roll_dice_with_class():
 
 def test_roll_dice_with_campaign_and_class():
     """Test rolling a dice with both campaign_id and class_id."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
@@ -231,6 +238,7 @@ def test_roll_dice_with_campaign_and_class():
 
 def test_read_dices_pagination():
     """Test pagination for dice list."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
 
@@ -251,6 +259,7 @@ def test_read_dices_pagination():
 def test_roll_dice_multiple_times():
     """Test rolling the same dice multiple times
     produces different results."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
 

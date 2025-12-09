@@ -23,27 +23,17 @@ from dependencies import UserQueryParams
 from auth.test_helpers import create_test_user
 
 
-@pytest.fixture(scope="function")
-def db_session():
-    """Fixture to provide a test database session with proper cleanup."""
-    gen = get_test_session()
-    session = next(gen)
-    yield session
-    try:
-        next(gen)
-    except StopIteration:
-        pass
-
-
-def test_create_user(db_session):
+def test_create_user():
     """Test to create a new user."""
     import uuid
+    session = next(get_test_session())
+
     service = UserService(
-        user_repo=SqlAlchemyUserRepository(db_session),
-        campaign_repo=SqlAlchemyCampaignRepository(db_session),
-        class_repo=SqlAlchemyClassRepository(db_session),
-        diceset_repo=SqlAlchemyDiceSetRepository(db_session),
-        dicelog_repo=SqlAlchemyDiceLogRepository(db_session)
+        user_repo=SqlAlchemyUserRepository(session),
+        campaign_repo=SqlAlchemyCampaignRepository(session),
+        class_repo=SqlAlchemyClassRepository(session),
+        diceset_repo=SqlAlchemyDiceSetRepository(session),
+        dicelog_repo=SqlAlchemyDiceLogRepository(session)
     )
 
     suffix = uuid.uuid4().hex[:8]
@@ -58,16 +48,18 @@ def test_create_user(db_session):
     assert user.id is not None
 
 
-def test_get_user(db_session):
+def test_get_user():
     """Test to get a user by ID."""
-    user = create_test_user(db_session)
+    session = next(get_test_session())
+
+    user = create_test_user(session)
 
     service = UserService(
-        user_repo=SqlAlchemyUserRepository(db_session),
-        campaign_repo=SqlAlchemyCampaignRepository(db_session),
-        class_repo=SqlAlchemyClassRepository(db_session),
-        diceset_repo=SqlAlchemyDiceSetRepository(db_session),
-        dicelog_repo=SqlAlchemyDiceLogRepository(db_session)
+        user_repo=SqlAlchemyUserRepository(session),
+        campaign_repo=SqlAlchemyCampaignRepository(session),
+        class_repo=SqlAlchemyClassRepository(session),
+        diceset_repo=SqlAlchemyDiceSetRepository(session),
+        dicelog_repo=SqlAlchemyDiceLogRepository(session)
     )
 
     result = service.get_user(user.id)
@@ -76,31 +68,35 @@ def test_get_user(db_session):
     assert result.user_name == user.user_name
 
 
-def test_get_user_not_found(db_session):
+def test_get_user_not_found():
     """Test get user with non-existent ID."""
+    session = next(get_test_session())
+
     service = UserService(
-        user_repo=SqlAlchemyUserRepository(db_session),
-        campaign_repo=SqlAlchemyCampaignRepository(db_session),
-        class_repo=SqlAlchemyClassRepository(db_session),
-        diceset_repo=SqlAlchemyDiceSetRepository(db_session),
-        dicelog_repo=SqlAlchemyDiceLogRepository(db_session)
+        user_repo=SqlAlchemyUserRepository(session),
+        campaign_repo=SqlAlchemyCampaignRepository(session),
+        class_repo=SqlAlchemyClassRepository(session),
+        diceset_repo=SqlAlchemyDiceSetRepository(session),
+        dicelog_repo=SqlAlchemyDiceLogRepository(session)
     )
 
     with pytest.raises(UserNotFoundError):
         service.get_user(99999)
 
 
-def test_list_users(db_session):
+def test_list_users():
     """Test to list all users."""
-    create_test_user(db_session)
-    create_test_user(db_session)
+    session = next(get_test_session())
+
+    create_test_user(session)
+    create_test_user(session)
 
     service = UserService(
-        user_repo=SqlAlchemyUserRepository(db_session),
-        campaign_repo=SqlAlchemyCampaignRepository(db_session),
-        class_repo=SqlAlchemyClassRepository(db_session),
-        diceset_repo=SqlAlchemyDiceSetRepository(db_session),
-        dicelog_repo=SqlAlchemyDiceLogRepository(db_session)
+        user_repo=SqlAlchemyUserRepository(session),
+        campaign_repo=SqlAlchemyCampaignRepository(session),
+        class_repo=SqlAlchemyClassRepository(session),
+        diceset_repo=SqlAlchemyDiceSetRepository(session),
+        dicelog_repo=SqlAlchemyDiceLogRepository(session)
     )
 
     filters = UserQueryParams()
@@ -109,14 +105,16 @@ def test_list_users(db_session):
     assert isinstance(users, list)
 
 
-def test_list_users_with_filter(db_session):
+def test_list_users_with_filter():
     """Test list users with name filter."""
+    session = next(get_test_session())
+
     service = UserService(
-        user_repo=SqlAlchemyUserRepository(db_session),
-        campaign_repo=SqlAlchemyCampaignRepository(db_session),
-        class_repo=SqlAlchemyClassRepository(db_session),
-        diceset_repo=SqlAlchemyDiceSetRepository(db_session),
-        dicelog_repo=SqlAlchemyDiceLogRepository(db_session)
+        user_repo=SqlAlchemyUserRepository(session),
+        campaign_repo=SqlAlchemyCampaignRepository(session),
+        class_repo=SqlAlchemyClassRepository(session),
+        diceset_repo=SqlAlchemyDiceSetRepository(session),
+        dicelog_repo=SqlAlchemyDiceLogRepository(session)
     )
 
     service.create_user(UserCreate(
@@ -132,15 +130,17 @@ def test_list_users_with_filter(db_session):
     assert any("filtered" in u.user_name for u in users)
 
 
-def test_update_user(db_session):
+def test_update_user():
     """Test to update a user."""
+    session = next(get_test_session())
+
     import uuid
     service = UserService(
-        user_repo=SqlAlchemyUserRepository(db_session),
-        campaign_repo=SqlAlchemyCampaignRepository(db_session),
-        class_repo=SqlAlchemyClassRepository(db_session),
-        diceset_repo=SqlAlchemyDiceSetRepository(db_session),
-        dicelog_repo=SqlAlchemyDiceLogRepository(db_session)
+        user_repo=SqlAlchemyUserRepository(session),
+        campaign_repo=SqlAlchemyCampaignRepository(session),
+        class_repo=SqlAlchemyClassRepository(session),
+        diceset_repo=SqlAlchemyDiceSetRepository(session),
+        dicelog_repo=SqlAlchemyDiceLogRepository(session)
     )
 
     # Create user via service to ensure same session
@@ -161,14 +161,16 @@ def test_update_user(db_session):
     assert updated.id == user.id
 
 
-def test_update_user_not_found(db_session):
+def test_update_user_not_found():
     """Test update with non-existent user ID."""
+    session = next(get_test_session())
+
     service = UserService(
-        user_repo=SqlAlchemyUserRepository(db_session),
-        campaign_repo=SqlAlchemyCampaignRepository(db_session),
-        class_repo=SqlAlchemyClassRepository(db_session),
-        diceset_repo=SqlAlchemyDiceSetRepository(db_session),
-        dicelog_repo=SqlAlchemyDiceLogRepository(db_session)
+        user_repo=SqlAlchemyUserRepository(session),
+        campaign_repo=SqlAlchemyCampaignRepository(session),
+        class_repo=SqlAlchemyClassRepository(session),
+        diceset_repo=SqlAlchemyDiceSetRepository(session),
+        dicelog_repo=SqlAlchemyDiceLogRepository(session)
     )
 
     update_data = UserUpdate(user_name="new_name")
@@ -177,16 +179,18 @@ def test_update_user_not_found(db_session):
         service.update_user(99999, update_data)
 
 
-def test_delete_user(db_session):
+def test_delete_user():
     """Test to delete a user."""
-    user = create_test_user(db_session)
+    session = next(get_test_session())
+
+    user = create_test_user(session)
 
     service = UserService(
-        user_repo=SqlAlchemyUserRepository(db_session),
-        campaign_repo=SqlAlchemyCampaignRepository(db_session),
-        class_repo=SqlAlchemyClassRepository(db_session),
-        diceset_repo=SqlAlchemyDiceSetRepository(db_session),
-        dicelog_repo=SqlAlchemyDiceLogRepository(db_session)
+        user_repo=SqlAlchemyUserRepository(session),
+        campaign_repo=SqlAlchemyCampaignRepository(session),
+        class_repo=SqlAlchemyClassRepository(session),
+        diceset_repo=SqlAlchemyDiceSetRepository(session),
+        dicelog_repo=SqlAlchemyDiceLogRepository(session)
     )
 
     deleted = service.delete_user(user.id)
@@ -199,14 +203,16 @@ def test_delete_user(db_session):
         service.get_user(user.id)
 
 
-def test_delete_user_not_found(db_session):
+def test_delete_user_not_found():
     """Test delete with non-existent user ID."""
+    session = next(get_test_session())
+
     service = UserService(
-        user_repo=SqlAlchemyUserRepository(db_session),
-        campaign_repo=SqlAlchemyCampaignRepository(db_session),
-        class_repo=SqlAlchemyClassRepository(db_session),
-        diceset_repo=SqlAlchemyDiceSetRepository(db_session),
-        dicelog_repo=SqlAlchemyDiceLogRepository(db_session)
+        user_repo=SqlAlchemyUserRepository(session),
+        campaign_repo=SqlAlchemyCampaignRepository(session),
+        class_repo=SqlAlchemyClassRepository(session),
+        diceset_repo=SqlAlchemyDiceSetRepository(session),
+        dicelog_repo=SqlAlchemyDiceLogRepository(session)
     )
 
     with pytest.raises((UserNotFoundError, UserDeleteError)):

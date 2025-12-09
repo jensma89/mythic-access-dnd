@@ -19,7 +19,6 @@ from repositories.sql_dicelog_repository import SqlAlchemyDiceLogRepository
 
 # Override DB dependency
 app.dependency_overrides[prod_get_session] = get_test_session
-client = TestClient(app)
 
 
 def auth_header(user):
@@ -42,6 +41,7 @@ def test_create_campaign():
     """Test to create a new campaign."""
     session = next(get_test_session())
     user = create_test_user(session)
+    client = TestClient(app)
 
     payload = {
         "title": "Test Campaign",
@@ -67,6 +67,7 @@ def test_read_campaign_success():
     """Test for reading a campaign."""
     session = next(get_test_session())
     user = create_test_user(session)
+    client = TestClient(app)
 
     service = get_campaign_service(session)
 
@@ -92,6 +93,7 @@ def test_read_campaign_not_found():
     """Test for retrieve non existing campaign."""
     session = next(get_test_session())
     user = create_test_user(session)
+    client = TestClient(app)
 
     response = client.get(
         "/campaigns/9999",
@@ -106,6 +108,7 @@ def test_read_campaign_forbidden():
     session = next(get_test_session())
     owner = create_test_user(session)
     other = create_test_user(session)
+    client = TestClient(app)
 
     service = get_campaign_service(session)
 
@@ -132,6 +135,7 @@ def test_update_campaign_success():
     """Test for updating campaign successfully."""
     session = next(get_test_session())
     user = create_test_user(session)
+    client = TestClient(app)
 
     service = get_campaign_service(session)
 
@@ -162,6 +166,7 @@ def test_update_campaign_forbidden():
     session = next(get_test_session())
     owner = create_test_user(session)
     other = create_test_user(session)
+    client = TestClient(app)
 
     service = get_campaign_service(session)
 
@@ -187,6 +192,7 @@ def test_delete_campaign_success():
     """Test delete campaign successfully."""
     session = next(get_test_session())
     user = create_test_user(session)
+    client = TestClient(app)
 
     service = get_campaign_service(session)
 
@@ -212,6 +218,7 @@ def test_delete_campaign_forbidden():
     session = next(get_test_session())
     owner = create_test_user(session)
     other = create_test_user(session)
+    client = TestClient(app)
 
     service = get_campaign_service(session)
 

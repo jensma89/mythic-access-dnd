@@ -25,7 +25,6 @@ from services.dnd_class.class_service import ClassService
 
 # Override DB dependency
 app.dependency_overrides[prod_get_session] = get_test_session
-client = TestClient(app)
 
 
 def auth_header(user):
@@ -102,6 +101,7 @@ def create_test_dicelog(session, user, campaign, dnd_class, diceset=None, roll="
 
 def test_list_logs_empty():
     """Test listing logs when there are none."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
 
@@ -118,6 +118,7 @@ def test_list_logs_empty():
 
 def test_list_logs_with_entries():
     """Test listing logs when entries exist."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
@@ -151,6 +152,7 @@ def test_list_logs_with_entries():
 
 def test_list_logs_pagination():
     """Test pagination for dice logs."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
@@ -196,6 +198,7 @@ def test_list_logs_pagination():
 
 def test_list_logs_only_own():
     """Test that users only see their own logs."""
+    client = TestClient(app)
     session = next(get_test_session())
     user1 = create_test_user(session)
     user2 = create_test_user(session)
@@ -242,6 +245,7 @@ def test_list_logs_only_own():
 
 def test_get_log_success():
     """Test getting a single log by ID."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
@@ -274,6 +278,7 @@ def test_get_log_success():
 
 def test_get_log_not_found():
     """Test getting a non-existing log returns 404."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
 
@@ -287,6 +292,7 @@ def test_get_log_not_found():
 
 def test_get_log_forbidden():
     """Test that accessing another user's log is forbidden."""
+    client = TestClient(app)
     session = next(get_test_session())
     owner = create_test_user(session)
     other = create_test_user(session)
@@ -318,6 +324,7 @@ def test_get_log_forbidden():
 
 def test_list_logs_with_diceset():
     """Test that logs with diceset_id are returned correctly."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)
@@ -360,6 +367,7 @@ def test_list_logs_with_diceset():
 
 def test_list_logs_with_single_dice():
     """Test that logs without diceset_id (single dice rolls) work correctly."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
     campaign = create_test_campaign(session, user)

@@ -10,12 +10,8 @@ from dependencies import get_session as prod_get_session
 from models.db_models.test_db import get_session as get_test_session
 from auth.test_helpers import create_test_user, get_test_token
 
-
-
 # Override the DB dependency for tests
 app.dependency_overrides[prod_get_session] = get_test_session
-
-client = TestClient(app)
 
 
 # Success tests
@@ -23,6 +19,7 @@ client = TestClient(app)
 def test_register():
     """Test user registration using the test DB."""
     session = next(get_test_session())
+    client = TestClient(app)
 
     response = client.post(
         "/auth/register",
@@ -46,6 +43,7 @@ def test_login():
     # Use test session
     session = next(get_test_session())
     test_user = create_test_user(session)
+    client = TestClient(app)
 
     response = client.post(
         "/auth/login",
@@ -66,13 +64,12 @@ def test_me():
     """Test the /auth/me endpoint."""
     session = next(get_test_session())
     test_user = create_test_user(session)
-
     token = get_test_token(test_user)
 
-    response = client.get(
-        "/auth/me",
-        headers={"Authorization": f"Bearer {token}"}
-    )
+    auth_client = TestClient(app)
+    auth_client.headers = {"Authorization": f"Bearer {token}"}
+
+    response = auth_client.get("/auth/me")
 
     assert response.status_code == 200
 
@@ -87,6 +84,7 @@ def test_me():
 def test_register_duplicate_email():
     """Registering the same email twice."""
     session = next(get_test_session())
+    client = TestClient(app)
 
     # First user (normal)
     client.post(
@@ -97,7 +95,6 @@ def test_register_duplicate_email():
             "password": "password123"
         }
     )
-
 
     # Second user → expect failure
     response = client.post(
@@ -116,6 +113,7 @@ def test_login_wrong_password():
     """Login with incorrect password."""
     session = next(get_test_session())
     test_user = create_test_user(session)
+    client = TestClient(app)
 
     response = client.post(
         "/auth/login",
@@ -130,6 +128,8 @@ def test_login_wrong_password():
 
 def test_login_user_not_found():
     """Login with non existen email."""
+    client = TestClient(app)
+
     response = client.post(
         "/auth/login",
         data={
@@ -143,6 +143,8 @@ def test_login_user_not_found():
 
 def test_me_unauthorized():
     """Calling /me without a token."""
+    client = TestClient(app)
+
     response = client.get("/auth/me")
 
     assert response.status_code == 401

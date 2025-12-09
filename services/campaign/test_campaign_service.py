@@ -24,21 +24,10 @@ from dependencies import CampaignQueryParams
 from auth.test_helpers import create_test_user
 
 
-@pytest.fixture(scope="function")
-def db_session():
-    """Fixture to provide a test database session with proper cleanup."""
-    gen = get_test_session()
-    session = next(gen)
-    yield session
-    try:
-        next(gen)
-    except StopIteration:
-        pass
 
-
-def test_create_campaign(db_session):
+def test_create_campaign():
     """Test to create a new campaign."""
-    session = db_session
+    session = next(get_test_session())
     user = create_test_user(session)
 
     service = CampaignService(
@@ -63,9 +52,9 @@ def test_create_campaign(db_session):
     assert campaign.id is not None
 
 
-def test_get_campaign(db_session):
+def test_get_campaign():
     """Test to get a campaign by ID."""
-    session = db_session
+    session = next(get_test_session())
     user = create_test_user(session)
 
     service = CampaignService(
@@ -90,9 +79,9 @@ def test_get_campaign(db_session):
     assert result.title == "Get Test Campaign"
 
 
-def test_get_campaign_not_found(db_session):
+def test_get_campaign_not_found():
     """Test get campaign with non-existent ID."""
-    session = db_session
+    session = next(get_test_session())
     service = CampaignService(
         campaign_repo=SqlAlchemyCampaignRepository(session),
         class_repo=SqlAlchemyClassRepository(session),
@@ -104,9 +93,9 @@ def test_get_campaign_not_found(db_session):
         service.get_campaign(99999)
 
 
-def test_list_campaigns(db_session):
+def test_list_campaigns():
     """Test to list all campaigns."""
-    session = db_session
+    session = next(get_test_session())
     user = create_test_user(session)
 
     service = CampaignService(
@@ -140,9 +129,9 @@ def test_list_campaigns(db_session):
     assert isinstance(campaigns, list)
 
 
-def test_list_campaigns_with_filter(db_session):
+def test_list_campaigns_with_filter():
     """Test list campaigns with name filter."""
-    session = db_session
+    session = next(get_test_session())
     user = create_test_user(session)
 
     service = CampaignService(
@@ -169,9 +158,9 @@ def test_list_campaigns_with_filter(db_session):
     assert any(f"filtered_campaign_{suffix}" in c.title for c in campaigns)
 
 
-def test_update_campaign(db_session):
+def test_update_campaign():
     """Test to update a campaign."""
-    session = db_session
+    session = next(get_test_session())
     user = create_test_user(session)
 
     service = CampaignService(
@@ -199,9 +188,9 @@ def test_update_campaign(db_session):
     assert updated.id == campaign.id
 
 
-def test_update_campaign_not_found(db_session):
+def test_update_campaign_not_found():
     """Test update with non-existent campaign ID."""
-    session = db_session
+    session = next(get_test_session())
     service = CampaignService(
         campaign_repo=SqlAlchemyCampaignRepository(session),
         class_repo=SqlAlchemyClassRepository(session),
@@ -215,9 +204,9 @@ def test_update_campaign_not_found(db_session):
         service.update_campaign(99999, update_data)
 
 
-def test_delete_campaign(db_session):
+def test_delete_campaign():
     """Test to delete a campaign."""
-    session = db_session
+    session = next(get_test_session())
     user = create_test_user(session)
 
     service = CampaignService(
@@ -245,9 +234,9 @@ def test_delete_campaign(db_session):
         service.get_campaign(campaign.id)
 
 
-def test_delete_campaign_not_found(db_session):
+def test_delete_campaign_not_found():
     """Test delete with non-existent campaign ID."""
-    session = db_session
+    session = next(get_test_session())
     service = CampaignService(
         campaign_repo=SqlAlchemyCampaignRepository(session),
         class_repo=SqlAlchemyClassRepository(session),

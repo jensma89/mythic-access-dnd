@@ -15,8 +15,6 @@ from auth.test_helpers import create_test_user, get_test_token
 # Override DB with test DB
 app.dependency_overrides[prod_get_session] = get_test_session
 
-client = TestClient(app)
-
 
 def auth_header(user):
     """Create a authentication header."""
@@ -27,6 +25,7 @@ def auth_header(user):
 
 def test_get_single_user():
     """Test to retrieve a single user by ID."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
 
@@ -43,6 +42,7 @@ def test_get_single_user():
 
 def test_get_single_user_not_found():
     """Test for user not found."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
 
@@ -60,6 +60,7 @@ def test_get_single_user_not_found():
 def test_get_single_user_unauthorized():
     """Test to get a single user
     from unauthorized user."""
+    client = TestClient(app)
     response = client.get("/users/1")
     assert response.status_code == 401
 
@@ -67,6 +68,7 @@ def test_get_single_user_unauthorized():
 
 def test_list_users():
     """Test list users."""
+    client = TestClient(app)
     session = next(get_test_session())
     user_1 = create_test_user(session)
     user_2 = create_test_user(session)
@@ -84,12 +86,14 @@ def test_list_users():
 
 def test_list_users_unauthorized():
     """Test list users by unauthorized user."""
+    client = TestClient(app)
     response = client.get("/users/")
     assert response.status_code == 401
 
 
 def test_update_user():
     """Test for update a user."""
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
 
@@ -106,6 +110,7 @@ def test_update_user():
 
 def test_update_user_unauthorized():
     """Test update a user by a unauthorized user."""
+    client = TestClient(app)
     response = client.patch(
         "/users/me/update",
         json={"user_name": "x"}
@@ -115,6 +120,7 @@ def test_update_user_unauthorized():
 
 
 def test_delete_user():
+    client = TestClient(app)
     session = next(get_test_session())
     user = create_test_user(session)
 
@@ -134,5 +140,6 @@ def test_delete_user():
 
 def test_delete_user_unauthorized():
     """Test to delete a user by a unauthorized user."""
+    client = TestClient(app)
     response = client.delete("/users/me/delete")
     assert response.status_code == 401
