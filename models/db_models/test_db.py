@@ -1,7 +1,7 @@
 """
 test_db.py
 
-Creates a test database SQLite for unit tests.
+Creates a fake database SQLite for unit tests.
 """
 import os
 from sqlmodel import SQLModel, create_engine, Session
