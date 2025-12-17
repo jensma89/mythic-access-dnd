@@ -392,4 +392,199 @@
 #     # Find logs without diceset
 #     single_dice_logs = [log for log in data if log.get("diceset_id") is None]
 #     assert len(single_dice_logs) >= 1
-# 
+#
+
+
+# Independent functional unit tests with mocks
+import pytest
+from unittest.mock import Mock
+from fastapi import HTTPException, Request
+from routes.dicelog.dicelogs import list_logs, get_log
+from models.schemas.dicelog_schema import DiceLogPublic
+from models.db_models.table_models import User
+from dependencies import Pagination
+from datetime import datetime
+
+
+@pytest.fixture
+def mock_request():
+    """Fixture for mocked request object."""
+    return Mock(spec=Request)
+
+
+@pytest.fixture
+def mock_repo():
+    """Fixture for mocked dicelog repository."""
+    return Mock()
+
+
+@pytest.fixture
+def mock_user():
+    """Fixture for mocked current user."""
+    user = User(
+        id=1,
+        user_name="testuser",
+        email="test@example.com",
+        hashed_password="hashed_password",
+        created_at=datetime.now()
+    )
+    return user
+
+
+@pytest.fixture
+def mock_other_user():
+    """Fixture for mocked other user."""
+    user = User(
+        id=2,
+        user_name="otheruser",
+        email="other@example.com",
+        hashed_password="hashed_password",
+        created_at=datetime.now()
+    )
+    return user
+
+
+@pytest.fixture
+def sample_dicelog():
+    """Fixture for sample dice log."""
+    return DiceLogPublic(
+        id=1,
+        user_id=1,
+        campaign_id=10,
+        dnd_class_id=5,
+        diceset_id=None,
+        roll="D20: 15",
+        result=15,
+        timestamp=datetime.now()
+    )
+
+
+@pytest.fixture
+def mock_pagination():
+    """Fixture for mocked pagination."""
+    return Pagination(offset=0, limit=100)
+
+
+# Tests for list_logs function
+def test_list_logs_success(mock_request, mock_user, mock_pagination, mock_repo):
+    """Test successful dice logs list retrieval."""
+    logs = [
+        DiceLogPublic(id=1, user_id=1, campaign_id=10, dnd_class_id=5, diceset_id=None, roll="D6: 3", result=3, timestamp=datetime.now()),
+        DiceLogPublic(id=2, user_id=1, campaign_id=10, dnd_class_id=5, diceset_id=None, roll="D20: 15", result=15, timestamp=datetime.now()),
+        DiceLogPublic(id=3, user_id=1, campaign_id=10, dnd_class_id=5, diceset_id=2, roll="Set: [4,6]", result=10, timestamp=datetime.now())
+    ]
+    mock_repo.list_logs.return_value = logs
+
+    result = list_logs(mock_request, mock_user, mock_pagination, mock_repo)
+
+    mock_repo.list_logs.assert_called_once_with(
+        user_id=mock_user.id,
+        offset=0,
+        limit=100
+    )
+    assert len(result) == 3
+    assert result[0].roll == "D6: 3"
+    assert result[1].roll == "D20: 15"
+    assert result[2].diceset_id == 2
+
+
+def test_list_logs_empty(mock_request, mock_user, mock_pagination, mock_repo):
+    """Test dice logs list returns empty list."""
+    mock_repo.list_logs.return_value = []
+
+    result = list_logs(mock_request, mock_user, mock_pagination, mock_repo)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_list_logs_exception(mock_request, mock_user, mock_pagination, mock_repo):
+    """Test list logs raises HTTPException on generic error."""
+    mock_repo.list_logs.side_effect = Exception("Database error")
+
+    with pytest.raises(HTTPException) as exc_info:
+        list_logs(mock_request, mock_user, mock_pagination, mock_repo)
+
+    assert exc_info.value.status_code == 500
+    assert exc_info.value.detail == "Error while listing dice logs."
+
+
+def test_list_logs_with_pagination(mock_request, mock_user, mock_repo):
+    """Test dice logs list with custom pagination."""
+    custom_pagination = Pagination(offset=10, limit=5)
+    mock_repo.list_logs.return_value = []
+
+    list_logs(mock_request, mock_user, custom_pagination, mock_repo)
+
+    mock_repo.list_logs.assert_called_once_with(
+        user_id=mock_user.id,
+        offset=10,
+        limit=5
+    )
+
+
+# Tests for get_log function
+def test_get_log_success(mock_request, mock_user, mock_repo, sample_dicelog):
+    """Test successful dice log retrieval."""
+    mock_repo.get_by_id.return_value = sample_dicelog
+
+    result = get_log(mock_request, 1, mock_user, mock_repo)
+
+    mock_repo.get_by_id.assert_called_once_with(1)
+    assert result.id == sample_dicelog.id
+    assert result.user_id == mock_user.id
+    assert result.roll == sample_dicelog.roll
+    assert result.result == sample_dicelog.result
+
+
+def test_get_log_not_found(mock_request, mock_user, mock_repo):
+    """Test get log raises HTTPException when log not found."""
+    mock_repo.get_by_id.return_value = None
+
+    with pytest.raises(HTTPException) as exc_info:
+        get_log(mock_request, 999, mock_user, mock_repo)
+
+    assert exc_info.value.status_code == 404
+    assert exc_info.value.detail == "Dice log not found."
+
+
+def test_get_log_forbidden(mock_request, mock_other_user, mock_repo, sample_dicelog):
+    """Test get log raises HTTPException when user is not owner."""
+    mock_repo.get_by_id.return_value = sample_dicelog
+
+    with pytest.raises(HTTPException) as exc_info:
+        get_log(mock_request, 1, mock_other_user, mock_repo)
+
+    assert exc_info.value.status_code == 403
+    assert exc_info.value.detail == "Not allowed."
+
+
+def test_get_log_exception(mock_request, mock_user, mock_repo):
+    """Test get log raises HTTPException on generic error."""
+    mock_repo.get_by_id.side_effect = Exception("Database error")
+
+    with pytest.raises(HTTPException) as exc_info:
+        get_log(mock_request, 1, mock_user, mock_repo)
+
+    assert exc_info.value.status_code == 500
+    assert exc_info.value.detail == "Error while fetching dice log."
+
+
+def test_get_log_with_diceset(mock_request, mock_user, mock_repo):
+    """Test get log with diceset_id."""
+    log_with_diceset = DiceLogPublic(
+        id=5,
+        user_id=1,
+        campaign_id=10,
+        dnd_class_id=5,
+        diceset_id=3,
+        roll="Set: [4,5,6]",
+        result=15,
+        timestamp=datetime.now()
+    )
+    mock_repo.get_by_id.return_value = log_with_diceset
+
+    result = get_log(mock_request, 5, mock_user, mock_repo)
+
+    assert result.diceset_id == 3
+    assert result.roll == "Set: [4,5,6]"
