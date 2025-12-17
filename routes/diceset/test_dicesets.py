@@ -570,3 +570,392 @@
 #     assert isinstance(data, list)
 #     # Should have at least some results, but not necessarily all
 #     assert len(data) >= min(created_count, 5)
+
+
+# Independent functional unit tests with mocks
+import pytest
+from unittest.mock import Mock
+from fastapi import HTTPException, Request
+from routes.diceset.dicesets import (
+    read_diceset,
+    read_dicesets,
+    create_diceset,
+    update_diceset,
+    delete_diceset,
+    roll_diceset
+)
+from models.schemas.diceset_schema import DiceSetCreateInput, DiceSetUpdate, DiceSetPublic, DiceSetRollResult
+from models.db_models.table_models import User
+from services.diceset.diceset_service_exceptions import (
+    DiceSetNotFoundError,
+    DiceSetCreateError,
+    DiceSetServiceError
+)
+from dependencies import Pagination
+from datetime import datetime
+
+
+@pytest.fixture
+def mock_request():
+    """Fixture for mocked request object."""
+    return Mock(spec=Request)
+
+
+@pytest.fixture
+def mock_service():
+    """Fixture for mocked diceset service."""
+    return Mock()
+
+
+@pytest.fixture
+def mock_user():
+    """Fixture for mocked current user."""
+    user = User(
+        id=1,
+        user_name="testuser",
+        email="test@example.com",
+        hashed_password="hashed_password",
+        created_at=datetime.now()
+    )
+    return user
+
+
+@pytest.fixture
+def mock_other_user():
+    """Fixture for mocked other user."""
+    user = User(
+        id=2,
+        user_name="otheruser",
+        email="other@example.com",
+        hashed_password="hashed_password",
+        created_at=datetime.now()
+    )
+    return user
+
+
+@pytest.fixture
+def sample_diceset():
+    """Fixture for sample diceset."""
+    return DiceSetPublic(
+        id=1,
+        name="Test Set",
+        user_id=1,
+        campaign_id=10,
+        dnd_class_id=5,
+        dices=[],
+        created_at=datetime.now()
+    )
+
+
+@pytest.fixture
+def sample_diceset_create_input():
+    """Fixture for sample diceset creation input."""
+    return DiceSetCreateInput(
+        name="New Set",
+        campaign_id=10,
+        dnd_class_id=5,
+        dice_ids=[1, 2, 3]
+    )
+
+
+@pytest.fixture
+def sample_diceset_roll_result():
+    """Fixture for sample diceset roll result."""
+    from models.schemas.dice_schema import DiceRollResult
+    return DiceSetRollResult(
+        diceset_id=1,
+        name="Test Set",
+        results=[
+            DiceRollResult(id=1, name="D6", sides=6, result=3, created_at=datetime.now()),
+            DiceRollResult(id=2, name="D8", sides=8, result=5, created_at=datetime.now()),
+            DiceRollResult(id=3, name="D10", sides=10, result=7, created_at=datetime.now())
+        ],
+        total=15
+    )
+
+
+@pytest.fixture
+def mock_pagination():
+    """Fixture for mocked pagination."""
+    return Pagination(offset=0, limit=100)
+
+
+# Tests for read_diceset function
+def test_read_diceset_success(mock_request, mock_service, mock_user, sample_diceset):
+    """Test successful diceset retrieval."""
+    mock_service.get_diceset.return_value = sample_diceset
+
+    result = read_diceset(mock_request, 1, mock_user, mock_service)
+
+    mock_service.get_diceset.assert_called_once_with(1)
+    assert result.id == sample_diceset.id
+    assert result.name == sample_diceset.name
+
+
+def test_read_diceset_not_found(mock_request, mock_service, mock_user):
+    """Test read diceset raises HTTPException when diceset not found."""
+    mock_service.get_diceset.side_effect = DiceSetNotFoundError("Dice set not found")
+
+    with pytest.raises(HTTPException) as exc_info:
+        read_diceset(mock_request, 999, mock_user, mock_service)
+
+    assert exc_info.value.status_code == 404
+    assert exc_info.value.detail == "Dice set not found."
+
+
+def test_read_diceset_service_error(mock_request, mock_service, mock_user):
+    """Test read diceset raises HTTPException on service error."""
+    mock_service.get_diceset.side_effect = DiceSetServiceError("Service error")
+
+    with pytest.raises(HTTPException) as exc_info:
+        read_diceset(mock_request, 1, mock_user, mock_service)
+
+    assert exc_info.value.status_code == 500
+    assert exc_info.value.detail == "Internal Server Error."
+
+
+# Tests for read_dicesets function
+def test_read_dicesets_success(mock_request, mock_service, mock_user, mock_pagination):
+    """Test successful dicesets list retrieval."""
+    dicesets = [
+        DiceSetPublic(id=1, name="Set 1", user_id=1, campaign_id=10, dnd_class_id=5, dices=[], created_at=datetime.now()),
+        DiceSetPublic(id=2, name="Set 2", user_id=1, campaign_id=10, dnd_class_id=5, dices=[], created_at=datetime.now())
+    ]
+    mock_service.list_dicesets.return_value = dicesets
+
+    result = read_dicesets(mock_request, mock_user, mock_pagination, mock_service)
+
+    mock_service.list_dicesets.assert_called_once_with(offset=0, limit=100)
+    assert len(result) == 2
+    assert result[0].name == "Set 1"
+    assert result[1].name == "Set 2"
+
+
+def test_read_dicesets_empty(mock_request, mock_service, mock_user, mock_pagination):
+    """Test dicesets list returns empty list."""
+    mock_service.list_dicesets.return_value = []
+
+    result = read_dicesets(mock_request, mock_user, mock_pagination, mock_service)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+def test_read_dicesets_service_error(mock_request, mock_service, mock_user, mock_pagination):
+    """Test read dicesets raises HTTPException on service error."""
+    mock_service.list_dicesets.side_effect = DiceSetServiceError("Service error")
+
+    with pytest.raises(HTTPException) as exc_info:
+        read_dicesets(mock_request, mock_user, mock_pagination, mock_service)
+
+    assert exc_info.value.status_code == 500
+    assert exc_info.value.detail == "Internal Server Error."
+
+
+# Tests for create_diceset function
+def test_create_diceset_success(mock_request, mock_service, mock_user, sample_diceset_create_input, sample_diceset):
+    """Test successful diceset creation."""
+    mock_service.create_diceset.return_value = sample_diceset
+
+    result = create_diceset(mock_request, sample_diceset_create_input, mock_user, mock_service)
+
+    mock_service.create_diceset.assert_called_once()
+    assert result.id == sample_diceset.id
+    assert result.name == sample_diceset.name
+
+
+def test_create_diceset_create_error(mock_request, mock_service, mock_user, sample_diceset_create_input):
+    """Test create diceset raises HTTPException on create error."""
+    mock_service.create_diceset.side_effect = DiceSetCreateError("Failed to create")
+
+    with pytest.raises(HTTPException) as exc_info:
+        create_diceset(mock_request, sample_diceset_create_input, mock_user, mock_service)
+
+    assert exc_info.value.status_code == 400
+    assert exc_info.value.detail == "Failed to create dice set."
+
+
+def test_create_diceset_not_found_error(mock_request, mock_service, mock_user, sample_diceset_create_input):
+    """Test create diceset raises HTTPException when dice not found."""
+    mock_service.create_diceset.side_effect = DiceSetNotFoundError("Dice not found")
+
+    with pytest.raises(HTTPException) as exc_info:
+        create_diceset(mock_request, sample_diceset_create_input, mock_user, mock_service)
+
+    assert exc_info.value.status_code == 404
+    assert exc_info.value.detail == "Dice set not found."
+
+
+def test_create_diceset_service_error(mock_request, mock_service, mock_user, sample_diceset_create_input):
+    """Test create diceset raises HTTPException on service error."""
+    mock_service.create_diceset.side_effect = DiceSetServiceError("Service error")
+
+    with pytest.raises(HTTPException) as exc_info:
+        create_diceset(mock_request, sample_diceset_create_input, mock_user, mock_service)
+
+    assert exc_info.value.status_code == 500
+    assert exc_info.value.detail == "Internal Server Error."
+
+
+# Tests for update_diceset function
+def test_update_diceset_success(mock_request, mock_service, mock_user, sample_diceset):
+    """Test successful diceset update."""
+    updated_diceset = DiceSetPublic(
+        id=1,
+        name="Updated Set",
+        user_id=1,
+        campaign_id=10,
+        dnd_class_id=5,
+        dices=[],
+        created_at=datetime.now()
+    )
+    mock_service.get_diceset.return_value = sample_diceset
+    mock_service.update_diceset.return_value = updated_diceset
+
+    update_data = DiceSetUpdate(name="Updated Set")
+    result = update_diceset(mock_request, update_data, 1, mock_user, mock_service)
+
+    mock_service.get_diceset.assert_called_once_with(1)
+    mock_service.update_diceset.assert_called_once_with(1, update_data)
+    assert result.name == "Updated Set"
+
+
+def test_update_diceset_forbidden(mock_request, mock_service, mock_other_user, sample_diceset):
+    """Test update diceset raises HTTPException when user is not owner."""
+    mock_service.get_diceset.return_value = sample_diceset
+
+    update_data = DiceSetUpdate(name="Hacked")
+
+    with pytest.raises(HTTPException) as exc_info:
+        update_diceset(mock_request, update_data, 1, mock_other_user, mock_service)
+
+    assert exc_info.value.status_code == 403
+    assert exc_info.value.detail == "Not allowed"
+
+
+def test_update_diceset_not_found(mock_request, mock_service, mock_user):
+    """Test update diceset raises HTTPException when diceset not found."""
+    mock_service.get_diceset.side_effect = DiceSetNotFoundError("Not found")
+
+    update_data = DiceSetUpdate(name="New Name")
+
+    with pytest.raises(HTTPException) as exc_info:
+        update_diceset(mock_request, update_data, 999, mock_user, mock_service)
+
+    assert exc_info.value.status_code == 404
+    assert exc_info.value.detail == "Dice set not found."
+
+
+def test_update_diceset_service_error(mock_request, mock_service, mock_user, sample_diceset):
+    """Test update diceset raises HTTPException on service error."""
+    mock_service.get_diceset.return_value = sample_diceset
+    mock_service.update_diceset.side_effect = DiceSetServiceError("Service error")
+
+    update_data = DiceSetUpdate(name="New Name")
+
+    with pytest.raises(HTTPException) as exc_info:
+        update_diceset(mock_request, update_data, 1, mock_user, mock_service)
+
+    assert exc_info.value.status_code == 500
+    assert exc_info.value.detail == "Internal Server Error."
+
+
+# Tests for delete_diceset function
+def test_delete_diceset_success(mock_request, mock_service, mock_user, sample_diceset):
+    """Test successful diceset deletion."""
+    mock_service.get_diceset.return_value = sample_diceset
+    mock_service.delete_diceset.return_value = sample_diceset
+
+    result = delete_diceset(mock_request, 1, mock_user, mock_service)
+
+    mock_service.get_diceset.assert_called_once_with(1)
+    mock_service.delete_diceset.assert_called_once_with(1)
+    assert result.id == sample_diceset.id
+
+
+def test_delete_diceset_forbidden(mock_request, mock_service, mock_other_user, sample_diceset):
+    """Test delete diceset raises HTTPException when user is not owner."""
+    mock_service.get_diceset.return_value = sample_diceset
+
+    with pytest.raises(HTTPException) as exc_info:
+        delete_diceset(mock_request, 1, mock_other_user, mock_service)
+
+    assert exc_info.value.status_code == 403
+    assert exc_info.value.detail == "Not allowed"
+
+
+def test_delete_diceset_not_found(mock_request, mock_service, mock_user):
+    """Test delete diceset raises HTTPException when diceset not found."""
+    mock_service.get_diceset.side_effect = DiceSetNotFoundError("Not found")
+
+    with pytest.raises(HTTPException) as exc_info:
+        delete_diceset(mock_request, 999, mock_user, mock_service)
+
+    assert exc_info.value.status_code == 404
+    assert exc_info.value.detail == "Dice set not found."
+
+
+def test_delete_diceset_service_error(mock_request, mock_service, mock_user, sample_diceset):
+    """Test delete diceset raises HTTPException on service error."""
+    mock_service.get_diceset.return_value = sample_diceset
+    mock_service.delete_diceset.side_effect = DiceSetServiceError("Service error")
+
+    with pytest.raises(HTTPException) as exc_info:
+        delete_diceset(mock_request, 1, mock_user, mock_service)
+
+    assert exc_info.value.status_code == 500
+    assert exc_info.value.detail == "Internal Server Error."
+
+
+# Tests for roll_diceset function
+def test_roll_diceset_success(mock_request, mock_service, mock_user, sample_diceset, sample_diceset_roll_result):
+    """Test successful diceset roll."""
+    mock_service.get_diceset.return_value = sample_diceset
+    mock_service.roll_diceset.return_value = sample_diceset_roll_result
+
+    result = roll_diceset(mock_request, 1, 10, 5, mock_user, mock_service)
+
+    mock_service.get_diceset.assert_called_once_with(1)
+    mock_service.roll_diceset.assert_called_once_with(
+        mock_user.id,
+        10,
+        5,
+        1
+    )
+    assert result.diceset_id == sample_diceset_roll_result.diceset_id
+    assert result.total == sample_diceset_roll_result.total
+    assert len(result.results) == len(sample_diceset_roll_result.results)
+
+
+def test_roll_diceset_forbidden(mock_request, mock_service, mock_other_user, sample_diceset):
+    """Test roll diceset raises HTTPException when user is not owner."""
+    mock_service.get_diceset.return_value = sample_diceset
+
+    with pytest.raises(HTTPException) as exc_info:
+        roll_diceset(mock_request, 1, 10, 5, mock_other_user, mock_service)
+
+    assert exc_info.value.status_code == 403
+    assert exc_info.value.detail == "Not allowed"
+
+
+def test_roll_diceset_not_found(mock_request, mock_service, mock_user):
+    """Test roll diceset raises HTTPException when diceset not found."""
+    mock_service.get_diceset.side_effect = DiceSetNotFoundError("Not found")
+
+    with pytest.raises(HTTPException) as exc_info:
+        roll_diceset(mock_request, 999, 10, 5, mock_user, mock_service)
+
+    assert exc_info.value.status_code == 404
+    assert exc_info.value.detail == "Dice set not found."
+
+
+def test_roll_diceset_service_error(mock_request, mock_service, mock_user, sample_diceset):
+    """Test roll diceset raises HTTPException on service error."""
+    mock_service.get_diceset.return_value = sample_diceset
+    mock_service.roll_diceset.side_effect = DiceSetServiceError("Service error")
+
+    with pytest.raises(HTTPException) as exc_info:
+        roll_diceset(mock_request, 1, 10, 5, mock_user, mock_service)
+
+    assert exc_info.value.status_code == 500
+    assert exc_info.value.detail == "Internal Server Error."
