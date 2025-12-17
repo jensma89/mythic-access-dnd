@@ -215,4 +215,264 @@
 #         headers=auth_header(other)
 #     )
 #     assert response.status_code == 403
-# 
+#
+
+
+# Independent functional unit tests with mocks
+import pytest
+from unittest.mock import Mock
+from fastapi import HTTPException, Request
+from routes.dnd_class.dnd_classes import (
+    read_class,
+    read_classes,
+    create_class,
+    update_class,
+    delete_class
+)
+from models.schemas.class_schema import ClassCreateInput, ClassUpdate, ClassPublic, ClassSkills
+from models.db_models.table_models import User
+from services.dnd_class.class_service_exceptions import ClassNotFoundError
+from dependencies import ClassQueryParams, Pagination
+from datetime import datetime
+
+
+@pytest.fixture
+def mock_request():
+    """Fixture for mocked request object."""
+    return Mock(spec=Request)
+
+
+@pytest.fixture
+def mock_service():
+    """Fixture for mocked class service."""
+    return Mock()
+
+
+@pytest.fixture
+def mock_user():
+    """Fixture for mocked current user."""
+    user = User(
+        id=1,
+        user_name="testuser",
+        email="test@example.com",
+        hashed_password="hashed_password",
+        created_at=datetime.now()
+    )
+    return user
+
+
+@pytest.fixture
+def mock_other_user():
+    """Fixture for mocked other user."""
+    user = User(
+        id=2,
+        user_name="otheruser",
+        email="other@example.com",
+        hashed_password="hashed_password",
+        created_at=datetime.now()
+    )
+    return user
+
+
+@pytest.fixture
+def sample_class():
+    """Fixture for sample dnd class."""
+    return ClassPublic(
+        id=1,
+        name="Test Warrior",
+        dnd_class="Warrior",
+        race="Human",
+        user_id=1,
+        campaign_id=10,
+        skills=ClassSkills(),
+        notes=None,
+        created_at=datetime.now()
+    )
+
+
+@pytest.fixture
+def sample_class_create_input():
+    """Fixture for sample class creation input."""
+    return ClassCreateInput(
+        name="New Mage",
+        dnd_class="Mage",
+        race="Elf",
+        campaign_id=10,
+        skills=ClassSkills()
+    )
+
+
+@pytest.fixture
+def mock_pagination():
+    """Fixture for mocked pagination."""
+    return Pagination(offset=0, limit=100)
+
+
+@pytest.fixture
+def mock_filters():
+    """Fixture for mocked class query params."""
+    return ClassQueryParams()
+
+
+# Tests for read_class function
+def test_read_class_success(mock_request, mock_service, mock_user, sample_class):
+    """Test successful class retrieval."""
+    mock_service.get_class.return_value = sample_class
+
+    result = read_class(mock_request, 1, mock_user, mock_service)
+
+    mock_service.get_class.assert_called_once_with(1)
+    assert result.id == sample_class.id
+    assert result.name == sample_class.name
+
+
+def test_read_class_not_found(mock_request, mock_service, mock_user):
+    """Test read class raises HTTPException when class not found."""
+    mock_service.get_class.side_effect = ClassNotFoundError("Class not found")
+
+    with pytest.raises(HTTPException) as exc_info:
+        read_class(mock_request, 999, mock_user, mock_service)
+
+    assert exc_info.value.status_code == 404
+    assert exc_info.value.detail == "Class not found"
+
+
+def test_read_class_forbidden(mock_request, mock_service, mock_other_user, sample_class):
+    """Test read class raises HTTPException when user is not owner."""
+    mock_service.get_class.return_value = sample_class
+
+    with pytest.raises(HTTPException) as exc_info:
+        read_class(mock_request, 1, mock_other_user, mock_service)
+
+    assert exc_info.value.status_code == 403
+    assert exc_info.value.detail == "Not allowed"
+
+
+# Tests for read_classes function
+def test_read_classes_success(mock_request, mock_service, mock_user, mock_pagination, mock_filters):
+    """Test successful classes list retrieval."""
+    classes = [
+        ClassPublic(id=1, name="Warrior 1", dnd_class="Warrior", race="Human", user_id=1, campaign_id=10, skills=ClassSkills(), notes=None, created_at=datetime.now()),
+        ClassPublic(id=2, name="Mage 1", dnd_class="Mage", race="Elf", user_id=1, campaign_id=10, skills=ClassSkills(), notes=None, created_at=datetime.now())
+    ]
+    mock_service.list_classes.return_value = classes
+
+    result = read_classes(mock_request, mock_user, mock_pagination, mock_filters, mock_service)
+
+    mock_service.list_classes.assert_called_once_with(
+        offset=0,
+        limit=100,
+        filters=mock_filters
+    )
+    assert len(result) == 2
+    assert result[0].name == "Warrior 1"
+    assert result[1].name == "Mage 1"
+
+
+def test_read_classes_empty(mock_request, mock_service, mock_user, mock_pagination, mock_filters):
+    """Test classes list returns empty list."""
+    mock_service.list_classes.return_value = []
+
+    result = read_classes(mock_request, mock_user, mock_pagination, mock_filters, mock_service)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+# Tests for create_class function
+def test_create_class_success(mock_request, mock_service, mock_user, sample_class_create_input, sample_class):
+    """Test successful class creation."""
+    mock_service.create_class.return_value = sample_class
+
+    result = create_class(mock_request, sample_class_create_input, mock_user, mock_service)
+
+    mock_service.create_class.assert_called_once()
+    assert result.id == sample_class.id
+    assert result.name == sample_class.name
+
+
+# Tests for update_class function
+def test_update_class_success(mock_request, mock_service, mock_user, sample_class):
+    """Test successful class update."""
+    updated_class = ClassPublic(
+        id=1,
+        name="Test Warrior",
+        dnd_class="Warrior",
+        race="Human",
+        user_id=1,
+        campaign_id=10,
+        skills=ClassSkills(),
+        notes="Updated notes",
+        created_at=datetime.now()
+    )
+    mock_service.get_class.return_value = sample_class
+    mock_service.update_class.return_value = updated_class
+
+    update_data = ClassUpdate(notes="Updated notes")
+    result = update_class(mock_request, update_data, 1, mock_user, mock_service)
+
+    mock_service.get_class.assert_called_once_with(1)
+    mock_service.update_class.assert_called_once_with(1, update_data)
+    assert result.notes == "Updated notes"
+
+
+def test_update_class_forbidden(mock_request, mock_service, mock_other_user, sample_class):
+    """Test update class raises HTTPException when user is not owner."""
+    mock_service.get_class.return_value = sample_class
+
+    update_data = ClassUpdate(notes="Hacked")
+
+    with pytest.raises(HTTPException) as exc_info:
+        update_class(mock_request, update_data, 1, mock_other_user, mock_service)
+
+    assert exc_info.value.status_code == 403
+    assert exc_info.value.detail == "Not allowed"
+
+
+def test_update_class_not_found(mock_request, mock_service, mock_user, sample_class):
+    """Test update class raises HTTPException when update returns None."""
+    mock_service.get_class.return_value = sample_class
+    mock_service.update_class.return_value = None
+
+    update_data = ClassUpdate(notes="New notes")
+
+    with pytest.raises(HTTPException) as exc_info:
+        update_class(mock_request, update_data, 1, mock_user, mock_service)
+
+    assert exc_info.value.status_code == 404
+    assert exc_info.value.detail == "Class not found."
+
+
+# Tests for delete_class function
+def test_delete_class_success(mock_request, mock_service, mock_user, sample_class):
+    """Test successful class deletion."""
+    mock_service.get_class.return_value = sample_class
+    mock_service.delete_class.return_value = sample_class
+
+    result = delete_class(mock_request, 1, mock_user, mock_service)
+
+    mock_service.get_class.assert_called_once_with(1)
+    mock_service.delete_class.assert_called_once_with(1)
+    assert result.id == sample_class.id
+
+
+def test_delete_class_forbidden(mock_request, mock_service, mock_other_user, sample_class):
+    """Test delete class raises HTTPException when user is not owner."""
+    mock_service.get_class.return_value = sample_class
+
+    with pytest.raises(HTTPException) as exc_info:
+        delete_class(mock_request, 1, mock_other_user, mock_service)
+
+    assert exc_info.value.status_code == 403
+    assert exc_info.value.detail == "Not allowed"
+
+
+def test_delete_class_not_found(mock_request, mock_service, mock_user):
+    """Test delete class raises HTTPException when class not found."""
+    mock_service.get_class.side_effect = ClassNotFoundError("Class not found")
+
+    with pytest.raises(HTTPException) as exc_info:
+        delete_class(mock_request, 999, mock_user, mock_service)
+
+    assert exc_info.value.status_code == 404
+    assert exc_info.value.detail == "Class not found"
