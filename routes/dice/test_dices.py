@@ -271,4 +271,215 @@
 #     assert all(1 <= r <= 20 for r in results)
 #     # Check we got at least some variation (not all same)
 #     assert len(set(results)) > 1
-# 
+#
+
+
+# Independent functional unit tests with mocks
+import pytest
+from unittest.mock import Mock
+from fastapi import HTTPException, Request
+from routes.dice.dices import read_dice, read_dices, roll_dice
+from models.schemas.dice_schema import DicePublic, DiceRollResult
+from models.db_models.table_models import User
+from services.dice.dice_service_exceptions import DiceNotFoundError
+from dependencies import Pagination
+from datetime import datetime
+
+
+@pytest.fixture
+def mock_request():
+    """Fixture for mocked request object."""
+    return Mock(spec=Request)
+
+
+@pytest.fixture
+def mock_service():
+    """Fixture for mocked dice service."""
+    service = Mock()
+    service.repo = Mock()
+    return service
+
+
+@pytest.fixture
+def mock_user():
+    """Fixture for mocked current user."""
+    user = User(
+        id=1,
+        user_name="testuser",
+        email="test@example.com",
+        hashed_password="hashed_password",
+        created_at=datetime.now()
+    )
+    return user
+
+
+@pytest.fixture
+def sample_dice():
+    """Fixture for sample dice."""
+    return DicePublic(
+        id=1,
+        name="D20",
+        sides=20,
+        created_at=datetime.now()
+    )
+
+
+@pytest.fixture
+def sample_dice_roll_result():
+    """Fixture for sample dice roll result."""
+    return DiceRollResult(
+        id=1,
+        name="D20",
+        sides=20,
+        result=15
+    )
+
+
+@pytest.fixture
+def mock_pagination():
+    """Fixture for mocked pagination."""
+    return Pagination(offset=0, limit=100)
+
+
+# Tests for read_dice function
+def test_read_dice_success(mock_request, mock_service, mock_user, sample_dice):
+    """Test successful dice retrieval."""
+    mock_service.get_dice.return_value = sample_dice
+
+    result = read_dice(mock_request, 1, mock_user, mock_service)
+
+    mock_service.get_dice.assert_called_once_with(1)
+    assert result.id == sample_dice.id
+    assert result.name == sample_dice.name
+    assert result.sides == sample_dice.sides
+
+
+def test_read_dice_not_found(mock_request, mock_service, mock_user):
+    """Test read dice raises HTTPException when dice not found."""
+    mock_service.get_dice.side_effect = DiceNotFoundError("Dice not found")
+
+    with pytest.raises(HTTPException) as exc_info:
+        read_dice(mock_request, 999, mock_user, mock_service)
+
+    assert exc_info.value.status_code == 404
+    assert exc_info.value.detail == "Dice not found"
+
+
+# Tests for read_dices function
+def test_read_dices_success(mock_request, mock_service, mock_user, mock_pagination):
+    """Test successful dice list retrieval."""
+    dices = [
+        DicePublic(id=1, name="D4", sides=4, created_at=datetime.now()),
+        DicePublic(id=2, name="D6", sides=6, created_at=datetime.now()),
+        DicePublic(id=3, name="D20", sides=20, created_at=datetime.now())
+    ]
+    mock_service.list_dices.return_value = dices
+
+    result = read_dices(mock_request, mock_user, mock_pagination, mock_service)
+
+    mock_service.list_dices.assert_called_once_with(offset=0, limit=100)
+    assert len(result) == 3
+    assert result[0].name == "D4"
+    assert result[1].name == "D6"
+    assert result[2].name == "D20"
+
+
+def test_read_dices_empty_list(mock_request, mock_service, mock_user, mock_pagination):
+    """Test dice list returns empty list."""
+    mock_service.list_dices.return_value = []
+
+    result = read_dices(mock_request, mock_user, mock_pagination, mock_service)
+
+    assert isinstance(result, list)
+    assert len(result) == 0
+
+
+# Tests for roll_dice function
+def test_roll_dice_success(mock_request, mock_service, mock_user, sample_dice, sample_dice_roll_result):
+    """Test successful dice roll."""
+    mock_service.repo.get_by_id.return_value = sample_dice
+    mock_service.roll_dice.return_value = sample_dice_roll_result
+
+    result = roll_dice(mock_request, 1, None, None, mock_user, mock_service)
+
+    mock_service.repo.get_by_id.assert_called_once_with(1)
+    mock_service.roll_dice.assert_called_once_with(
+        dice_id=1,
+        user_id=mock_user.id,
+        campaign_id=None,
+        dnd_class_id=None
+    )
+    assert result.id == sample_dice_roll_result.id
+    assert result.result == sample_dice_roll_result.result
+    assert result.sides == sample_dice_roll_result.sides
+
+
+def test_roll_dice_with_campaign_id(mock_request, mock_service, mock_user, sample_dice, sample_dice_roll_result):
+    """Test dice roll with campaign_id parameter."""
+    mock_service.repo.get_by_id.return_value = sample_dice
+    mock_service.roll_dice.return_value = sample_dice_roll_result
+
+    result = roll_dice(mock_request, 1, 10, None, mock_user, mock_service)
+
+    mock_service.roll_dice.assert_called_once_with(
+        dice_id=1,
+        user_id=mock_user.id,
+        campaign_id=10,
+        dnd_class_id=None
+    )
+    assert result.result == sample_dice_roll_result.result
+
+
+def test_roll_dice_with_class_id(mock_request, mock_service, mock_user, sample_dice, sample_dice_roll_result):
+    """Test dice roll with dnd_class_id parameter."""
+    mock_service.repo.get_by_id.return_value = sample_dice
+    mock_service.roll_dice.return_value = sample_dice_roll_result
+
+    result = roll_dice(mock_request, 1, None, 5, mock_user, mock_service)
+
+    mock_service.roll_dice.assert_called_once_with(
+        dice_id=1,
+        user_id=mock_user.id,
+        campaign_id=None,
+        dnd_class_id=5
+    )
+    assert result.result == sample_dice_roll_result.result
+
+
+def test_roll_dice_with_campaign_and_class(mock_request, mock_service, mock_user, sample_dice, sample_dice_roll_result):
+    """Test dice roll with both campaign_id and dnd_class_id."""
+    mock_service.repo.get_by_id.return_value = sample_dice
+    mock_service.roll_dice.return_value = sample_dice_roll_result
+
+    result = roll_dice(mock_request, 1, 10, 5, mock_user, mock_service)
+
+    mock_service.roll_dice.assert_called_once_with(
+        dice_id=1,
+        user_id=mock_user.id,
+        campaign_id=10,
+        dnd_class_id=5
+    )
+    assert result.result == sample_dice_roll_result.result
+
+
+def test_roll_dice_not_found(mock_request, mock_service, mock_user):
+    """Test roll dice raises HTTPException when dice not found."""
+    mock_service.repo.get_by_id.return_value = None
+
+    with pytest.raises(HTTPException) as exc_info:
+        roll_dice(mock_request, 999, None, None, mock_user, mock_service)
+
+    assert exc_info.value.status_code == 404
+    assert exc_info.value.detail == "Dice not found"
+
+
+def test_roll_dice_roll_result_none(mock_request, mock_service, mock_user, sample_dice):
+    """Test roll dice raises HTTPException when roll_result is None."""
+    mock_service.repo.get_by_id.return_value = sample_dice
+    mock_service.roll_dice.return_value = None
+
+    with pytest.raises(HTTPException) as exc_info:
+        roll_dice(mock_request, 1, None, None, mock_user, mock_service)
+
+    assert exc_info.value.status_code == 404
+    assert exc_info.value.detail == "Dice not found."
