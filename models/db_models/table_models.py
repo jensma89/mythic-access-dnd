@@ -141,9 +141,15 @@ class DiceSetDice(SQLModel, table=True):
     dice_id: int = Field(foreign_key="dice.id", primary_key=True)
     quantity: int = Field(default=1)
 
-    diceset: Optional["DiceSet"] = Relationship(back_populates="dice_entries")
+    diceset: Optional["DiceSet"] = Relationship(
+        back_populates="dice_entries",
+        sa_relationship_kwargs={"overlaps": "dices"}
+    )
 
-    dice: Optional["Dice"] = Relationship(back_populates="dice_entries")
+    dice: Optional["Dice"] = Relationship(
+        back_populates="dice_entries",
+        sa_relationship_kwargs={"overlaps": "dice_sets"}
+    )
 
 
 class DiceSet(SQLModel, table=True):
@@ -165,7 +171,7 @@ class DiceSet(SQLModel, table=True):
     dices: List["Dice"] = Relationship(
         back_populates="dice_sets",
         link_model=DiceSetDice,
-        sa_relationship_kwargs={}
+        sa_relationship_kwargs={"overlaps": "dice_entries,diceset,dice"}
     )
 
     def __repr__(self):
@@ -185,7 +191,8 @@ class Dice(SQLModel, table=True):
     # Many-to-many relationship to DiceSet
     dice_sets: List["DiceSet"] = Relationship(
         back_populates="dices",
-        link_model=DiceSetDice
+        link_model=DiceSetDice,
+        sa_relationship_kwargs={"overlaps": "dice_entries,dice,diceset"}
     )
 
 
