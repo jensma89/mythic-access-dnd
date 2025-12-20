@@ -5,7 +5,8 @@ DB-Session, Config...
 """
 from typing import Annotated
 from fastapi import Depends, Query
-from sqlmodel import create_engine, Session, SQLModel
+from sqlmodel import create_engine,select, Session, SQLModel
+from models.db_models.table_models import Dice
 from dotenv import load_dotenv
 import os
 
@@ -20,8 +21,29 @@ engine = create_engine(DATABASE_URL, echo=False) # Set echo True for debug mode
 
 
 def create_db_and_tables():
-    """Create db and tables"""
+    """Create db and tables with
+    the fixed dice table."""
     SQLModel.metadata.create_all(engine)
+
+    with Session(engine) as session:
+        dice = [
+            Dice(name="d4", sides=4),
+            Dice(name="d6", sides=6),
+            Dice(name="d8", sides=8),
+            Dice(name="d10", sides=10),
+            Dice(name="d12", sides=12),
+            Dice(name="d20", sides=20),
+            Dice(name="d100", sides=100),
+        ]
+
+        for d in dice:
+            exists = session.exec(
+                select(Dice).where(Dice.name == d.name)
+            ).first()
+            if not exists:
+                session.add(d)
+
+        session.commit()
 
 
 def get_session():
