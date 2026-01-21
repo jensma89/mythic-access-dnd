@@ -4,7 +4,7 @@ A FastAPI-based backend for managing users, campaigns, dnd classes, dice sets an
 Built with PostgreSQL, JWT authentication, and rate limiting.
 
 
-- [Live API](https://mythic-access-dnd.onrender.com/](https://mythic-access-dnd.onrender.com/)
+- [Live API](https://mythic-access-dnd.onrender.com/)
 
 ---
 
