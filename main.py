@@ -4,6 +4,8 @@ main.py
 Webserver entry and links to routes.
 """
 from fastapi import FastAPI
+
+import ai_client.ai_route
 from dependencies import create_db_and_tables
 from contextlib import asynccontextmanager
 from slowapi import _rate_limit_exceeded_handler
@@ -74,6 +76,8 @@ app.include_router(dnd_classes.router)
 app.include_router(dices.router)
 app.include_router(dicesets.router)
 app.include_router(dicelogs.router)
+
+app.include_router(ai_client.ai_route.router)
 
 
 @app.get("/healthz")
