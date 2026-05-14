@@ -18,6 +18,7 @@ class CampaignBase(SQLModel):
 
 
 class CampaignCreateInput(SQLModel):
+    """Input model for the campaign create request body."""
     title: str
     genre: str
     description: str
@@ -25,10 +26,11 @@ class CampaignCreateInput(SQLModel):
 
 
 class CampaignCreate(CampaignBase):
-    """Fields to create a campaign."""
+    """Internal model to create a campaign."""
     created_by: Optional[int] = None
 
     def set_user(self, user_id: int):
+        """Set the owner user ID."""
         self.created_by = user_id
 
 

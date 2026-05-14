@@ -20,8 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class DiceService:
-    """Business logic
-    for dice service operations."""
+    """Business logic for dice service operations."""
 
     def __init__(
             self,

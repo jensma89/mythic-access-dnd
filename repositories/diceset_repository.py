@@ -10,7 +10,7 @@ from typing import List, Optional
 
 
 class DiceSetRepository(ABC):
-    """This dnd_class defines the management methods for dice sets."""
+    """This class defines the management methods for dice sets."""
 
     @abstractmethod
     def get_by_id(self, diceset_id: int) \

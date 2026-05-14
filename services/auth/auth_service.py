@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 class AuthService:
+    """Business logic for authentication: registration, login, token issuing."""
 
     def register_user(
             self,

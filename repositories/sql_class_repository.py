@@ -16,8 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class SqlAlchemyClassRepository(ClassRepository):
-    """This dnd_class implement
-        the dnd_class handling methods with sqlalchemy."""
+    """This class implements the dnd_class handling methods with sqlalchemy."""
 
     def __init__(self, session: Session):
         self.session = session

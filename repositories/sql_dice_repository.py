@@ -16,8 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class SqlAlchemyDiceRepository(DiceRepository):
-    """This dnd_class implement
-    the dice handling methods with sqlalchemy."""
+    """This class implements the dice handling methods with sqlalchemy."""
 
     def __init__(self, session: Session):
         self.session = session

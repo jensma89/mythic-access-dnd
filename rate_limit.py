@@ -1,7 +1,7 @@
 """
 rate_limit.py
 
-
+Shared slowapi limiter instance used across all route decorators.
 """
 from slowapi import Limiter
 from slowapi.util import get_remote_address
@@ -11,8 +11,9 @@ logger = logging.getLogger(__name__)
 
 limiter = Limiter(key_func=get_remote_address)
 
-# log whenever a request is blocked
+
 def rate_limit_exceeded_handler(request, exception):
+    """Log the blocked IP and return the slowapi exception response."""
     user_ip = get_remote_address(request)
     logger.warning(f"Rate limit exceeded for IP: {user_ip}")
     return exception

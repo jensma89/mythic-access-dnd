@@ -20,8 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class CampaignService:
-    """Initialise the bussines logic
-    for campaign service operations."""
+    """Business logic for campaign service operations."""
     def __init__(
             self,
             campaign_repo: CampaignRepository,

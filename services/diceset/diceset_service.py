@@ -36,6 +36,7 @@ class DiceSetService:
             self,
             diceset: DiceSetCreate) \
             -> DiceSetPublic:
+        """Create a new dice set (max 5 per dnd_class)."""
         try:
             # Validation max 5 sets per dnd dnd_class
             existing_sets = self.diceset_repo.get_by_class_id(
@@ -204,8 +205,7 @@ class DiceSetService:
             self,
             diceset_id: int) \
             -> Optional[DiceSetPublic]:
-        """Remove a dnd_class and the belonging entries:
-        dice sets and dice logs."""
+        """Remove a dice set and its dice log entries."""
         try:
             # Delete dice logs
             logs = (self.dicelog_repo

@@ -10,7 +10,7 @@ from typing import List, Optional
 
 
 class CampaignRepository(ABC):
-    """This dnd_class defines the management methods for campaigns."""
+    """This class defines the management methods for campaigns."""
 
     @abstractmethod
     def get_by_id(self, campaign_id: int) \

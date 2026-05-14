@@ -17,8 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class SqlAlchemyUserRepository(UserRepository):
-    """This dnd_class implement
-    the user handling methods with sqlalchemy."""
+    """This class implements the user handling methods with sqlalchemy."""
     def __init__(self, session: Session):
         self.session = session
         logger.debug("SqlAlchemyUserRepository initialized")

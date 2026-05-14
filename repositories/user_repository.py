@@ -10,7 +10,7 @@ from typing import List, Optional
 
 
 class UserRepository(ABC):
-    """This dnd_class defines the management methods for users."""
+    """This class defines the management methods for users."""
 
     @abstractmethod
     def get_by_id(self, user_id: int) \

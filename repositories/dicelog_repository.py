@@ -10,8 +10,7 @@ from typing import List, Optional
 
 
 class DiceLogRepository(ABC):
-    """This dnd_class defines
-    the management methods for dice logs."""
+    """This class defines the management methods for dice logs."""
 
 
     @abstractmethod

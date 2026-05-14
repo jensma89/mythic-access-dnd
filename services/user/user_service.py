@@ -21,8 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class UserService:
-    """Initialise the business logic
-    for user service operations."""
+    """Business logic for user service operations."""
     def __init__(
             self,
             user_repo: UserRepository,

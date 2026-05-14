@@ -19,8 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class ClassService:
-    """Business logic
-    for dnd_class service operations."""
+    """Business logic for dnd_class service operations."""
 
     def __init__(
             self,
